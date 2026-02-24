@@ -1,4 +1,4 @@
-# TravelLogMap
+# Color My Travels
 
 ## Links (access with school account):
 
