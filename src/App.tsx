@@ -1,9 +1,12 @@
 import Sidebar from "./components/Sidebar"
+import { SidebarProvider } from "./components/ui/sidebar"
 
 function App() {
   return (
     <div>
-      <Sidebar />
+      <SidebarProvider>
+        <Sidebar />
+      </SidebarProvider>
     </div>
   )
 }
