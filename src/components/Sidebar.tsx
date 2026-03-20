@@ -9,10 +9,13 @@ import {
   } from "@/components/ui/sidebar"
   
   import { Map, User } from "lucide-react"
+  import { Link, useLocation } from "react-router-dom"
   
   export default function AppSidebar() {
+    const location = useLocation()
+  
     return (
-      <Sidebar className="h-screen">
+      <Sidebar className="h-screen w-64 border-r">
         {/* Top title */}
         <SidebarHeader>
           <h1 className="text-lg font-bold px-4 pt-4">
@@ -24,9 +27,14 @@ import {
         <SidebarContent className="p-4">
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton>
-                <Map className="w-4 h-4 mr-2" />
-                Map
+              <SidebarMenuButton
+                asChild
+                isActive={location.pathname === "/"}
+              >
+                <Link to="/">
+                  <Map className="w-4 h-4 mr-2" />
+                  Map
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
@@ -36,9 +44,14 @@ import {
         <SidebarFooter>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton>
-                <User className="w-4 h-4 mr-2" />
-                User
+              <SidebarMenuButton
+                asChild
+                isActive={location.pathname === "/user"}
+              >
+                <Link to="/user">
+                  <User className="w-4 h-4 mr-2" />
+                  User
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>

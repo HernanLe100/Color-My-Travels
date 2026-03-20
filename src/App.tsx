@@ -1,13 +1,26 @@
+import { BrowserRouter, Route, Routes } from "react-router-dom"
 import Sidebar from "./components/Sidebar"
 import { SidebarProvider } from "./components/ui/sidebar"
+import MapPage from "./components/MapPage"
+import UserPage from "./components/UserPage"
+
 
 function App() {
   return (
-    <div>
+    <BrowserRouter>
       <SidebarProvider>
-        <Sidebar />
+        <div className="flex">
+          <Sidebar />
+
+          <main className="flex-1 p-6">
+            <Routes>
+              <Route path="/" element={<MapPage />} />
+              <Route path="/user" element={<UserPage />} />
+            </Routes>
+          </main>
+        </div>
       </SidebarProvider>
-    </div>
+    </BrowserRouter>
   )
 }
 
