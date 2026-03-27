@@ -3,9 +3,16 @@ import Sidebar from "./components/Sidebar"
 import { SidebarProvider } from "./components/ui/sidebar"
 import MapPage from "./components/MapPage"
 import UserPage from "./components/UserPage"
+import { useEffect } from "react"
 
 
 function App() {
+  useEffect(() => {
+    fetch("http://127.0.0.1:5000/test")
+      .then(res => res.json())
+      .then(data => console.log(data));
+  }, []);
+
   return (
     <BrowserRouter>
       <SidebarProvider>
