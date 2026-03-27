@@ -1,12 +1,15 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 import os
 from dotenv import load_dotenv
-import psycopg2
+import psycopg
+from psycopg_pool import ConnectionPool
+from psycopg.rows import dict_row
 
 load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
+connection_pool = ConnectionPool(conninfo=DATABASE_URL, kwargs={"row_factory":dict_row}) 
 
 app = Flask(__name__)
 CORS(app)
@@ -16,19 +19,29 @@ def test():
     return jsonify({"message": "Hello world"})
 
 def get_db_connection():
-    return psycopg2.connect(DATABASE_URL)
+    return psycopg.connect(DATABASE_URL) # connection_pool.connection() #  psycopg2.connect(DATABASE_URL)
 
 @app.route("/get_users", methods=["GET"])
 def get_users():
-    conn = get_db_connection()
-    cur = conn.cursor()
+    with connection_pool.connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM users;")
+            result = cursor.fetchall()
+            print(result)
 
-    cur.execute("SELECT * FROM users;")
-    result = cur.fetchall()
+    return jsonify({"db_response": result})
 
-    cur.close()
-    conn.close()
-
+@app.route("/get_albums", methods=["GET"])
+def get_albums():
+    user_id = request.args.get("user_id", "")
+    user_id = user_id.replace("\\", "\\\\")\
+        .replace("%", "\\%").replace("_", "\\_")
+    
+    with connection_pool.connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(f"SELECT * FROM albums WHERE user_id = %s::text;", [user_id])
+            result = cursor.fetchall()
+    
     return jsonify({"db_response": result})
 
 if __name__ == "__main__":
