@@ -31,6 +31,20 @@ def get_users():
 
     return jsonify({"db_response": result})
 
+@app.route("/get_user", methods=["GET"])
+def get_user():
+    user_id = request.args.get("user_id", "")
+    user_id = user_id.replace("\\", "\\\\")\
+        .replace("%", "\\%").replace("_", "\\_")
+    
+    with connection_pool.connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(f"SELECT * FROM users WHERE user_id = %s::text;",  [user_id])
+            result = cursor.fetchall()
+            print(result)
+
+    return jsonify({"db_response": result})
+
 @app.route("/get_albums", methods=["GET"])
 def get_albums():
     user_id = request.args.get("user_id", "")
