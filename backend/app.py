@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 import os
 from dotenv import load_dotenv
@@ -29,6 +29,23 @@ def get_users():
     cur.close()
     conn.close()
 
+    return jsonify({"db_response": result})
+
+@app.route("/get_albums", methods=["GET"])
+def get_albums():
+    user_id = request.args.get("user_id", "")
+    user_id = user_id.replace("\\", "\\\\")\
+        .replace("%", "\\%").replace("_", "\\_")
+    
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    cur.execute(f"SELECT * FROM albums WHERE user_id = %s::text;", [user_id])
+    result = cur.fetchall()
+    
+    cur.close()
+    conn.close()
+    
     return jsonify({"db_response": result})
 
 if __name__ == "__main__":
