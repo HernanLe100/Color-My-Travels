@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 
+// TODO: create seperate file to store types
 type User = {
   user_id: string;
   name: string;
