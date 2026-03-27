@@ -25,7 +25,7 @@ export default function MapPage() {
       <MapContainer
         center={position}
         zoom={13}
-        scrollWheelZoom={false}
+        scrollWheelZoom={true}
         className="h-full w-full"
       >
         <TileLayer
