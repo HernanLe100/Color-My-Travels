@@ -18,6 +18,7 @@ export default function MapContent() {
   const [adm1, setAdm1] = useState<any[]>([]);
   const [loaded, setLoaded] = useState(false);
 
+  // TODO: extract from database instead of hardcoding
   const points = useMemo(
     () => [
       { id: 1, lat: 40.343, lng: -74.651, country: "USA", adm1: "US-NJ" },
