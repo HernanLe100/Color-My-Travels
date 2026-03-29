@@ -19,8 +19,9 @@ CORS(app)
 def test():
     return jsonify({"message": "Hello world"})
 
-def get_db_connection():
-    return psycopg.connect(DATABASE_URL) # connection_pool.connection() #  psycopg2.connect(DATABASE_URL)
+# not used
+#def get_db_connection():
+#    return psycopg.connect(DATABASE_URL) # connection_pool.connection() #  psycopg2.connect(DATABASE_URL)
 
 @app.route("/get_users", methods=["GET"])
 def get_users():
