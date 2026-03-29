@@ -60,6 +60,39 @@ def get_albums():
     
     return jsonify({"db_response": result})
 
+# get location details by location_id
+@app.route("/get_location", methods=["GET"])
+def get_location():
+    location_id = request.args.get("location_id", "")
+    
+    with connection_pool.connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(f"SELECT * FROM locations WHERE location_id = %s::text;", [location_id])
+            result = cursor.fetchall()
+    
+    return jsonify({"db_response": result})
+
+@app.route("/get_locations", methods=["GET"])
+def get_locations():
+    user_id = request.args.get("user_id", "")
+    user_id = user_id.replace("\\", "\\\\")\
+        .replace("%", "\\%").replace("_", "\\_")
+
+    with connection_pool.connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT locations.* FROM albums
+                JOIN locations ON albums.location_id = locations.location_id
+                WHERE albums.user_id = %s::text;
+                """,
+                [user_id]
+            )
+
+            result = cursor.fetchall()
+
+    return jsonify({"db_response": result})
+
 @app.route("/geo", methods=["GET"])
 def get_geo():
     country = request.args.get("country")
@@ -106,7 +139,7 @@ def get_colors():
 
     with connection_pool.connection() as connection:
         with connection.cursor() as cursor:
-            cursor.execute("SELECT * FROM colors WHERE user_id = %s::text;", [user_id])
+            cursor.execute("SELECT * FROM colors WHERE user_id = %s::text ORDER BY region_code ASC;", [user_id])
             result = cursor.fetchall()
     
     return jsonify({"db_response": result})
@@ -115,14 +148,14 @@ def get_colors():
 def update_color():
     data = request.get_json()
     user_id = data.get("user_id")
-    location_id = data.get("location_id")
-    adm = data.get("adm")
+    region_code = data.get("region_code")
+    region_type = data.get("region_type")
     color = data.get("color")
     with connection_pool.connection() as connection:
         with connection.cursor() as cursor:
             cursor.execute(
-                "UPDATE colors SET color = %s WHERE user_id = %s::text AND location_id = %s AND adm = %s::text;",
-                [color, user_id, location_id, adm]
+                "UPDATE colors SET color = %s WHERE user_id = %s::text AND region_code = %s AND region_type = %s::text;",
+                [color, user_id, region_code, region_type]
             )
         connection.commit()
     return jsonify({"success": True})
