@@ -19,14 +19,15 @@ export default function MapContent() {
   const [loaded, setLoaded] = useState(false);
 
   const [pins, setPins] = useState<any[]>([]);
+  const [pinsLoaded, setPinsLoaded] = useState(false);
 
   useEffect(() => {
     async function loadPoints() {
       const res = await fetch(
-        `http://localhost:5001/get_locations?user_id=0000`
+        `http://localhost:5001/get_locations?user_id=0000`,
       );
       const data = await res.json();
-  
+
       // map DB response
       const mapped = data.db_response.map((p: any) => ({
         id: p.location_id,
@@ -36,10 +37,11 @@ export default function MapContent() {
         adm1: p.adm1,
         city: p.city,
       }));
-  
+
       setPins(mapped);
+      setPinsLoaded(true);
     }
-  
+
     loadPoints();
   }, []);
 
@@ -48,10 +50,7 @@ export default function MapContent() {
     [pins],
   );
 
-  const visitedADM1 = useMemo(
-    () => new Set(pins.map((p) => p.adm1)),
-    [pins],
-  );
+  const visitedADM1 = useMemo(() => new Set(pins.map((p) => p.adm1)), [pins]);
 
   const cache = useRef(new Map<string, any>());
 
@@ -118,7 +117,18 @@ export default function MapContent() {
     };
   }, [combinedGeo, visitedADM1, level]);
 
-  if (!loaded) return null;
+  const isLoading = !pinsLoaded || !loaded;
+
+  if (isLoading) {
+    return (
+      <div className="absolute inset-0 z-[1000] flex items-center justify-center bg-white">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-300 border-t-blue-500"></div>
+          <p className="text-sm text-gray-600">Loading your travels...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -126,7 +136,9 @@ export default function MapContent() {
       {level === "POINTS" &&
         pins.map((p) => (
           <Marker key={p.id} position={[p.lat, p.lng]} icon={icon}>
-            <Popup>{p.city}, {p.adm1}, {p.country}</Popup>
+            <Popup>
+              {p.city}, {p.adm1}, {p.country}
+            </Popup>
           </Marker>
         ))}
 
