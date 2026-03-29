@@ -12,11 +12,20 @@ const icon = new L.Icon({
   iconAnchor: [12, 41],
 });
 
+// TODO: create seperate file to store types
+type Color = {
+  color: string;
+  user_id: string;
+  location_id: string;
+  adm: string;
+};
+
 export default function MapContent() {
   const zoom = useZoomLevel();
   const [adm0, setAdm0] = useState<any[]>([]);
   const [adm1, setAdm1] = useState<any[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const [colors, setColors] = useState<Color[]>([]);
 
   // TODO: extract from database instead of hardcoding
   const points = useMemo(
@@ -26,6 +35,7 @@ export default function MapContent() {
     ],
     [],
   );
+  const testUser = "0000";
 
   const countriesVisited = useMemo(
     () => [...new Set(points.map((p) => p.country))],
@@ -38,6 +48,14 @@ export default function MapContent() {
   );
 
   const cache = useRef(new Map<string, any>());
+
+  useEffect(() => {
+    fetch(`http://localhost:5001/get_colors?user_id=${testUser}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setColors(data.db_response);
+      });
+  }, []);
 
   useEffect(() => {
     if (!countriesVisited.length) return;
@@ -76,6 +94,29 @@ export default function MapContent() {
 
     load();
   }, [countriesVisited.join(",")]);
+
+  // Map shapeISO → color for each adm level
+  const countryColorMap = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const c of colors) {
+      if (c.adm === "country") {
+        const point = points.find((p) => p.id === Number(c.location_id));
+        if (point) map.set(point.country, c.color);
+      }
+    }
+    return map;
+  }, [colors, points]);
+
+  const adm1ColorMap = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const c of colors) {
+      if (c.adm === "adm1") {
+        const point = points.find((p) => p.id === Number(c.location_id));
+        if (point) map.set(point.adm1, c.color);
+      }
+    }
+    return map;
+  }, [colors, points]);
 
   const level = zoom >= 8 ? "POINTS" : zoom >= 5 ? "ADM1" : "ADM0";
 
@@ -119,10 +160,13 @@ export default function MapContent() {
         <GeoJSON
           key={level} // MUST ADD KEY!!! Or else it will not re-render the polygon when the level changes
           data={filteredGeo}
-          style={{
-            color: "orange",
-            fillColor: "orange",
-            fillOpacity: 0.3,
+          style={(feature) => {
+            const iso = feature?.properties?.shapeISO;
+            const fillColor =
+              level === "ADM1"
+                ? (adm1ColorMap.get(iso) ?? "#eb4034")
+                : (countryColorMap.get(iso) ?? "#eb4034");
+            return { color: fillColor, fillColor, fillOpacity: 0.3 };
           }}
         />
       )}

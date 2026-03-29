@@ -8,7 +8,7 @@ import {
     SidebarMenuButton,
   } from "@/components/ui/sidebar"
   
-  import { Map, User } from "lucide-react"
+  import { Map, User, Paintbrush } from "lucide-react"
   import { Link, useLocation } from "react-router-dom"
   
   export default function AppSidebar() {
@@ -34,6 +34,17 @@ import {
                 <Link to="/">
                   <Map className="w-4 h-4 mr-2" />
                   Map
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                isActive={location.pathname === "/colors"}
+              >
+                <Link to="/colors">
+                  <Paintbrush className="w-4 h-4 mr-2" />
+                  Colors
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
