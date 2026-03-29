@@ -18,24 +18,39 @@ export default function MapContent() {
   const [adm1, setAdm1] = useState<any[]>([]);
   const [loaded, setLoaded] = useState(false);
 
-  // TODO: extract from database instead of hardcoding
-  const points = useMemo(
-    () => [
-      { id: 1, lat: 40.343, lng: -74.651, country: "USA", adm1: "US-NJ" },
-      { id: 2, lat: 48.8566, lng: 2.3522, country: "FRA", adm1: "FR-IDF" },
-    ],
-    [],
-  );
+  const [pins, setPins] = useState<any[]>([]);
+  const [pinsLoaded, setPinsLoaded] = useState(false);
+
+  useEffect(() => {
+    async function loadPoints() {
+      const res = await fetch(
+        `http://localhost:5001/get_locations?user_id=0000`,
+      );
+      const data = await res.json();
+
+      // map DB response
+      const mapped = data.db_response.map((p: any) => ({
+        id: p.location_id,
+        lat: p.lat,
+        lng: p.lng,
+        country: p.country,
+        adm1: p.adm1,
+        city: p.city,
+      }));
+
+      setPins(mapped);
+      setPinsLoaded(true);
+    }
+
+    loadPoints();
+  }, []);
 
   const countriesVisited = useMemo(
-    () => [...new Set(points.map((p) => p.country))],
-    [points],
+    () => [...new Set(pins.map((p) => p.country))],
+    [pins],
   );
 
-  const visitedADM1 = useMemo(
-    () => new Set(points.map((p) => p.adm1)),
-    [points],
-  );
+  const visitedADM1 = useMemo(() => new Set(pins.map((p) => p.adm1)), [pins]);
 
   const cache = useRef(new Map<string, any>());
 
@@ -102,15 +117,28 @@ export default function MapContent() {
     };
   }, [combinedGeo, visitedADM1, level]);
 
-  if (!loaded) return null;
+  const isLoading = !pinsLoaded || !loaded;
+
+  if (isLoading) {
+    return (
+      <div className="absolute inset-0 z-[1000] flex items-center justify-center bg-white">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-300 border-t-blue-500"></div>
+          <p className="text-sm text-gray-600">Loading your travels...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
       {/* pins */}
       {level === "POINTS" &&
-        points.map((p) => (
+        pins.map((p) => (
           <Marker key={p.id} position={[p.lat, p.lng]} icon={icon}>
-            <Popup>{p.country}</Popup>
+            <Popup>
+              {p.city}, {p.adm1}, {p.country}
+            </Popup>
           </Marker>
         ))}
 

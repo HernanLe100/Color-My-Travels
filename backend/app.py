@@ -60,6 +60,40 @@ def get_albums():
     
     return jsonify({"db_response": result})
 
+# get location details by location_id
+@app.route("/get_location", methods=["GET"])
+def get_location():
+    location_id = request.args.get("location_id", "")
+    
+    with connection_pool.connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(f"SELECT * FROM locations WHERE location_id = %s::text;", [location_id])
+            result = cursor.fetchall()
+    
+    return jsonify({"db_response": result})
+
+@app.route("/get_locations", methods=["GET"])
+def get_locations():
+    user_id = request.args.get("user_id", "")
+    user_id = user_id.replace("\\", "\\\\")\
+        .replace("%", "\\%").replace("_", "\\_")
+
+    with connection_pool.connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT locations.* FROM albums
+                JOIN locations ON albums.location_id = locations.location_id
+                WHERE albums.user_id = %s::text;
+                """,
+                [user_id]
+            )
+
+            result = cursor.fetchall()
+
+    return jsonify({"db_response": result})
+
+
 @app.route("/geo", methods=["GET"])
 def get_geo():
     country = request.args.get("country")
