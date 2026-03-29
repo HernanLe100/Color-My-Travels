@@ -18,23 +18,38 @@ export default function MapContent() {
   const [adm1, setAdm1] = useState<any[]>([]);
   const [loaded, setLoaded] = useState(false);
 
-  // TODO: extract from database instead of hardcoding
-  const points = useMemo(
-    () => [
-      { id: 1, lat: 40.343, lng: -74.651, country: "USA", adm1: "US-NJ" },
-      { id: 2, lat: 48.8566, lng: 2.3522, country: "FRA", adm1: "FR-IDF" },
-    ],
-    [],
-  );
+  const [pins, setPins] = useState<any[]>([]);
+
+  useEffect(() => {
+    async function loadPoints() {
+      const res = await fetch(
+        `http://localhost:5001/get_locations?user_id=0000`
+      );
+      const data = await res.json();
+  
+      // map DB response
+      const mapped = data.db_response.map((p: any) => ({
+        id: p.location_id,
+        lat: p.lat,
+        lng: p.lng,
+        country: p.country,
+        adm1: p.adm1,
+      }));
+  
+      setPins(mapped);
+    }
+  
+    loadPoints();
+  }, []);
 
   const countriesVisited = useMemo(
-    () => [...new Set(points.map((p) => p.country))],
-    [points],
+    () => [...new Set(pins.map((p) => p.country))],
+    [pins],
   );
 
   const visitedADM1 = useMemo(
-    () => new Set(points.map((p) => p.adm1)),
-    [points],
+    () => new Set(pins.map((p) => p.adm1)),
+    [pins],
   );
 
   const cache = useRef(new Map<string, any>());
@@ -108,7 +123,7 @@ export default function MapContent() {
     <>
       {/* pins */}
       {level === "POINTS" &&
-        points.map((p) => (
+        pins.map((p) => (
           <Marker key={p.id} position={[p.lat, p.lng]} icon={icon}>
             <Popup>{p.country}</Popup>
           </Marker>
