@@ -4,7 +4,7 @@ import { useZoomLevel } from "@/hooks/useZoomLevel";
 import L from "leaflet";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
-import type { Pin } from "@/types";
+import type { Pin, Color } from "@/types";
 
 const icon = new L.Icon({
   iconUrl: markerIcon,
@@ -13,13 +13,6 @@ const icon = new L.Icon({
   iconAnchor: [12, 41],
 });
 
-// TODO: create seperate file to store types
-type Color = {
-  color: string;
-  user_id: string;
-  region_code: string;
-  region_type: string;
-};
 
 export default function MapContent() {
   const zoom = useZoomLevel();

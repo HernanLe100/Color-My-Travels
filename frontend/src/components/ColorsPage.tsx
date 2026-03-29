@@ -1,12 +1,6 @@
 import { useState, useEffect } from "react";
+import type { Color } from "@/types";
 
-// TODO: create seperate file to store types
-type Color = {
-  color: string;
-  user_id: string;
-  region_code: string;
-  region_type: string;
-};
 
 export default function ColorsPage() {
   const [colors, setColors] = useState<Color[]>([]);
@@ -35,7 +29,7 @@ export default function ColorsPage() {
   return (
     <div>
       <h1 className="text-lg font-bold px-4 pt-4">
-        Colors
+        Edit Colors
       </h1>
       <div className="px-4 pt-4">
         {colors?.map((row, i) => {

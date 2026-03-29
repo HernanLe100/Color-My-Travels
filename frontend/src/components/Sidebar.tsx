@@ -44,7 +44,7 @@ import {
               >
                 <Link to="/colors">
                   <Paintbrush className="w-4 h-4 mr-2" />
-                  Colors
+                  Edit Colors
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>

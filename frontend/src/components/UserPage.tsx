@@ -38,7 +38,7 @@ export default function UserPage() {
       <p className="px-4">
         Album captions:{" "}
         {albums?.map((album, i) => (
-          <span key={i}>{album?.caption} </span>
+          <div key={i}>{album?.caption} </div>
         ))}
       </p>
 
