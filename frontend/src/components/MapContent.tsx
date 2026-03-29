@@ -34,6 +34,7 @@ export default function MapContent() {
         lng: p.lng,
         country: p.country,
         adm1: p.adm1,
+        city: p.city,
       }));
   
       setPins(mapped);
@@ -125,7 +126,7 @@ export default function MapContent() {
       {level === "POINTS" &&
         pins.map((p) => (
           <Marker key={p.id} position={[p.lat, p.lng]} icon={icon}>
-            <Popup>{p.country}</Popup>
+            <Popup>{p.city}, {p.adm1}, {p.country}</Popup>
           </Marker>
         ))}
 
