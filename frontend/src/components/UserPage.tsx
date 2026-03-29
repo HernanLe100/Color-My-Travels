@@ -1,18 +1,5 @@
+import type { Album, User } from "@/types";
 import { useState, useEffect } from "react";
-
-// TODO: create seperate file to store types
-type User = {
-  user_id: string;
-  name: string;
-};
-type Album = {
-  album_id: string;
-  user_id: string;
-  caption: string;
-  pages: string[];
-  start_date: string;
-  end_date: string;
-};
 
 export default function UserPage() {
   const [user, setUser] = useState<User>();

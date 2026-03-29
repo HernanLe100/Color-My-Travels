@@ -4,6 +4,7 @@ import { useZoomLevel } from "@/hooks/useZoomLevel";
 import L from "leaflet";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
+import type { Pin } from "@/types";
 
 const icon = new L.Icon({
   iconUrl: markerIcon,
@@ -18,7 +19,7 @@ export default function MapContent() {
   const [adm1, setAdm1] = useState<any[]>([]);
   const [loaded, setLoaded] = useState(false);
 
-  const [pins, setPins] = useState<any[]>([]);
+  const [pins, setPins] = useState<Pin[]>([]);
   const [pinsLoaded, setPinsLoaded] = useState(false);
 
   useEffect(() => {
@@ -30,7 +31,7 @@ export default function MapContent() {
 
       // map DB response
       const mapped = data.db_response.map((p: any) => ({
-        id: p.location_id,
+        location_id: p.location_id,
         lat: p.lat,
         lng: p.lng,
         country: p.country,
@@ -135,7 +136,7 @@ export default function MapContent() {
       {/* pins */}
       {level === "POINTS" &&
         pins.map((p) => (
-          <Marker key={p.id} position={[p.lat, p.lng]} icon={icon}>
+          <Marker key={p.location_id} position={[p.lat, p.lng]} icon={icon}>
             <Popup>
               {p.city}, {p.adm1}, {p.country}
             </Popup>
