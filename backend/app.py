@@ -6,6 +6,7 @@ import psycopg
 from psycopg_pool import ConnectionPool
 from psycopg.rows import dict_row
 import requests
+import pycountry
 
 load_dotenv()
 
@@ -131,6 +132,66 @@ def get_geo():
     except Exception as e:
         print("Geo fetch error:", e)
         return jsonify({"error": str(e)}), 500
+
+def iso2_to_iso3(code):
+    if not code:
+        return None
+
+    try:
+        country = pycountry.countries.get(alpha_2=code)
+        return country.alpha_3 if country else None
+    except:
+        return None
+
+@app.route("/search")
+def search():
+    q = request.args.get("q")
+
+    url = f"https://nominatim.openstreetmap.org/search?q={q}&format=json&addressdetails=1&limit=5"
+    res = requests.get(url, headers={"User-Agent": "color-my-travels"})
+    data = res.json()
+
+    results = []
+
+    print(data)
+
+    for p in data:
+        addr = p.get("address", {})
+
+        print(addr)
+
+        city = (
+            addr.get("city")
+            or addr.get("town")
+            or addr.get("village")
+            or addr.get("municipality")
+            or addr.get("county")
+            or addr.get("province")
+        )
+
+        state = (
+            addr.get("state")
+            or addr.get("region")
+            or addr.get("state_district")
+        )
+
+        adm1_code = addr.get("ISO3166-2-lvl4")
+
+        if not city:
+            city = state
+
+        country_iso3 = iso2_to_iso3(addr.get("country_code", "").upper())
+
+        results.append({
+            "city": city,
+            "state": state,
+            "adm1": adm1_code,
+            "country": country_iso3,
+            "lat": float(p["lat"]),
+            "lng": float(p["lon"])
+        })
+
+    return results
 
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=False, port=5001)
