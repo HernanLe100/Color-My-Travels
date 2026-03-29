@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 import psycopg
 from psycopg_pool import ConnectionPool
 from psycopg.rows import dict_row
+import requests
 
 load_dotenv()
 
@@ -57,6 +58,44 @@ def get_albums():
             result = cursor.fetchall()
     
     return jsonify({"db_response": result})
+
+@app.route("/geo", methods=["GET"])
+def get_geo():
+    country = request.args.get("country")
+    level = request.args.get("level") # ADM0 or ADM1
+
+    if not country or not level:
+        return jsonify({"error": "Missing country or level"}), 400
+
+    try:
+        # call geoBoundaries metadata API
+        meta_url = f"https://www.geoboundaries.org/api/current/gbOpen/{country}/{level}"
+        meta_res = requests.get(meta_url)
+
+        if meta_res.status_code != 200:
+            return jsonify({"error": "Failed to fetch metadata"}), 500
+
+        meta = meta_res.json()
+
+        # get the actual GeoJSON link
+        geojson_url = meta.get("simplifiedGeometryGeoJSON")
+
+        if not geojson_url:
+            return jsonify({"error": "No GeoJSON URL found"}), 500
+
+        # fetch the actual geometry
+        geo_res = requests.get(geojson_url)
+
+        if geo_res.status_code != 200:
+            return jsonify({"error": "Failed to fetch GeoJSON"}), 500
+
+        geo_data = geo_res.json()
+
+        return jsonify(geo_data)
+
+    except Exception as e:
+        print("Geo fetch error:", e)
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=False, port=5001)
