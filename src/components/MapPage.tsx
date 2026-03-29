@@ -19,6 +19,7 @@ export default function MapPage() {
       <MapContainer
         center={position}
         zoom={3}
+        minZoom={2}
         scrollWheelZoom={true}
         className="h-full w-full"
       >
