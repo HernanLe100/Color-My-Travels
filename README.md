@@ -23,4 +23,6 @@ create a .env file in the backend folder and paste the external db url from rend
 python app.py
 
 Frontend:
+cd frontend
+
 npm run dev
