@@ -1,18 +1,6 @@
+import type { Album, User } from "@/types";
 import { useState, useEffect } from "react";
-
-// TODO: create seperate file to store types
-type User = {
-  user_id: string;
-  name: string;
-};
-type Album = {
-  album_id: string;
-  user_id: string;
-  caption: string;
-  pages: string[];
-  start_date: string;
-  end_date: string;
-};
+import CitySearch from "./CitySearch";
 
 export default function UserPage() {
   const [user, setUser] = useState<User>();
@@ -33,6 +21,13 @@ export default function UserPage() {
       });
   }, []);
 
+  const [selectedLocation, setSelectedLocation] = useState<any>(null);
+
+  const handleSelect = (location: any) => {
+    console.log(location);
+    setSelectedLocation(location);
+  };
+
   return (
     <div>
       <h1 className="text-lg font-bold px-4 pt-4">
@@ -46,6 +41,9 @@ export default function UserPage() {
           <span key={i}>{album?.caption} </span>
         ))}
       </p>
+
+      <CitySearch onSelect={handleSelect} />
+      <p>{JSON.stringify(selectedLocation)}</p>
     </div>
   );
 }

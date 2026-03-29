@@ -4,6 +4,7 @@ import { useZoomLevel } from "@/hooks/useZoomLevel";
 import L from "leaflet";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
+import type { Pin } from "@/types";
 
 const icon = new L.Icon({
   iconUrl: markerIcon,
@@ -27,7 +28,7 @@ export default function MapContent() {
   const [loaded, setLoaded] = useState(false);
   const [colors, setColors] = useState<Color[]>([]);
 
-  const [pins, setPins] = useState<any[]>([]);
+  const [pins, setPins] = useState<Pin[]>([]);
   const [pinsLoaded, setPinsLoaded] = useState(false);
 
   useEffect(() => {
@@ -39,7 +40,7 @@ export default function MapContent() {
 
       // map DB response
       const mapped = data.db_response.map((p: any) => ({
-        id: p.location_id,
+        location_id: p.location_id,
         lat: p.lat,
         lng: p.lng,
         country: p.country,
@@ -159,25 +160,25 @@ export default function MapContent() {
     };
   }, [combinedGeo, visitedADM1, level]);
 
-    const isLoading = !pinsLoaded || !loaded;
+  const isLoading = !pinsLoaded || !loaded;
 
-    if (isLoading) {
-      return (
-        <div className="absolute inset-0 z-[1000] flex items-center justify-center bg-white">
-          <div className="flex flex-col items-center gap-3">
-            <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-300 border-t-blue-500"></div>
-            <p className="text-sm text-gray-600">Loading your travels...</p>
-          </div>
+  if (isLoading) {
+    return (
+      <div className="absolute inset-0 z-[1000] flex items-center justify-center bg-white">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-300 border-t-blue-500"></div>
+          <p className="text-sm text-gray-600">Loading your travels...</p>
         </div>
-      );
-    }
+      </div>
+    );
+  }
 
   return (
     <>
       {/* pins */}
       {level === "POINTS" &&
-         pins.map((p) => (
-          <Marker key={p.id} position={[p.lat, p.lng]} icon={icon}>
+        pins.map((p) => (
+          <Marker key={p.location_id} position={[p.lat, p.lng]} icon={icon}>
             <Popup>
               {p.city}, {p.adm1}, {p.country}
             </Popup>
