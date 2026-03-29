@@ -5,7 +5,9 @@ import CitySearch from "./CitySearch";
 export default function UserPage() {
   const [user, setUser] = useState<User>();
   const [albums, setAlbums] = useState<Album[]>([]);
+  // TODO: fetch user from db
   const testUser = "0000";
+
   useEffect(() => {
     fetch(`http://localhost:5001/get_user?user_id=${testUser}`)
       .then((res) => res.json())
