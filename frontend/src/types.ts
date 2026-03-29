@@ -21,3 +21,10 @@ export type Album = {
     end_date: string;
     location_id: number;
 };
+
+export type Color = {
+    color: string;
+    user_id: string;
+    region_code: string;
+    region_type: string;
+};

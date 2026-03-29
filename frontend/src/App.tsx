@@ -3,6 +3,7 @@ import Sidebar from "./components/Sidebar"
 import { SidebarProvider } from "./components/ui/sidebar"
 import MapPage from "./components/MapPage"
 import UserPage from "./components/UserPage"
+import ColorsPage from "./components/ColorsPage"
 import { useEffect } from "react"
 
 
@@ -23,6 +24,7 @@ function App() {
             <Routes>
               <Route path="/" element={<MapPage />} />
               <Route path="/user" element={<UserPage />} />
+              <Route path="/colors" element={<ColorsPage />} />
             </Routes>
           </main>
         </div>

@@ -42,7 +42,7 @@ def get_user():
     
     with connection_pool.connection() as connection:
         with connection.cursor() as cursor:
-            cursor.execute(f"SELECT * FROM users WHERE user_id = %s::text;",  [user_id])
+            cursor.execute("SELECT * FROM users WHERE user_id = %s::text;",  [user_id])
             result = cursor.fetchall()
             print(result)
 
@@ -56,7 +56,7 @@ def get_albums():
     
     with connection_pool.connection() as connection:
         with connection.cursor() as cursor:
-            cursor.execute(f"SELECT * FROM albums WHERE user_id = %s::text;", [user_id])
+            cursor.execute("SELECT * FROM albums WHERE user_id = %s::text;", [user_id])
             result = cursor.fetchall()
     
     return jsonify({"db_response": result})
@@ -133,6 +133,35 @@ def get_geo():
         print("Geo fetch error:", e)
         return jsonify({"error": str(e)}), 500
 
+@app.route("/get_colors", methods=["GET"])
+def get_colors():
+    user_id = request.args.get("user_id", "")
+    user_id = user_id.replace("\\", "\\\\")\
+        .replace("%", "\\%").replace("_", "\\_")
+
+    with connection_pool.connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM colors WHERE user_id = %s::text ORDER BY region_code ASC;", [user_id])
+            result = cursor.fetchall()
+    
+    return jsonify({"db_response": result})
+
+@app.route("/update_color", methods=["PUT"])
+def update_color():
+    data = request.get_json()
+    user_id = data.get("user_id")
+    region_code = data.get("region_code")
+    region_type = data.get("region_type")
+    color = data.get("color")
+    with connection_pool.connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "UPDATE colors SET color = %s WHERE user_id = %s::text AND region_code = %s AND region_type = %s::text;",
+                [color, user_id, region_code, region_type]
+            )
+        connection.commit()
+    return jsonify({"success": True})
+  
 def iso2_to_iso3(code):
     if not code:
         return None
