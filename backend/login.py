@@ -14,7 +14,7 @@ login_bp = flask.Blueprint("login", __name__)
 
 load_dotenv()
 
-_FRONTEND_URL = os.environ["FRONTEND_URL"]
+_FRONTEND_URL = "http://localhost:5173"#os.environ["FRONTEND_URL"]
 
 _GOOGLE_CLIENT_ID = os.environ["GOOGLE_CLIENT_ID"]
 _GOOGLE_CLIENT_SECRET = os.environ["GOOGLE_CLIENT_SECRET"]
@@ -29,12 +29,18 @@ def login():
     google_provider_cfg = requests.get(_GOOGLE_DISCOVERY_URL, timeout=2).json()
     auth_endpoint = google_provider_cfg["authorization_endpoint"]
     client = oauthlib.oauth2.WebApplicationClient(_GOOGLE_CLIENT_ID)
+    
+    print(auth_endpoint)
+    print(flask.request.base_url + "/callback")
+    print(original_url)
+    
     request_uri = client.prepare_request_uri(
         auth_endpoint,
         redirect_uri = flask.request.base_url + "/callback",
         scope=["openid", "email", "profile"],
         state=original_url
     )
+    print(request_uri)
     return flask.redirect(request_uri)
     # authorization server redirects browser to the login page
     # user logs in
@@ -44,15 +50,17 @@ def login():
 
 @login_bp.route("/login/callback", methods=["GET"])
 def callback():
+    print(1)
     authorization_code = flask.request.args.get("code")
     # app sends authorization code to authorization server
     # authorization server sends access token and other tokens to app
     google_provider_cfg = requests.get(_GOOGLE_DISCOVERY_URL, timeout=2).json()
     token_endpoint = google_provider_cfg["token_endpoint"]
     client = oauthlib.oauth2.WebApplicationClient(_GOOGLE_CLIENT_ID)
+    print(2)
     token_url, headers, body = client.prepare_token_request(
         token_endpoint,
-        #authorization_response=flask.request.url, <-- question -- what does this param even do and why does removing it seem to work?
+        #authorization_response=flask.request.url, # <-- question -- what does this param even do and why does removing it seem to work?
         redirect_url=flask.request.base_url,
         code=authorization_code
     )

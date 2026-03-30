@@ -11,6 +11,11 @@ import {
   import { Map, User, Paintbrush } from "lucide-react"
   import { Link, useLocation } from "react-router-dom"
   
+
+  // TEMPORARY
+  const BACKEND_URL = "http://127.0.0.1:5001" //import.meta.env.BACKEND_URL
+  const loginUrl = `${BACKEND_URL}/login?originalurl=${encodeURIComponent(window.location.pathname)}`
+
   export default function AppSidebar() {
     const location = useLocation()
   
@@ -48,6 +53,20 @@ import {
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
+
+            <SidebarMenuItem>
+              <SidebarMenuButton 
+              type="button"
+              onClick={() => {
+                window.location.href = loginUrl
+              }}
+              >
+                  <Paintbrush className="w-4 h-4 mr-2" />
+                  log in VERY TEMPORARY
+                
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+
           </SidebarMenu>
         </SidebarContent>
   
