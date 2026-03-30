@@ -4,13 +4,14 @@ from database.utils import connection_pool as _connection_pool
 def get_nonce(nonce):
     with _connection_pool.connection() as connection:
         with connection.cursor() as cursor:
-            query_str = "SELECT username FROM nonces WHERE nonce = %s;"
+            query_str = "SELECT sub FROM nonces WHERE nonce = %s;"
             cursor.execute(query_str, [nonce])
             table = cursor.fetchall()
             if len(table) == 0:
                 return None
-            username = table[0][0]
-            return username
+            print(table)
+            sub = table[0]["sub"]
+            return sub
         
 def put_nonce(nonce, sub):
     with _connection_pool.connection() as connection:

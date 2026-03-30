@@ -21,7 +21,7 @@ connection_pool = ConnectionPool(conninfo=DATABASE_URL, kwargs={"row_factory":di
 app = Flask(__name__)
 app.register_blueprint(login_bp)
 
-_FRONTEND_URL = os.environ["FRONTEND_URL"]
+_FRONTEND_URL = "http://localhost:5173" #os.environ["FRONTEND_URL"]
 #CORS(app, resources={r'/api/*': {'origins': _FRONTEND_URL}}) <-- please keep this commented for now - Hernan
 CORS(app)
 
