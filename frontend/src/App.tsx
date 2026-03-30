@@ -6,6 +6,7 @@ import UserPage from "./components/UserPage"
 import ColorsPage from "./components/ColorsPage"
 import { useEffect } from "react"
 
+const BACKEND_URL = import.meta.env.BACKEND_URL
 
 function App() {
   useEffect(() => {
