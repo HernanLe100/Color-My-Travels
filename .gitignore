@@ -30,3 +30,5 @@ backend/venv/
 __pycache__/
 *.pyc
 .env
+cert.pem
+key.pem
