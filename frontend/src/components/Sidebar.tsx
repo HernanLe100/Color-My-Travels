@@ -48,6 +48,19 @@ import {
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
+
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                isActive={location.pathname === "/login"}
+              >
+                <Link to="/login">
+                  <Paintbrush className="w-4 h-4 mr-2" />
+                  log
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+
           </SidebarMenu>
         </SidebarContent>
   

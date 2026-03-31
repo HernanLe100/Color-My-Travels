@@ -1,30 +1,28 @@
 import os
-import datetime
+from dotenv import load_dotenv
 import json
 import flask
-from dotenv import load_dotenv
-import flask_jwt_extended
 import flask_cors
+import flask_jwt_extended
 import requests
 import oauthlib.oauth2
+
+import database.login as dbl
 # --------------------------------------------------
+
+login_bp = flask.Blueprint("login", __name__)
+
 load_dotenv()
-_APP_SECRET_KEY = os.environ["APP_SECRET_KEY"]
+
 _FRONTEND_URL = os.environ["FRONTEND_URL"]
+
 _GOOGLE_CLIENT_ID = os.environ["GOOGLE_CLIENT_ID"]
 _GOOGLE_CLIENT_SECRET = os.environ["GOOGLE_CLIENT_SECRET"]
 _GOOGLE_DISCOVERY_URL = "https://accounts.google.com/.well-known/openid-configuration"
+
 # --------------------------------------------------
-# sample code:
-# app = flask.Flask(__name__, template_folder='.')
-#app.secret_key = _APP_SECRET_KEY
-#flask_cors.CORS(app, resources={r'/api/*': {'origins': _FRONTEND_URL}})
-#app.config['JWT_SECRET_KEY'] = _APP_SECRET_KEY
-#app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.timedelta(hours=1)
-#app.config['JWT_REFRESH_TOKEN_EXPIRES'] = datetime.timedelta(days=1)
-#jwt_manager = flask_jwt_extended.JWTManager(app)
-# --------------------------------------------------
-@app.route("/login", methods=["GET"])
+
+@login_bp.route("/login1", methods=["GET"])
 def login():
     # redirect browser to authorization server
     original_url = flask.request.args.get("originalurl")
@@ -41,19 +39,20 @@ def login():
     # authorization server redirects browser to the login page
     # user logs in
     # authorization server redirects browser to callback endpoint, provides single use authorization code
+    
 # --------------------------------------------------
-@app.route("/login/callback", methods=["GET"])
+
+@login_bp.route("/login/callback", methods=["GET"])
 def callback():
     authorization_code = flask.request.args.get("code")
     # app sends authorization code to authorization server
     # authorization server sends access token and other tokens to app
-    
     google_provider_cfg = requests.get(_GOOGLE_DISCOVERY_URL, timeout=2).json()
     token_endpoint = google_provider_cfg["token_endpoint"]
     client = oauthlib.oauth2.WebApplicationClient(_GOOGLE_CLIENT_ID)
     token_url, headers, body = client.prepare_token_request(
         token_endpoint,
-        authorization_response=flask.request.url,
+        #authorization_response=flask.request.url, <-- question -- what does this param even do and why does removing it seem to work?
         redirect_url=flask.request.base_url,
         code=authorization_code
     )
@@ -65,8 +64,7 @@ def callback():
         timeout=2
     )
     # app uses the access token to fetch information about the user
-    client.parse_request_body_response(
-        json.dumps(token_response.json()))
+    client.parse_request_body_response(json.dumps(token_response.json()))
     userinfo_endpoint = google_provider_cfg["userinfo_endpoint"]
     uri, headers, body = client.add_token(userinfo_endpoint)
     userinfo_response = requests.get(uri, headers=headers, data=body, timeout=2)
@@ -78,35 +76,43 @@ def callback():
     # redirect the browser to the client with a nonce as an argument
     nonce = os.urandom(32).hex()
     userinfo_dict = userinfo_response.json()
-    username = userinfo_dict.get("email", "")
-    database.put_nonce(nonce, username)
-    database.put_userinfo(username, json.dumps(userinfo_dict))
-    original_url = flask.request.args.get("state")
+    sub = userinfo_dict.get("sub", "")
+    dbl.put_nonce(nonce, sub)
+    # dbl.put_userinfo(sub, json.dumps(userinfo_dict)) <-- need to edit to put into users table
+    
+    original_url = flask.request.args.get("state") # <-- currently returning null
+    print(flask.request.url)
+    print(original_url)
+    
     response = flask.redirect(_FRONTEND_URL + original_url + "?nonce=" + nonce)
     return response
+
 # --------------------------------------------------
-@app.route("/api/get_tokens", methods=["GET"])
+# not in use at this moment
+@login_bp.route("/api/get_tokens", methods=["GET"])
 def get_tokens():
     nonce = flask.request.args.get("nonce")
     if nonce is None:
         return
-    username = database.get_nonce(nonce)
+    username = dbl.get_nonce(nonce)
     if username is None:
         return
-    database.delete_nonce(nonce)
+    dbl.delete_nonce(nonce)
     accesstoken = flask_jwt_extended.create_access_token(identity=username)
     refreshtoken = flask_jwt_extended.create_refresh_token(identity=username)
     return flask.jsonify([username, accesstoken, refreshtoken])
+
 # --------------------------------------------------
+
 # logging out of app
-@app.route("/logout_app", methods=["GET"])
+@login_bp.route("/logout_app", methods=["GET"])
 def logoutapp():
     # cannot invalidate JWTs, so best option is ask frontend to discard JWTs
     response = flask.redirect(_FRONTEND_URL + "/logout")
     return response
-# --------------------------------------------------
+
 #logging out of both app and Google
-@app.route("/logout_google", methods=["GET"])
+@login_bp.route("/logout_google", methods=["GET"])
 def logoutgoogle():
     # Log out of Google
     google_logout_page = 'https://www.google.com/accounts/Logout'

@@ -8,21 +8,48 @@ from psycopg.rows import dict_row
 import requests
 import pycountry
 
+import datetime
+import flask_jwt_extended
+
+from login import login_bp
+
 load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 connection_pool = ConnectionPool(conninfo=DATABASE_URL, kwargs={"row_factory":dict_row}) 
 
 app = Flask(__name__)
+#app.register_blueprint(login_bp)
+
+_FRONTEND_URL = os.environ["FRONTEND_URL"]
+#CORS(app, resources={r'/api/*': {'origins': _FRONTEND_URL}}) <-- please keep this commented for now - Hernan
 CORS(app)
+
+_APP_SECRET_KEY = os.environ["APP_SECRET_KEY"]
+app.config['JWT_SECRET_KEY'] = _APP_SECRET_KEY
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.timedelta(hours=1)
+app.config['JWT_REFRESH_TOKEN_EXPIRES'] = datetime.timedelta(days=1)
+jwt_manager = flask_jwt_extended.JWTManager(app)
 
 @app.route("/test")
 def test():
     return jsonify({"message": "Hello world"})
 
-# not used
-#def get_db_connection():
-#    return psycopg.connect(DATABASE_URL) # connection_pool.connection() #  psycopg2.connect(DATABASE_URL)
+
+#import oauthlib.oauth2
+from google.oauth2 import id_token
+import google.auth
+from google.auth.transport.requests import Request
+CLIENT_ID = os.environ["GOOGLE_CLIENT_ID"]
+
+@app.route("/ten", methods=["POST"])
+def ten():
+    token = request.get_json()["credential"]
+    claims = id_token.verify_oauth2_token(token, Request(), CLIENT_ID)
+
+    print(claims)
+    
+    return jsonify({"message": f"{claims}"})
 
 @app.route("/get_users", methods=["GET"])
 def get_users():
@@ -223,4 +250,4 @@ def search():
     return results
 
 if __name__ == "__main__":
-    app.run(debug=True, use_reloader=False, port=5001)
+    app.run(debug=True, use_reloader=False, port=5001, ssl_context=("cert.pem", "key.pem"))

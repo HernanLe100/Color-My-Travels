@@ -6,10 +6,12 @@ import UserPage from "./components/UserPage"
 import ColorsPage from "./components/ColorsPage"
 import { useEffect } from "react"
 
+import LoginPage from "./components/LoginPage"
+
 
 function App() {
   useEffect(() => {
-    fetch("http://127.0.0.1:5001/test")
+    fetch("https://127.0.0.1:5001/test")
       .then(res => res.json())
       .then(data => console.log(data));
   }, []);
@@ -25,6 +27,7 @@ function App() {
               <Route path="/" element={<MapPage />} />
               <Route path="/user" element={<UserPage />} />
               <Route path="/colors" element={<ColorsPage />} />
+              <Route path="/login" element={<LoginPage />} />
             </Routes>
           </main>
         </div>

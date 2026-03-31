@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 
+const BACKEND_URL = "https://127.0.0.1:5001" //import.meta.env.BACKEND_URL
+
 export default function CitySearch({ onSelect }: any) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<any[]>([]);
@@ -9,7 +11,7 @@ export default function CitySearch({ onSelect }: any) {
 
     const timeout = setTimeout(async () => {
       const res = await fetch(
-        `http://localhost:5001/search?q=${query}`
+        `${BACKEND_URL}/search?q=${query}`
       );
       const data = await res.json();
       setResults(data);
