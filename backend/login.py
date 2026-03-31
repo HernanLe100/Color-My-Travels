@@ -2,7 +2,6 @@ import os
 from dotenv import load_dotenv
 import json
 import flask
-import flask_cors
 import flask_jwt_extended
 import requests
 import oauthlib.oauth2
@@ -14,7 +13,7 @@ login_bp = flask.Blueprint("login", __name__)
 
 load_dotenv()
 
-_FRONTEND_URL = "http://localhost:5173"#os.environ["FRONTEND_URL"]
+_FRONTEND_URL = "https://localhost:5173"#os.environ["FRONTEND_URL"]
 
 _GOOGLE_CLIENT_ID = os.environ["GOOGLE_CLIENT_ID"]
 _GOOGLE_CLIENT_SECRET = os.environ["GOOGLE_CLIENT_SECRET"]
@@ -30,17 +29,12 @@ def login():
     auth_endpoint = google_provider_cfg["authorization_endpoint"]
     client = oauthlib.oauth2.WebApplicationClient(_GOOGLE_CLIENT_ID)
     
-    print(auth_endpoint)
-    print(flask.request.base_url + "/callback")
-    print(original_url)
-    
     request_uri = client.prepare_request_uri(
         auth_endpoint,
         redirect_uri = flask.request.base_url + "/callback",
         scope=["openid", "email", "profile"],
         state=original_url
     )
-    print(request_uri)
     return flask.redirect(request_uri)
     # authorization server redirects browser to the login page
     # user logs in
@@ -50,17 +44,15 @@ def login():
 
 @login_bp.route("/login/callback", methods=["GET"])
 def callback():
-    print(1)
     authorization_code = flask.request.args.get("code")
     # app sends authorization code to authorization server
     # authorization server sends access token and other tokens to app
     google_provider_cfg = requests.get(_GOOGLE_DISCOVERY_URL, timeout=2).json()
     token_endpoint = google_provider_cfg["token_endpoint"]
     client = oauthlib.oauth2.WebApplicationClient(_GOOGLE_CLIENT_ID)
-    print(2)
     token_url, headers, body = client.prepare_token_request(
         token_endpoint,
-        #authorization_response=flask.request.url, # <-- question -- what does this param even do and why does removing it seem to work?
+        authorization_response=flask.request.url, # <-- requires https to work --> generate cert and key pem files
         redirect_url=flask.request.base_url,
         code=authorization_code
     )
@@ -71,15 +63,18 @@ def callback():
         auth=(_GOOGLE_CLIENT_ID, _GOOGLE_CLIENT_SECRET),
         timeout=2
     )
+    
     # app uses the access token to fetch information about the user
     client.parse_request_body_response(json.dumps(token_response.json()))
     userinfo_endpoint = google_provider_cfg["userinfo_endpoint"]
     uri, headers, body = client.add_token(userinfo_endpoint)
     userinfo_response = requests.get(uri, headers=headers, data=body, timeout=2)
+    
     # Optional: make sure email address is verified
     if not userinfo_response.json().get("email_verified"):
         message = "User email not available or not verified by Google."
         return message, 400
+    
     # save the userinfo in the database
     # redirect the browser to the client with a nonce as an argument
     nonce = os.urandom(32).hex()
@@ -88,27 +83,27 @@ def callback():
     dbl.put_nonce(nonce, sub)
     # dbl.put_userinfo(sub, json.dumps(userinfo_dict)) <-- need to edit to put into users table
     
-    original_url = flask.request.args.get("state") # <-- currently returning null
-    print(flask.request.url)
-    print(original_url)
+    original_url = flask.request.args.get("state")
     
     response = flask.redirect(_FRONTEND_URL + original_url + "?nonce=" + nonce)
     return response
 
 # --------------------------------------------------
-# not in use at this moment
-@login_bp.route("/api/get_tokens", methods=["GET"])
+
+@login_bp.route("/get_tokens", methods=["GET"])
 def get_tokens():
+    # remove the nonce, sub entry from the db - won't be needing after login
     nonce = flask.request.args.get("nonce")
     if nonce is None:
         return
-    username = dbl.get_nonce(nonce)
-    if username is None:
+    sub = dbl.get_nonce(nonce)
+    if sub is None:
         return
     dbl.delete_nonce(nonce)
-    accesstoken = flask_jwt_extended.create_access_token(identity=username)
-    refreshtoken = flask_jwt_extended.create_refresh_token(identity=username)
-    return flask.jsonify([username, accesstoken, refreshtoken])
+    
+    accesstoken = flask_jwt_extended.create_access_token(identity=sub)
+    refreshtoken = flask_jwt_extended.create_refresh_token(identity=sub)
+    return flask.jsonify([sub, accesstoken, refreshtoken])
 
 # --------------------------------------------------
 

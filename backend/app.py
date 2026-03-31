@@ -21,8 +21,8 @@ connection_pool = ConnectionPool(conninfo=DATABASE_URL, kwargs={"row_factory":di
 app = Flask(__name__)
 app.register_blueprint(login_bp)
 
-_FRONTEND_URL = "http://localhost:5173" #os.environ["FRONTEND_URL"]
-#CORS(app, resources={r'/api/*': {'origins': _FRONTEND_URL}}) <-- please keep this commented for now - Hernan
+_FRONTEND_URL = "https://localhost:5173" #os.environ["FRONTEND_URL"]
+#CORS(app, resources={r'/api/*': {'origins': _FRONTEND_URL}}) # <-- please keep this commented for now - Hernan
 CORS(app)
 
 _APP_SECRET_KEY = os.environ["APP_SECRET_KEY"]
@@ -34,10 +34,6 @@ jwt_manager = flask_jwt_extended.JWTManager(app)
 @app.route("/test")
 def test():
     return jsonify({"message": "Hello world"})
-
-# not used
-#def get_db_connection():
-#    return psycopg.connect(DATABASE_URL) # connection_pool.connection() #  psycopg2.connect(DATABASE_URL)
 
 @app.route("/get_users", methods=["GET"])
 def get_users():
@@ -238,4 +234,4 @@ def search():
     return results
 
 if __name__ == "__main__":
-    app.run(debug=True, use_reloader=False, port=5001)
+    app.run(debug=True, use_reloader=False, port=5001, ssl_context=("cert.pem", "key.pem"))

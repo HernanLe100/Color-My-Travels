@@ -13,6 +13,7 @@ dist
 frontend/dist
 dist-ssr
 *.local
+.env
 
 # Editor directories and files
 .vscode/*
@@ -30,3 +31,5 @@ backend/venv/
 __pycache__/
 *.pyc
 .env
+cert.pem
+key.pem

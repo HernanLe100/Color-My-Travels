@@ -28,6 +28,9 @@ def delete_nonce(nonce):
             connection.commit()
 # --------------------------------------------------
 
+
+
+
 def get_userinfo(username):
     with _connection_pool.connection() as connection:
         with connection.cursor() as cursor:

@@ -6,11 +6,11 @@ import UserPage from "./components/UserPage"
 import ColorsPage from "./components/ColorsPage"
 import { useEffect } from "react"
 
-const BACKEND_URL = import.meta.env.BACKEND_URL
+const BACKEND_URL = "https://127.0.0.1:5001" //import.meta.env.BACKEND_URL
 
 function App() {
   useEffect(() => {
-    fetch("http://127.0.0.1:5001/test")
+    fetch(`${BACKEND_URL}/test`)
       .then(res => res.json())
       .then(data => console.log(data));
   }, []);

@@ -13,6 +13,7 @@ const icon = new L.Icon({
   iconAnchor: [12, 41],
 });
 
+const BACKEND_URL = "https://127.0.0.1:5001" //import.meta.env.BACKEND_URL
 
 export default function MapContent() {
   const zoom = useZoomLevel();
@@ -27,7 +28,7 @@ export default function MapContent() {
   useEffect(() => {
     async function loadPoints() {
       const res = await fetch(
-        `http://localhost:5001/get_locations?user_id=0000`,
+        `${BACKEND_URL}/get_locations?user_id=0000`,
       );
       const data = await res.json();
 
@@ -60,7 +61,7 @@ export default function MapContent() {
   const cache = useRef(new Map<string, any>());
 
   useEffect(() => {
-    fetch(`http://localhost:5001/get_colors?user_id=${testUser}`)
+    fetch(`${BACKEND_URL}/get_colors?user_id=${testUser}`)
       .then((res) => res.json())
       .then((data) => {
         setColors(data.db_response);
@@ -78,7 +79,7 @@ export default function MapContent() {
       }
 
       const res = await fetch(
-        `http://localhost:5001/geo?country=${country}&level=${level}`,
+        `https://127.0.0.1:5001/geo?country=${country}&level=${level}`,
       );
       const data = await res.json();
 

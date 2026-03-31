@@ -2,6 +2,8 @@ import type { Album, User } from "@/types";
 import { useState, useEffect } from "react";
 import CitySearch from "./CitySearch";
 
+const BACKEND_URL = "https://127.0.0.1:5001" //import.meta.env.BACKEND_URL
+
 export default function UserPage() {
   const [user, setUser] = useState<User>();
   const [albums, setAlbums] = useState<Album[]>([]);
@@ -9,14 +11,14 @@ export default function UserPage() {
   const testUser = "0000";
 
   useEffect(() => {
-    fetch(`http://localhost:5001/get_user?user_id=${testUser}`)
+    fetch(`${BACKEND_URL}/get_user?user_id=${testUser}`)
       .then((res) => res.json())
       .then((data) => {
         setUser(data.db_response[0]);
       });
   }, []);
   useEffect(() => {
-    fetch(`http://localhost:5001/get_albums?user_id=${testUser}`)
+    fetch(`${BACKEND_URL}/get_albums?user_id=${testUser}`)
       .then((res) => res.json())
       .then((data) => {
         setAlbums(data.db_response);
