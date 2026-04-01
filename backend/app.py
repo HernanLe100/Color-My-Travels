@@ -13,7 +13,7 @@ import flask_jwt_extended
 
 from login import login_bp
 from flask_jwt_extended import create_access_token
-from  import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 load_dotenv()
 
