@@ -12,6 +12,8 @@ import datetime
 import flask_jwt_extended
 
 from login import login_bp
+from flask_jwt_extended import create_access_token
+from  import jwt_required, get_jwt_identity
 
 load_dotenv()
 
@@ -47,45 +49,56 @@ def ten():
     token = request.get_json()["credential"]
     claims = id_token.verify_oauth2_token(token, Request(), CLIENT_ID)
 
-    print(claims)
-    
-    return jsonify({"message": f"{claims}"})
+    user_id = claims["sub"]
+    name = claims.get("name", "")
 
-@app.route("/get_users", methods=["GET"])
-def get_users():
+    # insert user if not exists
     with connection_pool.connection() as connection:
         with connection.cursor() as cursor:
-            cursor.execute("SELECT * FROM users;")
-            result = cursor.fetchall()
-            print(result)
+            cursor.execute("""
+                INSERT INTO users (user_id, name)
+                VALUES (%s, %s)
+                ON CONFLICT (user_id) DO NOTHING;
+            """, [user_id, name])
+        connection.commit()
 
-    return jsonify({"db_response": result})
+    # create JWT
+    access_token = create_access_token(identity=user_id)
 
-@app.route("/get_user", methods=["GET"])
-def get_user():
-    user_id = request.args.get("user_id", "")
-    user_id = user_id.replace("\\", "\\\\")\
-        .replace("%", "\\%").replace("_", "\\_")
-    
+    return jsonify({
+        "user_id": user_id,
+        "name": name,
+        "token": access_token
+    })
+
+@app.route("/me", methods=["GET"])
+@jwt_required()
+def me():
+    user_id = get_jwt_identity()
+
     with connection_pool.connection() as connection:
         with connection.cursor() as cursor:
-            cursor.execute("SELECT * FROM users WHERE user_id = %s::text;",  [user_id])
-            result = cursor.fetchall()
-            print(result)
+            cursor.execute(
+                "SELECT user_id, name FROM users WHERE user_id = %s;",
+                [user_id]
+            )
+            user = cursor.fetchone()
 
-    return jsonify({"db_response": result})
+    return jsonify(user)
 
 @app.route("/get_albums", methods=["GET"])
+@jwt_required()
 def get_albums():
-    user_id = request.args.get("user_id", "")
-    user_id = user_id.replace("\\", "\\\\")\
-        .replace("%", "\\%").replace("_", "\\_")
-    
+    user_id = get_jwt_identity()
+
     with connection_pool.connection() as connection:
         with connection.cursor() as cursor:
-            cursor.execute("SELECT * FROM albums WHERE user_id = %s::text;", [user_id])
+            cursor.execute(
+                "SELECT * FROM albums WHERE user_id = %s::text;",
+                [user_id]
+            )
             result = cursor.fetchall()
-    
+
     return jsonify({"db_response": result})
 
 # get location details by location_id
@@ -101,10 +114,9 @@ def get_location():
     return jsonify({"db_response": result})
 
 @app.route("/get_locations", methods=["GET"])
+@jwt_required()
 def get_locations():
-    user_id = request.args.get("user_id", "")
-    user_id = user_id.replace("\\", "\\\\")\
-        .replace("%", "\\%").replace("_", "\\_")
+    user_id = get_jwt_identity()
 
     with connection_pool.connection() as connection:
         with connection.cursor() as cursor:
@@ -121,6 +133,27 @@ def get_locations():
 
     return jsonify({"db_response": result})
 
+@app.route("/add_album", methods=["POST"])
+@jwt_required()
+def add_album():
+    user_id = get_jwt_identity()
+    data = request.get_json()
+
+    location_id = data.get("location_id")
+    caption = data.get("caption", "")
+
+    with connection_pool.connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                INSERT INTO albums (user_id, location_id, caption)
+                VALUES (%s, %s, %s);
+                """,
+                [user_id, location_id, caption]
+            )
+        connection.commit()
+
+    return jsonify({"success": True})
 
 @app.route("/geo", methods=["GET"])
 def get_geo():
@@ -161,32 +194,48 @@ def get_geo():
         return jsonify({"error": str(e)}), 500
 
 @app.route("/get_colors", methods=["GET"])
+@jwt_required()
 def get_colors():
-    user_id = request.args.get("user_id", "")
-    user_id = user_id.replace("\\", "\\\\")\
-        .replace("%", "\\%").replace("_", "\\_")
+    user_id = get_jwt_identity()
 
-    with connection_pool.connection() as connection:
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT * FROM colors WHERE user_id = %s::text ORDER BY region_code ASC;", [user_id])
-            result = cursor.fetchall()
-    
-    return jsonify({"db_response": result})
-
-@app.route("/update_color", methods=["PUT"])
-def update_color():
-    data = request.get_json()
-    user_id = data.get("user_id")
-    region_code = data.get("region_code")
-    region_type = data.get("region_type")
-    color = data.get("color")
     with connection_pool.connection() as connection:
         with connection.cursor() as cursor:
             cursor.execute(
-                "UPDATE colors SET color = %s WHERE user_id = %s::text AND region_code = %s AND region_type = %s::text;",
+                """
+                SELECT * FROM colors
+                WHERE user_id = %s::text
+                ORDER BY region_code ASC;
+                """,
+                [user_id]
+            )
+            result = cursor.fetchall()
+
+    return jsonify({"db_response": result})
+
+@app.route("/update_color", methods=["PUT"])
+@jwt_required()
+def update_color():
+    user_id = get_jwt_identity()
+    data = request.get_json()
+
+    region_code = data.get("region_code")
+    region_type = data.get("region_type")
+    color = data.get("color")
+
+    with connection_pool.connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                UPDATE colors
+                SET color = %s
+                WHERE user_id = %s
+                  AND region_code = %s
+                  AND region_type = %s;
+                """,
                 [color, user_id, region_code, region_type]
             )
         connection.commit()
+
     return jsonify({"success": True})
   
 def iso2_to_iso3(code):
