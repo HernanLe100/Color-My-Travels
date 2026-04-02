@@ -1,49 +1,43 @@
 import { GoogleLogin } from '@react-oauth/google';
-/*
-import { useGoogleLogin } from '@react-oauth/google';
 
-const googleLogin = useGoogleLogin({
-    flow: 'auth-code', // Required for redirect mode to work correctly with a backend exchange
-    ux_mode: 'redirect',
-    redirect_uri: 'https://localhost:5173/', // **Your specified return URL**
-    onSuccess: async ({ code }) => {
-        // This callback won't be triggered in the frontend when using ux_mode="redirect" 
-        // because the page unmounts during the redirect.
-        // The code will be in the URL parameters of the redirect page.
-    },
-    onError: (error) => {
-        console.log(error);
-    },
-});*/
+function LoginPage() {
+  const handleSuccess = async (credentialResponse: any) => {
+    console.log("Google credential:", credentialResponse);
 
-import { useNavigate } from 'react-router-dom';
+    const res = await fetch("https://127.0.0.1:5001/ten", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        credential: credentialResponse.credential,
+      }),
+    });
 
-export default function LoginPage(){
+    const data = await res.json();
+    console.log("Backend response:", data);
 
-    const nav = useNavigate();
+    // store token in local storage
+    localStorage.setItem("token", data.token);
+    window.location.href = "/";
+  };
 
-    return (
-    <GoogleLogin
-        onSuccess={credentialResponse => {
-          fetch("https://127.0.0.1:5001/ten", {
-            method: "POST", 
-            headers: {"Content-Type": "application/json", },
-            body: JSON.stringify(credentialResponse), // The data body must be a stringified JSON object
-          }).then(res => res.json()).then(data => console.log(data));
+  const handleError = () => {
+    console.log("Login Failed");
+  };
 
-          console.log(credentialResponse);
-          console.log(JSON.stringify(credentialResponse));
-          nav("/"); 
-          
-        }}
+  return (
+    <div className="flex h-screen items-center justify-center">
+      <div className="p-6 shadow-lg rounded-xl">
+        <h1 className="text-xl mb-4">Login</h1>
 
-        onError={() => {
-          console.log('Login Failed');
-        }} 
-
-        //ux_mode="redirect"
-        
-    />
-    );
-
+        <GoogleLogin
+          onSuccess={handleSuccess}
+          onError={handleError}
+        />
+      </div>
+    </div>
+  );
 }
+
+export default LoginPage;

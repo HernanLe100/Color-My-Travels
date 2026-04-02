@@ -5,6 +5,7 @@ import L from "leaflet";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
 import type { Pin, Color } from "@/types";
+import { useAuth } from "@/App";
 
 const icon = new L.Icon({
   iconUrl: markerIcon,
@@ -25,12 +26,23 @@ export default function MapContent() {
   const [pins, setPins] = useState<Pin[]>([]);
   const [pinsLoaded, setPinsLoaded] = useState(false);
 
+  const token = useAuth();
+
+  console.log("TOKEN:", token);
+
   useEffect(() => {
     async function loadPoints() {
-      const res = await fetch(
-        `${BACKEND_URL}/get_locations?user_id=0000`,
-      );
+      const res = await fetch(`${BACKEND_URL}/get_locations`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       const data = await res.json();
+
+      if (!data.db_response || data.db_response.length === 0) {
+        setPinsLoaded(true);
+        return;
+      }
 
       // map DB response
       const mapped = data.db_response.map((p: any) => ({
@@ -49,8 +61,6 @@ export default function MapContent() {
     loadPoints();
   }, []);
 
-  const testUser = "0000";
-
   const countriesVisited = useMemo(
     () => [...new Set(pins.map((p) => p.country))],
     [pins],
@@ -61,15 +71,10 @@ export default function MapContent() {
   const cache = useRef(new Map<string, any>());
 
   useEffect(() => {
-    fetch(`${BACKEND_URL}/get_colors?user_id=${testUser}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setColors(data.db_response);
-      });
-  }, []);
-
-  useEffect(() => {
-    if (!countriesVisited.length) return;
+    if (!countriesVisited.length) {
+      setLoaded(true);
+      return;
+    }
 
     async function fetchLevel(country: string, level: string) {
       const key = `${country}-${level}`;
