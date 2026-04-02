@@ -61,6 +61,17 @@ export default function MapContent() {
     loadPoints();
   }, []);
 
+  useEffect(() => {
+    if (!token) return;
+    fetch(`${BACKEND_URL}/get_colors`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.db_response) setColors(data.db_response);
+      });
+  }, [token]);
+
   const countriesVisited = useMemo(
     () => [...new Set(pins.map((p) => p.country))],
     [pins],
