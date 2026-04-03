@@ -66,7 +66,7 @@ export default function MapPage() {
 
       <button
         onClick={handleAddAlbum}
-        className="absolute bottom-6 left-6 z-[1000]
+        className="absolute bottom-6 right-6 z-[1000] cursor-pointer
              w-14 h-14 rounded-full 
              bg-blue-600 hover:bg-blue-700
              text-white text-2xl
