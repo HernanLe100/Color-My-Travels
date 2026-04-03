@@ -9,18 +9,37 @@ import { useEffect, useState } from "react";
 import LoginPage from "./components/LoginPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
+import { jwtDecode } from "jwt-decode";
+
+type JwtPayload = {
+  exp: number;
+};
 
 export function useAuth() {
-  const [token, setToken] = useState<string | null>(() =>
-    localStorage.getItem("token")
-  );
+  const [token, setToken] = useState<string | null>(() => {
+    const t = localStorage.getItem("token");
+    if (!t) return null;
+
+    try {
+      const decoded = jwtDecode<JwtPayload>(t);
+      const now = Date.now() / 1000;
+
+      if (decoded.exp < now) {
+        localStorage.removeItem("token");
+        return null;
+      }
+
+      return t;
+    } catch {
+      localStorage.removeItem("token");
+      return null;
+    }
+  });
 
   useEffect(() => {
     const sync = () => setToken(localStorage.getItem("token"));
-
     window.addEventListener("storage", sync);
     window.addEventListener("focus", sync);
-
     return () => {
       window.removeEventListener("storage", sync);
       window.removeEventListener("focus", sync);
