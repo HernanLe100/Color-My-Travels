@@ -9,7 +9,7 @@ export default function ProtectedRoute({
 }) {
   const token = useAuth();
 
-  console.log("TOKEN:", token);
+  //console.log("TOKEN:", token);
 
   if (!token) {
     return <Navigate to="/login" replace />;
