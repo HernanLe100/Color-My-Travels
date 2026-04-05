@@ -28,7 +28,7 @@ export default function MapContent() {
 
   const token = useAuth();
 
-  console.log("TOKEN:", token);
+  //console.log("TOKEN:", token);
 
   useEffect(() => {
     async function loadPoints() {

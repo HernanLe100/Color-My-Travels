@@ -51,11 +51,11 @@ export function useAuth() {
 
 function App() {
   const token = useAuth();
-  useEffect(() => {
+  /*useEffect(() => {
     fetch("https://127.0.0.1:5001/test")
       .then((res) => res.json())
       .then((data) => console.log(data));
-  }, []);
+  }, []);*/
 
   return (
     <BrowserRouter>
