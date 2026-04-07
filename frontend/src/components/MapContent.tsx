@@ -14,7 +14,7 @@ const icon = new L.Icon({
   iconAnchor: [12, 41],
 });
 
-const BACKEND_URL = "https://127.0.0.1:5001" //import.meta.env.BACKEND_URL
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL; //"https://127.0.0.1:5001" 
 
 export default function MapContent() {
   const zoom = useZoomLevel();

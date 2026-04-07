@@ -17,7 +17,7 @@ load_dotenv()
 
 app = Flask(__name__)
 
-_FRONTEND_URL = os.environ.get("FRONTEND_URL", "https://localhost:5173")
+_FRONTEND_URL = os.environ.get("FRONTEND_URL") #"https://localhost:5173"
 
 _APP_SECRET_KEY = os.environ.get("APP_SECRET_KEY")
 app.config['JWT_SECRET_KEY'] = _APP_SECRET_KEY

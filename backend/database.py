@@ -8,7 +8,12 @@ from psycopg.rows import dict_row
 load_dotenv()
 _DATABASE_URL = os.getenv("DATABASE_URL")
 
-connection_pool = ConnectionPool(conninfo=_DATABASE_URL, kwargs={"row_factory":dict_row}) 
+connection_pool = ConnectionPool(conninfo=_DATABASE_URL, 
+                                 kwargs={
+                                     "row_factory":dict_row,
+                                     "sslmode": "require",
+                                     "channel_binding": "prefer"
+                                     }) 
 
 # --------------------------------------------------
 
