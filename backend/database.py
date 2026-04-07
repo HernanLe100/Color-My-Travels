@@ -7,13 +7,10 @@ from psycopg.rows import dict_row
 
 load_dotenv()
 _DATABASE_URL = os.getenv("DATABASE_URL")
+print(_DATABASE_URL)
 
-connection_pool = ConnectionPool(conninfo=_DATABASE_URL, 
-                                 kwargs={
-                                     "row_factory":dict_row,
-                                     "sslmode": "require",
-                                     "channel_binding": "prefer"
-                                     }) 
+connection_pool = ConnectionPool(conninfo=_DATABASE_URL, kwargs={"row_factory":dict_row}) 
+print(connection_pool)
 
 # --------------------------------------------------
 
@@ -84,6 +81,8 @@ def get_albums(user_id):
 
 def get_location(location_id):
     with connection_pool.connection() as connection:
+        print(connection)
+        print(location_id)
         with connection.cursor() as cursor:
             cursor.execute(f"SELECT * FROM locations WHERE location_id = %s;", [location_id])
             result = cursor.fetchall()
