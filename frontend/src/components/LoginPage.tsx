@@ -1,7 +1,6 @@
 import { GoogleLogin } from '@react-oauth/google';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-console.log(BACKEND_URL);
 
 function LoginPage() {
   const handleSuccess = async (credentialResponse: any) => {
