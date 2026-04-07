@@ -82,7 +82,9 @@ def get_location(location_id):
     print("connection:")
     print(connection_pool.connection())
     with connection_pool.connection() as connection:
+        print(connection)
         with connection.cursor() as cursor:
+            print("here")
             cursor.execute(f"SELECT * FROM locations WHERE location_id = %s;", [location_id])
             result = cursor.fetchall()
             return result
