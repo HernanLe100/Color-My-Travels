@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import type { Color } from "@/types";
 
-const BACKEND_URL = "https://127.0.0.1:5001" //import.meta.env.BACKEND_URL
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 export default function ColorsPage() {
   const [colors, setColors] = useState<Color[]>([]);

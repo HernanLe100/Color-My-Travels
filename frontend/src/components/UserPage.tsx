@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import CitySearch from "./CitySearch";
 import { Button } from "./ui/button";
 
-const BACKEND_URL = "https://127.0.0.1:5001"; //import.meta.env.BACKEND_URL
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 export default function UserPage() {
   const [user, setUser] = useState<User>();
