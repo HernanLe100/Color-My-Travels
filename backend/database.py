@@ -9,7 +9,6 @@ load_dotenv()
 _DATABASE_URL = os.getenv("DATABASE_URL")
 
 connection_pool = ConnectionPool(conninfo=_DATABASE_URL, timeout=120, kwargs={"row_factory":dict_row}) 
-print(connection_pool.connection())
 
 # --------------------------------------------------
 
@@ -79,12 +78,8 @@ def get_albums(user_id):
 # get location details by <location_id>
 
 def get_location(location_id):
-    print("connection:")
-    print(connection_pool.connection())
     with connection_pool.connection() as connection:
-        print(connection)
         with connection.cursor() as cursor:
-            print("here")
             cursor.execute(f"SELECT * FROM locations WHERE location_id = %s;", [location_id])
             result = cursor.fetchall()
             return result
