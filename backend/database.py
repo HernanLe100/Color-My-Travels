@@ -79,11 +79,8 @@ def get_albums(user_id):
 # get location details by <location_id>
 
 def get_location(location_id):
-    if connection_pool:
-        print("good")
-    else:
-        print("bad")
-    print(connection_pool)
+    print("connection:")
+    print(connection_pool.connection())
     with connection_pool.connection() as connection:
         with connection.cursor() as cursor:
             cursor.execute(f"SELECT * FROM locations WHERE location_id = %s;", [location_id])
