@@ -37,8 +37,8 @@ app.register_blueprint(info_bp)
 app.register_blueprint(map_bp)
 
 #CORS(app, resources={r'/api/*': {'origins': _FRONTEND_URL}}) # <-- please keep this commented for now - Hernan
-#CORS(app)
-CORS(app, origins=[_FRONTEND_URL])
+CORS(app)
+#CORS(app, origins=[_FRONTEND_URL])
 
 # --------------------------------------------------
 
