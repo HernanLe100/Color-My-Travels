@@ -1,10 +1,12 @@
 import { GoogleLogin } from '@react-oauth/google';
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
 function LoginPage() {
   const handleSuccess = async (credentialResponse: any) => {
     console.log("Google credential:", credentialResponse);
 
-    const res = await fetch("https://127.0.0.1:5001/login_success", {
+    const res = await fetch(`${BACKEND_URL}/login_success`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
