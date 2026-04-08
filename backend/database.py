@@ -1,14 +1,18 @@
 import os
 from dotenv import load_dotenv
 
-# import psycopg <-- is this needed here?
 from psycopg_pool import ConnectionPool
 from psycopg.rows import dict_row
 
 load_dotenv()
 _DATABASE_URL = os.getenv("DATABASE_URL")
 
-connection_pool = ConnectionPool(conninfo=_DATABASE_URL, timeout=300, kwargs={"row_factory":dict_row}) 
+connection_pool = ConnectionPool(
+    conninfo=_DATABASE_URL, 
+    timeout=300, 
+    check=ConnectionPool.check_connection,
+    kwargs={"row_factory":dict_row}
+) 
 
 # --------------------------------------------------
 
