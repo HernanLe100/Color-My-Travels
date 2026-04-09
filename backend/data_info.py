@@ -13,7 +13,7 @@ load_dotenv()
 
 _FRONTEND_URL = os.environ.get("FRONTEND_URL")
 
-_GOOGLE_CLIENT_SECRET = os.environ["GOOGLE_CLIENT_SECRET"]
+#_GOOGLE_CLIENT_SECRET = os.environ["GOOGLE_CLIENT_SECRET"]
 _GOOGLE_DISCOVERY_URL = "https://accounts.google.com/.well-known/openid-configuration"
 
 _GOOGLE_CLIENT_ID = os.environ["GOOGLE_CLIENT_ID"]
