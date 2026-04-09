@@ -122,7 +122,7 @@ export default function MapContent() {
         `${BACKEND_URL}/geo?country=${country}&level=${level}`,
       );
       const data = await res.json();
-
+      
       delete data.crs;
 
       cache.current.set(key, data);
@@ -130,6 +130,8 @@ export default function MapContent() {
     }
 
     async function load() {
+      setLoaded(false);
+
       const adm0Results = await Promise.all(
         countriesVisited.map((c) => fetchLevel(c, "ADM0")),
       );
