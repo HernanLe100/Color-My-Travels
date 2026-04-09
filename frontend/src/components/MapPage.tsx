@@ -226,10 +226,11 @@ export default function MapPage() {
                     setSubmitError(null);
                     setIsModalOpen(false);
                   }}
+                  size="lg"
                 >
                   Cancel
                 </Button>
-                <Button type="submit" disabled={isSubmitting}>
+                <Button type="submit" disabled={isSubmitting} size="lg">
                   {isSubmitting ? "Saving…" : "Add"}
                 </Button>
               </div>
