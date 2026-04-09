@@ -15,9 +15,13 @@ const icon = new L.Icon({
   iconAnchor: [12, 41],
 });
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL; //"https://127.0.0.1:5001" 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL; //"https://127.0.0.1:5001"
 
-export default function MapContent() {
+type MapContentProps = {
+  isTogglePins?: boolean;
+};
+
+export default function MapContent({ isTogglePins = false }: MapContentProps) {
   const zoom = useZoomLevel();
   const [adm0, setAdm0] = useState<any[]>([]);
   const [adm1, setAdm1] = useState<any[]>([]);
@@ -122,7 +126,7 @@ export default function MapContent() {
         `${BACKEND_URL}/geo?country=${country}&level=${level}`,
       );
       const data = await res.json();
-      
+
       delete data.crs;
 
       cache.current.set(key, data);
@@ -171,9 +175,12 @@ export default function MapContent() {
     return map;
   }, [colors, pins]);
 
-  const level = zoom >= 8 ? "POINTS" : zoom >= 5 ? "ADM1" : "ADM0";
+  const polygonLevel = zoom >= 5 ? "ADM1" : "ADM0";
+  const showPins = isTogglePins ? true : false || zoom >= 8;
+  const showPolygons = zoom < 8;
 
-  const geoData = level === "ADM0" ? adm0 : level === "ADM1" ? adm1 : [];
+  const geoData =
+    polygonLevel === "ADM0" ? adm0 : polygonLevel === "ADM1" ? adm1 : [];
 
   const combinedGeo = useMemo(
     () => ({
@@ -184,7 +191,7 @@ export default function MapContent() {
   );
 
   const filteredGeo = useMemo(() => {
-    if (level !== "ADM1") return combinedGeo;
+    if (polygonLevel !== "ADM1") return combinedGeo;
 
     return {
       type: "FeatureCollection" as const,
@@ -192,7 +199,7 @@ export default function MapContent() {
         visitedADM1.has(f.properties?.shapeISO),
       ),
     };
-  }, [combinedGeo, visitedADM1, level]);
+  }, [combinedGeo, visitedADM1, polygonLevel]);
 
   const albumAtLocation = useMemo(() => {
     if (!selectedPin) return null;
@@ -220,10 +227,12 @@ export default function MapContent() {
     return Number.isNaN(d.getTime()) ? value : d.toLocaleDateString();
   }
 
+  console.log(showPins, showPolygons);
+
   return (
     <>
       {/* pins */}
-      {level === "POINTS" &&
+      {showPins &&
         pins.map((p) => (
           <Marker
             key={p.location_id}
@@ -236,14 +245,14 @@ export default function MapContent() {
         ))}
 
       {/* polygons */}
-      {level !== "POINTS" && combinedGeo.features.length > 0 && (
+      {showPolygons && combinedGeo.features.length > 0 && (
         <GeoJSON
-          key={level} // MUST ADD KEY!!! Or else it will not re-render the polygon when the level changes
+          key={polygonLevel} // MUST ADD KEY!!! Or else it will not re-render the polygon when the level changes
           data={filteredGeo}
           style={(feature) => {
             const iso = feature?.properties?.shapeISO;
             const fillColor =
-              level === "ADM1"
+              polygonLevel === "ADM1"
                 ? (adm1ColorMap.get(iso) ?? "#eb4034")
                 : (countryColorMap.get(iso) ?? "#eb4034");
             return { color: fillColor, fillColor, fillOpacity: 0.3 };
@@ -264,9 +273,7 @@ export default function MapContent() {
               <p className="text-xs font-medium uppercase text-stone-500">
                 Travel album
               </p>
-              <h2
-                className="mt-2 text-2xl text-stone-900"
-              >
+              <h2 className="mt-2 text-2xl text-stone-900">
                 {selectedPin.city || "Unknown City"}
               </h2>
               <p className="mt-2 text-sm text-stone-600">

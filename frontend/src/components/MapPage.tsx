@@ -11,6 +11,7 @@ import { Input } from "./ui/input";
 import CitySearch from "./CitySearch";
 import { Label } from "./ui/label";
 import type { SearchLocation } from "@/types";
+import { Switch } from "./ui/switch";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -29,6 +30,8 @@ export default function MapPage() {
   const [endDate, setEndDate] = useState("");
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [isTogglePins, setIsTogglePins] = useState(false);
 
   const token = useAuth();
 
@@ -115,6 +118,25 @@ export default function MapPage() {
 
   return (
     <div className="h-screen w-full">
+      <div className="pointer-events-auto absolute top-6 right-6 z-[1000]">
+        <div className="flex max-w-xs items-center gap-4 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-lg">
+          <div className="min-w-0 flex-1">
+            <Label
+              htmlFor="togglePins"
+              className="block cursor-pointer text-sm font-medium text-slate-900"
+            >
+              Pins
+            </Label>
+          </div>
+          <Switch
+            id="togglePins"
+            className="shrink-0 cursor-pointer"
+            checked={isTogglePins}
+            onCheckedChange={setIsTogglePins}
+          />
+        </div>
+      </div>
+
       <MapContainer
         center={position}
         zoom={3}
@@ -135,7 +157,7 @@ export default function MapPage() {
         />
 
         {/* either polygon or pin depending on zoom level */}
-        <MapContent />
+        <MapContent isTogglePins={isTogglePins} />
       </MapContainer>
 
       <Button
@@ -176,8 +198,7 @@ export default function MapPage() {
                   Selected: {selectedLocation.city}
                   {selectedLocation.state
                     ? `, ${selectedLocation.state}`
-                    : ""}
-                  , {selectedLocation.country}
+                    : ""}, {selectedLocation.country}
                 </p>
               )}
 
