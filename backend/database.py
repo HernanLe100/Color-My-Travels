@@ -10,6 +10,8 @@ _DATABASE_URL = os.getenv("DATABASE_URL")
 connection_pool = ConnectionPool(
     conninfo=_DATABASE_URL, 
     timeout=300, 
+    min_size=1,
+    max_size=3,
     check=ConnectionPool.check_connection,
     kwargs={"row_factory":dict_row}
 ) 

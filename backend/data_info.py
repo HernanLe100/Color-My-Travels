@@ -20,6 +20,11 @@ _GOOGLE_CLIENT_ID = os.environ["GOOGLE_CLIENT_ID"]
 
 # --------------------------------------------------
 
+# route to spin up Render server or keep it active
+@info_bp.route("/ping")
+def ping():
+    return jsonify({"status": "ok"}), 200
+
 # --------------------------------------------------
 
 @info_bp.route("/me", methods=["GET"])
