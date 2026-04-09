@@ -52,25 +52,14 @@ export default function UserPage() {
   }
 
   return (
-    <div>
-      <h1 className="text-lg font-bold px-4 pt-4">
-        {user?.user_id}'s User Page
-      </h1>
+    <div className="flex flex-col gap-4 p-4">
+      <h1 className="text-lg font-bold">{user?.name}'s User Page</h1>
 
-      <p className="px-4 pt-4">Name: {user?.name}</p>
-      <p className="px-4 pt-4">Albums: {albums.length}</p>
+      <Button onClick={logout} className="w-fit cursor-pointer" size="lg">
+        Logout
+      </Button>
 
-      <div className="px-4">
-        Album notes:
-        {albums.map((album, i) => (
-          <div key={i}>{album.notes}</div>
-        ))}
-      </div>
-
-      <CitySearch onSelect={handleSelect} />
-      <p>{JSON.stringify(selectedLocation)}</p>
-
-      <Button onClick={logout}>Logout</Button>
+      <p className="text-neutral-400 text-xs">User Id: {user?.user_id}</p>
     </div>
   );
 }
