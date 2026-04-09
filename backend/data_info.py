@@ -49,13 +49,19 @@ def add_album():
     data = request.get_json()
 
     location_id = data.get("location_id")
-    caption = data.get("caption", "")
+    notes = data.get("notes", "")
+    start_date = data.get("start_date", "")
+    end_date = data.get("end_date", "")
+    name = data.get("name", "")
 
     db.add_album(
         {
             "user_id": user_id,
             "location_id": location_id,
-            "caption": caption
+            "notes": notes,
+            "start_date": start_date,
+            "end_date": end_date,
+            "name": name
         }
     )
 
@@ -80,6 +86,26 @@ def get_locations():
     result = db.get_locations(user_id)
 
     return jsonify({"db_response": result})
+
+
+@info_bp.route("/ensure_location", methods=["POST"])
+@jwt_required()
+def ensure_location():
+    data = request.get_json() or {}
+    if not data.get("city") or not data.get("country"):
+        return jsonify({"error": "city and country are required"}), 400
+    if data.get("lat") is None or data.get("lng") is None:
+        return jsonify({"error": "lat and lng are required"}), 400
+    location_id = db.ensure_location(
+        {
+            "city": data.get("city"),
+            "country": data.get("country"),
+            "adm1": data.get("adm1"),
+            "lat": data.get("lat"),
+            "lng": data.get("lng"),
+        }
+    )
+    return jsonify({"location_id": location_id})
 
 # --------------------------------------------------
 

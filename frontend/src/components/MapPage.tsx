@@ -1,10 +1,18 @@
 import { MapContainer, TileLayer } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import { useState } from "react";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
 import MapContent from "./MapContent";
 import { useAuth } from "@/App";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import CitySearch from "./CitySearch";
+import { Label } from "./ui/label";
+import type { SearchLocation } from "@/types";
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 // Fix default icon paths
 L.Icon.Default.mergeOptions({
@@ -14,29 +22,95 @@ L.Icon.Default.mergeOptions({
 
 export default function MapPage() {
   const position: [number, number] = [20, 0];
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [notes, setNotes] = useState("");
+  const [name, setName] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const token = useAuth();
 
-  const handleAddAlbum = async () => {
+  const [selectedLocation, setSelectedLocation] =
+    useState<SearchLocation | null>(null);
+
+  const handleSelect = (location: SearchLocation) => {
+    setSelectedLocation(location);
+  };
+
+  const handleAddAlbum = async (locationId: number) => {
     if (!token) return;
 
-    const res = await fetch("https://127.0.0.1:5001/add_album", {
+    const res = await fetch(`${BACKEND_URL}/add_album`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
-        location_id: 1,
-        caption: "Princeton",
+        location_id: locationId,
+        notes,
+        name,
+        start_date: startDate,
+        end_date: endDate,
       }),
     });
 
-    const data = await res.json();
-    console.log("Added album:", data);
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(err || "Failed to add album");
+    }
 
-    // quick refresh
     window.location.reload();
+  };
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setSubmitError(null);
+    if (!token) {
+      setSubmitError("You must be signed in.");
+      return;
+    }
+    if (!selectedLocation) {
+      setSubmitError("Choose a city from search.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const locRes = await fetch(`${BACKEND_URL}/ensure_location`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          adm1: selectedLocation.adm1,
+          city: selectedLocation.city,
+          country: selectedLocation.country,
+          lat: selectedLocation.lat,
+          lng: selectedLocation.lng,
+          state: selectedLocation.state,
+        }),
+      });
+      const locData = await locRes.json();
+      if (!locRes.ok) {
+        throw new Error(locData.error || "Could not save location");
+      }
+      const locationId = locData.location_id as number;
+      await handleAddAlbum(locationId);
+      setIsModalOpen(false);
+      setNotes("");
+      setName("");
+      setStartDate("");
+      setEndDate("");
+      setSelectedLocation(null);
+    } catch (e) {
+      setSubmitError(e instanceof Error ? e.message : "Something went wrong");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -64,17 +138,106 @@ export default function MapPage() {
         <MapContent />
       </MapContainer>
 
-      <button
-        onClick={handleAddAlbum}
+      <Button
+        onClick={() => setIsModalOpen(true)}
         className="absolute bottom-6 right-6 z-[1000] cursor-pointer
              w-14 h-14 rounded-full 
-             bg-blue-600 hover:bg-blue-700
              text-white text-2xl
              flex items-center justify-center
              shadow-xl"
       >
         +
-      </button>
+      </Button>
+
+      {isModalOpen && (
+        <div className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/30 px-4">
+          <div className="w-full max-w-md rounded-xl bg-white p-5 shadow-2xl">
+            <h2 className="text-lg font-semibold text-slate-900">New Album</h2>
+            <p className="mt-1 text-sm text-slate-600">
+              Create a new album entry for a location.
+            </p>
+
+            <form onSubmit={handleSubmit} className="mt-4 space-y-3">
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="name">Album Name</Label>
+                <Input
+                  id="name"
+                  type="text"
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                  placeholder="Add a name for your album"
+                  required
+                />
+              </div>
+
+              <CitySearch onSelect={handleSelect} />
+              {selectedLocation && (
+                <p className="text-sm text-slate-600">
+                  Selected: {selectedLocation.city}
+                  {selectedLocation.state
+                    ? `, ${selectedLocation.state}`
+                    : ""}
+                  , {selectedLocation.country}
+                </p>
+              )}
+
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="startDate">Start Date</Label>
+                <Input
+                  id="startDate"
+                  type="date"
+                  value={startDate}
+                  onChange={(event) => setStartDate(event.target.value)}
+                  placeholder="Add the start date of your trip"
+                  required
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="endDate">End Date</Label>
+                <Input
+                  id="endDate"
+                  type="date"
+                  value={endDate}
+                  onChange={(event) => setEndDate(event.target.value)}
+                  placeholder="Add the end date of your trip"
+                  required
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="notes">Notes</Label>
+                <Input
+                  id="notes"
+                  type="text"
+                  value={notes}
+                  onChange={(event) => setNotes(event.target.value)}
+                  placeholder="Enter trip notes here..."
+                  required
+                />
+              </div>
+              {submitError && (
+                <p className="text-sm text-red-600">{submitError}</p>
+              )}
+              <div className="mt-2 flex justify-end gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setSubmitError(null);
+                    setIsModalOpen(false);
+                  }}
+                  size="lg"
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={isSubmitting} size="lg">
+                  {isSubmitting ? "Saving…" : "Add"}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,10 +1,15 @@
 import { useState, useEffect } from "react";
+import type { SearchLocation } from "@/types";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
-export default function CitySearch({ onSelect }: any) {
+export default function CitySearch({
+  onSelect,
+}: {
+  onSelect: (location: SearchLocation) => void;
+}) {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<any[]>([]);
+  const [results, setResults] = useState<SearchLocation[]>([]);
 
   useEffect(() => {
     if (query.length < 3) return;

@@ -55,16 +55,55 @@ def add_album(info : dict):
         with connection.cursor() as cursor:
             cursor.execute(
                 """
-                INSERT INTO albums (user_id, location_id, caption)
-                VALUES (%s, %s, %s);
+                INSERT INTO albums (user_id, location_id, notes, start_date, end_date, name)
+                VALUES (%s, %s, %s, %s, %s, %s);
                 """,
                 [
-                    info.get("user_id"), 
-                    info.get("location_id"), 
-                    info.get("caption")
+                    info.get("user_id"),
+                    info.get("location_id"),
+                    info.get("notes"),
+                    info.get("start_date"),
+                    info.get("end_date"),
+                    info.get("name"),
                 ]
             )
         connection.commit()
+
+
+def ensure_location(info: dict):
+    """Return location_id for an existing row matching city/country/adm1, else insert."""
+    city = info.get("city")
+    country = info.get("country")
+    adm1 = info.get("adm1")
+    lat = info.get("lat")
+    lng = info.get("lng")
+
+    with connection_pool.connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT location_id FROM locations
+                WHERE city = %s AND country = %s
+                  AND (adm1 IS NOT DISTINCT FROM %s)
+                LIMIT 1;
+                """,
+                [city, country, adm1],
+            )
+            row = cursor.fetchone()
+            if row:
+                return row["location_id"]
+
+            cursor.execute(
+                """
+                INSERT INTO locations (lat, lng, country, adm1, city)
+                VALUES (%s, %s, %s, %s, %s)
+                RETURNING location_id;
+                """,
+                [lat, lng, country, adm1, city],
+            )
+            row = cursor.fetchone()
+        connection.commit()
+        return row["location_id"]
     
 
 def get_albums(user_id):
