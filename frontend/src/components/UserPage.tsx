@@ -61,9 +61,9 @@ export default function UserPage() {
       <p className="px-4 pt-4">Albums: {albums.length}</p>
 
       <div className="px-4">
-        Album captions:
+        Album notes:
         {albums.map((album, i) => (
-          <div key={i}>{album.caption}</div>
+          <div key={i}>{album.notes}</div>
         ))}
       </div>
 
