@@ -159,13 +159,13 @@ export default function MapPage() {
 
             <form onSubmit={handleSubmit} className="mt-4 space-y-3">
               <div className="flex flex-col gap-2">
-                <Label htmlFor="name">Name</Label>
+                <Label htmlFor="name">Album Name</Label>
                 <Input
                   id="name"
                   type="text"
                   value={name}
                   onChange={(event) => setName(event.target.value)}
-                  placeholder="Name"
+                  placeholder="Add a name for your album"
                   required
                 />
               </div>
@@ -188,7 +188,7 @@ export default function MapPage() {
                   type="date"
                   value={startDate}
                   onChange={(event) => setStartDate(event.target.value)}
-                  placeholder="Start Date"
+                  placeholder="Add the start date of your trip"
                   required
                 />
               </div>
@@ -199,7 +199,7 @@ export default function MapPage() {
                   type="date"
                   value={endDate}
                   onChange={(event) => setEndDate(event.target.value)}
-                  placeholder="End Date"
+                  placeholder="Add the end date of your trip"
                   required
                 />
               </div>

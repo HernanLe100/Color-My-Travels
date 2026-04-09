@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Marker, Popup, GeoJSON } from "react-leaflet";
+import { Marker, GeoJSON } from "react-leaflet";
 import { useZoomLevel } from "@/hooks/useZoomLevel";
 import L from "leaflet";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
-import type { Pin, Color } from "@/types";
+import type { Album, Color, Pin } from "@/types";
 import { useAuth } from "@/App";
+import { Button } from "./ui/button";
 
 const icon = new L.Icon({
   iconUrl: markerIcon,
@@ -24,42 +25,65 @@ export default function MapContent() {
   const [colors, setColors] = useState<Color[]>([]);
 
   const [pins, setPins] = useState<Pin[]>([]);
+  const [albums, setAlbums] = useState<Album[]>([]);
   const [pinsLoaded, setPinsLoaded] = useState(false);
+  const [selectedPin, setSelectedPin] = useState<Pin | null>(null);
 
   const token = useAuth();
 
-  //console.log("TOKEN:", token);
-
   useEffect(() => {
-    async function loadPoints() {
-      const res = await fetch(`${BACKEND_URL}/get_locations`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const data = await res.json();
+    if (!token) return;
 
-      if (!data.db_response || data.db_response.length === 0) {
-        setPinsLoaded(true);
-        return;
+    async function loadMapData() {
+      const [locRes, albumRes] = await Promise.all([
+        fetch(`${BACKEND_URL}/get_locations`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        fetch(`${BACKEND_URL}/get_albums`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ]);
+
+      const locData = await locRes.json();
+      const albumData = await albumRes.json();
+
+      const rows = locData.db_response ?? [];
+      const seen = new Set<number>();
+      const uniquePins: Pin[] = [];
+      for (const p of rows as Record<string, unknown>[]) {
+        const id = Number(p.location_id);
+        if (seen.has(id)) continue;
+        seen.add(id);
+        uniquePins.push({
+          location_id: id,
+          lat: Number(p.lat),
+          lng: Number(p.lng),
+          country: String(p.country ?? ""),
+          adm1: String(p.adm1 ?? ""),
+          city: String(p.city ?? ""),
+        });
       }
+      setPins(uniquePins);
 
-      // map DB response
-      const mapped = data.db_response.map((p: any) => ({
-        location_id: p.location_id,
-        lat: p.lat,
-        lng: p.lng,
-        country: p.country,
-        adm1: p.adm1,
-        city: p.city,
-      }));
+      const albumRows = albumData.db_response ?? [];
+      setAlbums(
+        (albumRows as Record<string, unknown>[]).map((a) => ({
+          album_id: Number(a.album_id),
+          user_id: String(a.user_id ?? ""),
+          notes: String(a.notes ?? ""),
+          pages: Array.isArray(a.pages) ? (a.pages as string[]) : [],
+          start_date: String(a.start_date ?? ""),
+          end_date: String(a.end_date ?? ""),
+          location_id: Number(a.location_id),
+          name: String(a.name ?? ""),
+        })),
+      );
 
-      setPins(mapped);
       setPinsLoaded(true);
     }
 
-    loadPoints();
-  }, []);
+    loadMapData();
+  }, [token]);
 
   useEffect(() => {
     if (!token) return;
@@ -149,8 +173,6 @@ export default function MapContent() {
 
   const geoData = level === "ADM0" ? adm0 : level === "ADM1" ? adm1 : [];
 
-  console.log("geoData:", geoData);
-
   const combinedGeo = useMemo(
     () => ({
       type: "FeatureCollection" as const,
@@ -170,6 +192,13 @@ export default function MapContent() {
     };
   }, [combinedGeo, visitedADM1, level]);
 
+  const albumAtLocation = useMemo(() => {
+    if (!selectedPin) return null;
+    return (
+      albums.find((a) => a.location_id === selectedPin.location_id) ?? null
+    );
+  }, [albums, selectedPin]);
+
   const isLoading = !pinsLoaded || !loaded;
 
   if (isLoading) {
@@ -183,16 +212,25 @@ export default function MapContent() {
     );
   }
 
+  function formatDate(value: string) {
+    if (!value) return "—";
+    const d = new Date(value);
+    return Number.isNaN(d.getTime()) ? value : d.toLocaleDateString();
+  }
+
   return (
     <>
       {/* pins */}
       {level === "POINTS" &&
         pins.map((p) => (
-          <Marker key={p.location_id} position={[p.lat, p.lng]} icon={icon}>
-            <Popup>
-              {p.city}, {p.adm1}, {p.country}
-            </Popup>
-          </Marker>
+          <Marker
+            key={p.location_id}
+            position={[p.lat, p.lng]}
+            icon={icon}
+            eventHandlers={{
+              click: () => setSelectedPin(p),
+            }}
+          />
         ))}
 
       {/* polygons */}
@@ -209,6 +247,67 @@ export default function MapContent() {
             return { color: fillColor, fillColor, fillOpacity: 0.3 };
           }}
         />
+      )}
+
+      {selectedPin && (
+        <div
+          className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/30 p-4"
+          onClick={() => setSelectedPin(null)}
+        >
+          <div
+            className="w-full max-w-md rounded-lg border-2 border-stone-300 bg-stone-50 p-6 shadow-lg"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <header className="border-b border-stone-300 pb-4 text-center">
+              <p className="text-xs font-medium uppercase text-stone-500">
+                Travel album
+              </p>
+              <h2
+                className="mt-2 text-2xl text-stone-900"
+              >
+                {selectedPin.city || "Unknown City"}
+              </h2>
+              <p className="mt-2 text-sm text-stone-600">
+                {[selectedPin.adm1, selectedPin.country]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </p>
+            </header>
+
+            <div className="mt-5">
+              {!albumAtLocation ? (
+                <p className="text-center text-sm text-stone-600">
+                  No album for this place yet.
+                </p>
+              ) : (
+                <div className="rounded-md border border-stone-200 bg-white p-4 shadow-sm flex flex-col gap-3">
+                  <h3 className="font-serif text-lg text-stone-800">
+                    {albumAtLocation.name || "Untitled"}
+                  </h3>
+                  <p className="text-sm text-stone-500">
+                    {formatDate(albumAtLocation.start_date)} —{" "}
+                    {formatDate(albumAtLocation.end_date)}
+                  </p>
+                  {albumAtLocation.notes ? (
+                    <blockquote className="border-l-2 border-stone-400 pl-3 text-sm leading-relaxed text-stone-700 whitespace-pre-wrap">
+                      {albumAtLocation.notes}
+                    </blockquote>
+                  ) : null}
+                </div>
+              )}
+            </div>
+
+            <div className="mt-6 flex justify-end border-t border-stone-300 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setSelectedPin(null)}
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );
