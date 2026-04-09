@@ -215,6 +215,18 @@ export default function MapPage() {
                   required
                 />
               </div>
+
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="notes">Images</Label>
+                <input
+                  id="notes"
+                  type="file"
+                  multiple accept="image/*"
+                  onChange={(e) => console.log(e.target.files!)} // currently does nothing with images
+                  required
+                />
+              </div>
+
               {submitError && (
                 <p className="text-sm text-red-600">{submitError}</p>
               )}
