@@ -13,7 +13,9 @@ connection_pool = ConnectionPool(
     min_size=1,
     max_size=3,
     #check=ConnectionPool.check_connection,
-    kwargs={"row_factory":dict_row, "connect_timeout":5}
+    kwargs={"row_factory":dict_row, "connect_timeout":5},
+    num_workers=1
+    
 ) 
 
 # --------------------------------------------------
@@ -120,20 +122,13 @@ def get_albums(user_id):
 
 # --------------------------------------------------
 
-import psycopg
-conn = psycopg.connect(_DATABASE_URL, connect_timeout=5)
-
 # get location details by <location_id>
 def get_location(location_id):
-    with conn.cursor() as cursor:
+    with connection_pool.connection() as connection:
+        with connection.cursor() as cursor:
             cursor.execute(f"SELECT * FROM locations WHERE location_id = %s;", [location_id])
             result = cursor.fetchall()
             return result
-    #with connection_pool.connection() as connection:
-    #    with connection.cursor() as cursor:
-    #        cursor.execute(f"SELECT * FROM locations WHERE location_id = %s;", [location_id])
-    #        result = cursor.fetchall()
-    #        return result
 
 # get locations from <user_id>
 def get_locations(user_id):
