@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 import psycopg
 
 #from psycopg_pool import ConnectionPool
-#from psycopg.rows import dict_row
+from psycopg.rows import dict_row
 
 load_dotenv()
 _DATABASE_URL = os.getenv("DATABASE_URL")
@@ -33,7 +33,7 @@ def add_escape(s):
 # does nothing if user already exists
 def add_user(user_id, name):
     with psycopg.connect(_DATABASE_URL, connect_timeout=5) as connection:
-        with connection.cursor() as cursor:
+        with connection.cursor(row_factory=dict_row) as cursor:
             cursor.execute("""
                 INSERT INTO users (user_id, name)
                 VALUES (%s, %s)
@@ -44,19 +44,20 @@ def add_user(user_id, name):
 
 def get_user(user_id):
     with psycopg.connect(_DATABASE_URL, connect_timeout=5) as connection:
-        with connection.cursor() as cursor:
+        with connection.cursor(row_factory=dict_row) as cursor:
             cursor.execute(
                 "SELECT user_id, name FROM users WHERE user_id = %s;",
                 [user_id]
             )
             user = cursor.fetchone()
+            print(user)
             return user
 
 # --------------------------------------------------
 
 def add_album(info : dict):
     with psycopg.connect(_DATABASE_URL, connect_timeout=5) as connection:
-        with connection.cursor() as cursor:
+        with connection.cursor(row_factory=dict_row) as cursor:
             cursor.execute(
                 """
                 INSERT INTO albums (user_id, location_id, notes, start_date, end_date, name)
@@ -83,7 +84,7 @@ def ensure_location(info: dict):
     lng = info.get("lng")
 
     with psycopg.connect(_DATABASE_URL, connect_timeout=5) as connection:
-        with connection.cursor() as cursor:
+        with connection.cursor(row_factory=dict_row) as cursor:
             cursor.execute(
                 """
                 SELECT location_id FROM locations
@@ -112,7 +113,7 @@ def ensure_location(info: dict):
 
 def get_albums(user_id):
     with psycopg.connect(_DATABASE_URL, connect_timeout=5) as connection:
-        with connection.cursor() as cursor:
+        with connection.cursor(row_factory=dict_row) as cursor:
             cursor.execute(
                 "SELECT * FROM albums WHERE user_id = %s::text;",
                 [user_id]
@@ -125,7 +126,7 @@ def get_albums(user_id):
 # get location details by <location_id>
 def get_location(location_id):
     with psycopg.connect(_DATABASE_URL, connect_timeout=5) as connection:
-        with connection.cursor() as cursor:
+        with connection.cursor(row_factory=dict_row) as cursor:
             cursor.execute(f"SELECT * FROM locations WHERE location_id = %s;", [location_id])
             result = cursor.fetchall()
             return result
@@ -133,7 +134,7 @@ def get_location(location_id):
 # get locations from <user_id>
 def get_locations(user_id):
     with psycopg.connect(_DATABASE_URL, connect_timeout=5) as connection:
-        with connection.cursor() as cursor:
+        with connection.cursor(row_factory=dict_row) as cursor:
             cursor.execute(
                 """
                 SELECT locations.* FROM albums
@@ -150,7 +151,7 @@ def get_locations(user_id):
 
 def get_colors(user_id):
     with psycopg.connect(_DATABASE_URL, connect_timeout=5) as connection:
-        with connection.cursor() as cursor:
+        with connection.cursor(row_factory=dict_row) as cursor:
             cursor.execute(
                 """
                 SELECT * FROM colors
@@ -164,7 +165,7 @@ def get_colors(user_id):
         
 def update_color(info : dict):
     with psycopg.connect(_DATABASE_URL, connect_timeout=5) as connection:
-        with connection.cursor() as cursor:
+        with connection.cursor(row_factory=dict_row) as cursor:
             cursor.execute(
                 """
                 UPDATE colors
