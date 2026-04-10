@@ -74,7 +74,46 @@ def add_album():
 
 # --------------------------------------------------
 
-# get location details by location_id
+@info_bp.route("/edit_album", methods=["PUT"])
+@jwt_required()
+def edit_album():
+    user_id = get_jwt_identity()
+    data = request.get_json()
+
+    album_id = data.get("album_id")
+    notes = data.get("notes", "")
+    start_date = data.get("start_date") or None
+    end_date = data.get("end_date") or None
+    name = data.get("name", "")
+
+    db.update_album({
+        "album_id": album_id,
+        "user_id": user_id,
+        "notes": notes,
+        "start_date": start_date,
+        "end_date": end_date,
+        "name": name
+    })
+
+    return jsonify({"success": True})
+
+# --------------------------------------------------
+
+@info_bp.route("/delete_album", methods=["DELETE"])
+@jwt_required()
+def delete_album():
+    user_id = get_jwt_identity()
+    album_id = request.args.get("album_id", type=int)
+
+    db.delete_album({
+        "album_id": album_id,
+        "user_id": user_id,
+    })
+
+    return jsonify({"success": True})
+
+# --------------------------------------------------
+
 @info_bp.route("/get_location", methods=["GET"])
 def get_location():
     location_id = request.args.get("location_id", "")

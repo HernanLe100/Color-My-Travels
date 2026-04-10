@@ -120,6 +120,95 @@ def add_album(info : dict):
         connection.commit()
 
 
+def update_album(info: dict):
+    with psycopg.connect(_DATABASE_URL, connect_timeout=5) as connection:
+        with connection.cursor(row_factory=dict_row) as cursor:
+            cursor.execute(
+                """
+                UPDATE albums
+                SET name = %s, notes = %s, start_date = %s, end_date = %s
+                WHERE album_id = %s AND user_id = %s;
+                """,
+                [
+                    info.get("name"),
+                    info.get("notes"),
+                    info.get("start_date"),
+                    info.get("end_date"),
+                    info.get("album_id"),
+                    info.get("user_id"),
+                ]
+            )
+        connection.commit()
+
+def delete_album(info: dict):
+    album_id = info.get("album_id")
+    user_id = info.get("user_id")
+
+    with psycopg.connect(_DATABASE_URL, connect_timeout=5) as connection:
+        with connection.cursor(row_factory=dict_row) as cursor:
+            cursor.execute(
+                """
+                SELECT l.country, l.adm1
+                FROM albums a
+                JOIN locations l ON a.location_id = l.location_id
+                WHERE a.album_id = %s AND a.user_id = %s;
+                """,
+                [album_id, user_id]
+            )
+            location = cursor.fetchone()
+
+            cursor.execute(
+                """
+                DELETE FROM albums 
+                WHERE album_id = %s AND user_id = %s;
+                """,
+                [album_id, user_id]
+            )
+
+            if location:
+                country = location["country"]
+                adm1 = location["adm1"]
+
+                cursor.execute(
+                    """
+                    SELECT COUNT(*) AS cnt 
+                    FROM albums a
+                    JOIN locations l ON a.location_id = l.location_id
+                    WHERE a.user_id = %s AND l.country = %s;
+                    """,
+                    [user_id, country]
+                )
+                if cursor.fetchone()["cnt"] == 0:
+                    cursor.execute(
+                        """
+                        DELETE FROM colors 
+                        WHERE user_id = %s AND region_code = %s 
+                        AND region_type = 'country';
+                        """,
+                        [user_id, country]
+                    )
+
+                if adm1:
+                    cursor.execute(
+                        """
+                        SELECT COUNT(*) AS cnt 
+                        FROM albums a
+                        JOIN locations l ON a.location_id = l.location_id
+                        WHERE a.user_id = %s AND l.adm1 = %s;
+                        """,
+                        [user_id, adm1]
+                    )
+                    if cursor.fetchone()["cnt"] == 0:
+                        cursor.execute(
+                            """DELETE FROM colors 
+                            WHERE user_id = %s AND region_code = %s 
+                            AND region_type = 'adm1';
+                            """,
+                            [user_id, adm1]
+                        )
+
+        connection.commit()
+
 def ensure_location(info: dict):
     """Return location_id for an existing row matching city/country/adm1, else insert."""
     city = info.get("city")
