@@ -31,6 +31,8 @@ export default function MapPage() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [images, setImages] = useState<File[]>([]);
+
   const [isTogglePins, setIsTogglePins] = useState(false);
 
   const token = useAuth();
@@ -242,10 +244,27 @@ export default function MapPage() {
                 <input
                   id="notes"
                   type="file"
-                  multiple accept="image/*"
-                  onChange={(e) => console.log(e.target.files!)} // currently does nothing with images
+                  multiple
+                  accept="image/*"
+                  onChange={(e) => {
+                    if (e.target.files) {
+                      setImages(Array.from(e.target.files));
+                    }
+                  }}
                   required
                 />
+                {images.length > 0 && (
+                  <div className="grid grid-cols-3 gap-2 mt-2">
+                    {images.map((file, idx) => (
+                      <img
+                        key={idx}
+                        src={URL.createObjectURL(file)}
+                        alt="preview"
+                        className="w-full h-24 object-cover rounded"
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
 
               {submitError && (
