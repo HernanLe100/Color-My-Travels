@@ -58,7 +58,8 @@ def add_album(info : dict):
             cursor.execute(
                 """
                 INSERT INTO albums (user_id, location_id, notes, start_date, end_date, name)
-                VALUES (%s, %s, %s, %s, %s, %s);
+                VALUES (%s, %s, %s, %s, %s, %s)
+                RETURNING location_id;
                 """,
                 [
                     info.get("user_id"),
@@ -69,6 +70,62 @@ def add_album(info : dict):
                     info.get("name"),
                 ]
             )
+
+            location_id = cursor.fetchone()["location_id"]
+
+            # get location information
+            cursor.execute(
+                """
+                SELECT country, adm1
+                FROM locations
+                WHERE location_id = %s;
+                """,
+                [location_id]
+            )
+
+            location = cursor.fetchone()
+            country = location["country"]
+            adm1 = location["adm1"]
+            user_id = info.get("user_id")
+
+            if adm1:
+                region_code = adm1
+                region_type = "adm1"
+            else:
+                region_code = country
+                region_type = "country"
+
+            # insert country if it does not already exist
+            cursor.execute(
+                """
+                INSERT INTO colors (region_code, color, region_type, user_id)
+                VALUES (%s, %s, %s, %s)
+                ON CONFLICT (user_id, region_code) DO NOTHING;
+                """,
+                [
+                    country,
+                    "#FF5733",
+                    "country",
+                    user_id,
+                ]
+            )
+
+            # insert adm1 if it does not already exist
+            if adm1:
+                cursor.execute(
+                    """
+                    INSERT INTO colors (region_code, color, region_type, user_id)
+                    VALUES (%s, %s, %s, %s)
+                    ON CONFLICT (user_id, region_code) DO NOTHING;
+                    """,
+                    [
+                        adm1,
+                        "#FF5733",
+                        "adm1",
+                        user_id,
+                    ]
+                )
+                
         connection.commit()
 
 
