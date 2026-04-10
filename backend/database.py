@@ -120,16 +120,20 @@ def get_albums(user_id):
 
 # --------------------------------------------------
 
+import psycopg
+conn = psycopg.connect(_DATABASE_URL, connect_timeout=5)
+
 # get location details by <location_id>
-import time
 def get_location(location_id):
-    start = time.time()
-    with connection_pool.connection() as connection:
-        with connection.cursor() as cursor:
+    with conn.cursor() as cursor:
             cursor.execute(f"SELECT * FROM locations WHERE location_id = %s;", [location_id])
             result = cursor.fetchall()
-            print(time.time()-start)
             return result
+    #with connection_pool.connection() as connection:
+    #    with connection.cursor() as cursor:
+    #        cursor.execute(f"SELECT * FROM locations WHERE location_id = %s;", [location_id])
+    #        result = cursor.fetchall()
+    #        return result
 
 # get locations from <user_id>
 def get_locations(user_id):
