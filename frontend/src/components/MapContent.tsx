@@ -32,6 +32,9 @@ export default function MapContent({ isTogglePins = false }: MapContentProps) {
   const [albums, setAlbums] = useState<Album[]>([]);
   const [pinsLoaded, setPinsLoaded] = useState(false);
   const [selectedPin, setSelectedPin] = useState<Pin | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({ name: "", notes: "", start_date: "", end_date: "" });
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
 
   const token = useAuth();
 
@@ -227,6 +230,62 @@ export default function MapContent({ isTogglePins = false }: MapContentProps) {
     return Number.isNaN(d.getTime()) ? value : d.toLocaleDateString();
   }
 
+  function toDateInputValue(value: string) {
+    if (!value) return "";
+    const d = new Date(value);
+    return Number.isNaN(d.getTime()) ? "" : d.toISOString().split("T")[0];
+  }
+
+  function openEdit() {
+    if (!albumAtLocation) return;
+    setEditForm({
+      name: albumAtLocation.name ?? "",
+      notes: albumAtLocation.notes ?? "",
+      start_date: toDateInputValue(albumAtLocation.start_date),
+      end_date: toDateInputValue(albumAtLocation.end_date),
+    });
+    setIsEditing(true);
+  }
+
+  async function handleDeleteAlbum() {
+    if (!albumAtLocation) return;
+    const res = await fetch(
+      `${BACKEND_URL}/delete_album?album_id=${albumAtLocation.album_id}`,
+      {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
+    if (!res.ok) {
+      alert(`Failed to delete album: ${await res.text()}`);
+      setIsConfirmingDelete(false);
+      return;
+    }
+    window.location.reload();
+  }
+
+  async function handleSaveEdit() {
+    if (!albumAtLocation) return;
+    const res = await fetch(`${BACKEND_URL}/edit_album`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ album_id: albumAtLocation.album_id, ...editForm }),
+    });
+    if (!res.ok) {
+      console.error("Failed to save album:", await res.text());
+      return;
+    }
+    setAlbums((prev) =>
+      prev.map((a) =>
+        a.album_id === albumAtLocation.album_id ? { ...a, ...editForm } : a,
+      ),
+    );
+    setIsEditing(false);
+  }
+
   console.log(showPins, showPolygons);
 
   return (
@@ -239,7 +298,7 @@ export default function MapContent({ isTogglePins = false }: MapContentProps) {
             position={[p.lat, p.lng]}
             icon={icon}
             eventHandlers={{
-              click: () => setSelectedPin(p),
+              click: () => { setSelectedPin(p); setIsEditing(false); setIsConfirmingDelete(false); },
             }}
           />
         ))}
@@ -263,13 +322,21 @@ export default function MapContent({ isTogglePins = false }: MapContentProps) {
       {selectedPin && (
         <div
           className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/30 p-4"
-          onClick={() => setSelectedPin(null)}
+          onClick={() => { setSelectedPin(null); setIsEditing(false); setIsConfirmingDelete(false); }}
         >
           <div
             className="w-full max-w-md rounded-lg border-2 border-stone-300 bg-stone-50 p-6 shadow-lg"
             onClick={(e) => e.stopPropagation()}
           >
-            <header className="border-b border-stone-300 pb-4 text-center">
+            <header className="relative border-b border-stone-300 pb-4 text-center">
+              <button
+                type="button"
+                className="absolute right-0 top-0 text-stone-400 hover:text-stone-700"
+                onClick={() => { setSelectedPin(null); setIsEditing(false); setIsConfirmingDelete(false); }}
+                aria-label="Close"
+              >
+                ✕
+              </button>
               <p className="text-xs font-medium uppercase text-stone-500">
                 Travel album
               </p>
@@ -288,6 +355,46 @@ export default function MapContent({ isTogglePins = false }: MapContentProps) {
                 <p className="text-center text-sm text-stone-600">
                   No album for this place yet.
                 </p>
+              ) : isEditing ? (
+                <div className="flex flex-col gap-3">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-medium text-stone-500">Name</label>
+                    <input
+                      className="rounded border border-stone-300 px-3 py-1.5 text-sm text-stone-800 focus:outline-none focus:ring-1 focus:ring-stone-400"
+                      value={editForm.name}
+                      onChange={(e) => setEditForm((f) => ({ ...f, name: e.target.value }))}
+                    />
+                  </div>
+                  <div className="flex gap-3">
+                    <div className="flex flex-1 flex-col gap-1">
+                      <label className="text-xs font-medium text-stone-500">Start date</label>
+                      <input
+                        type="date"
+                        className="rounded border border-stone-300 px-3 py-1.5 text-sm text-stone-800 focus:outline-none focus:ring-1 focus:ring-stone-400"
+                        value={editForm.start_date}
+                        onChange={(e) => setEditForm((f) => ({ ...f, start_date: e.target.value }))}
+                      />
+                    </div>
+                    <div className="flex flex-1 flex-col gap-1">
+                      <label className="text-xs font-medium text-stone-500">End date</label>
+                      <input
+                        type="date"
+                        className="rounded border border-stone-300 px-3 py-1.5 text-sm text-stone-800 focus:outline-none focus:ring-1 focus:ring-stone-400"
+                        value={editForm.end_date}
+                        onChange={(e) => setEditForm((f) => ({ ...f, end_date: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-medium text-stone-500">Notes</label>
+                    <textarea
+                      rows={4}
+                      className="rounded border border-stone-300 px-3 py-1.5 text-sm text-stone-800 focus:outline-none focus:ring-1 focus:ring-stone-400"
+                      value={editForm.notes}
+                      onChange={(e) => setEditForm((f) => ({ ...f, notes: e.target.value }))}
+                    />
+                  </div>
+                </div>
               ) : (
                 <div className="rounded-md border border-stone-200 bg-white p-4 shadow-sm flex flex-col gap-3">
                   <h3 className="font-serif text-lg text-stone-800">
@@ -306,14 +413,41 @@ export default function MapContent({ isTogglePins = false }: MapContentProps) {
               )}
             </div>
 
-            <div className="mt-6 flex justify-end border-t border-stone-300 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setSelectedPin(null)}
-              >
-                Close
-              </Button>
+            <div className="mt-6 flex justify-between border-t border-stone-300 pt-4">
+              <div className="flex gap-2">
+                {isEditing ? (
+                  <>
+                    <Button type="button" variant="outline" onClick={() => setIsEditing(false)}>
+                      Cancel
+                    </Button>
+                    <Button type="button" onClick={handleSaveEdit}>
+                      Save
+                    </Button>
+                  </>
+                ) : albumAtLocation && !isConfirmingDelete ? (
+                  <Button type="button" variant="outline" onClick={openEdit}>
+                    Edit
+                  </Button>
+                ) : null}
+              </div>
+              <div className="flex gap-2">
+                {albumAtLocation && !isEditing && !isConfirmingDelete && (
+                  <Button type="button" variant="destructive" onClick={() => setIsConfirmingDelete(true)}>
+                    Delete
+                  </Button>
+                )}
+                {isConfirmingDelete && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-stone-600">Delete this album?</span>
+                    <Button type="button" variant="destructive" onClick={handleDeleteAlbum}>
+                      Confirm
+                    </Button>
+                    <Button type="button" variant="outline" onClick={() => setIsConfirmingDelete(false)}>
+                      Cancel
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
