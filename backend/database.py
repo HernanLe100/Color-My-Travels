@@ -9,11 +9,11 @@ _DATABASE_URL = os.getenv("DATABASE_URL")
 
 connection_pool = ConnectionPool(
     conninfo=_DATABASE_URL, 
-    timeout=300, 
+    timeout=10, 
     min_size=1,
     max_size=3,
-    check=ConnectionPool.check_connection,
-    kwargs={"row_factory":dict_row}
+    #check=ConnectionPool.check_connection,
+    kwargs={"row_factory":dict_row, "connect_timeout":5}
 ) 
 
 # --------------------------------------------------
@@ -121,12 +121,14 @@ def get_albums(user_id):
 # --------------------------------------------------
 
 # get location details by <location_id>
-
+import time
 def get_location(location_id):
+    start = time.time()
     with connection_pool.connection() as connection:
         with connection.cursor() as cursor:
             cursor.execute(f"SELECT * FROM locations WHERE location_id = %s;", [location_id])
             result = cursor.fetchall()
+            print(time.time()-start)
             return result
 
 # get locations from <user_id>
