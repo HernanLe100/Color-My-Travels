@@ -12,6 +12,7 @@ export default function UserPage() {
   const [albums, setAlbums] = useState<Album[]>([]);
 
   const token = localStorage.getItem("token");
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
 
   useEffect(() => {
     if (!token) return;
@@ -55,6 +56,23 @@ export default function UserPage() {
     window.location.href = "/login";
   }
 
+  async function handleDeleteUser() {
+    if (!user) return;
+    const res = await fetch(
+      `${BACKEND_URL}/delete_user`,
+      {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
+    if (!res.ok) {
+      alert(`Failed to delete user: ${await res.text()}`);
+      setIsConfirmingDelete(false);
+      return;
+    }
+    logout()
+  }
+
   return (
     <div className="flex flex-col gap-4 p-4">
       <h1 className="text-lg font-bold">{user?.name}'s User Page</h1>
@@ -62,6 +80,25 @@ export default function UserPage() {
       <Button onClick={logout} className="w-fit cursor-pointer" size="lg">
         Logout
       </Button>
+
+      {!isConfirmingDelete && (
+        <Button onClick={() => setIsConfirmingDelete(true)} 
+          className="w-fit cursor-pointer" size="lg" 
+          variant="destructive">
+          Delete My Account
+        </Button>
+      )}
+      {isConfirmingDelete && (
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-stone-600 font-semibold">Are you sure you want to delete your account?</span>
+          <Button type="button" variant="destructive" onClick={handleDeleteUser}>
+            Confirm
+          </Button>
+          <Button type="button" variant="outline" onClick={() => setIsConfirmingDelete(false)}>
+            Cancel
+          </Button>
+        </div>
+      )}
 
       <p className="text-neutral-400 text-xs">User Id: {user?.user_id}</p>
     </div>

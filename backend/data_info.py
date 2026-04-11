@@ -36,6 +36,16 @@ def me():
 
     return jsonify(user)
 
+
+@info_bp.route("/delete_user", methods=["DELETE"])
+@jwt_required()
+def delete_user():
+    user_id = get_jwt_identity()
+    
+    db.delete_user(user_id)
+
+    return jsonify({"success": True})
+
 # --------------------------------------------------
 
 @info_bp.route("/get_albums", methods=["GET"])
@@ -46,6 +56,7 @@ def get_albums():
     result = db.get_albums(user_id)
     
     return jsonify({"db_response": result})
+
 
 @info_bp.route("/add_album", methods=["POST"])
 @jwt_required()
@@ -72,7 +83,6 @@ def add_album():
 
     return jsonify({"success": True})
 
-# --------------------------------------------------
 
 @info_bp.route("/edit_album", methods=["PUT"])
 @jwt_required()
@@ -97,7 +107,6 @@ def edit_album():
 
     return jsonify({"success": True})
 
-# --------------------------------------------------
 
 @info_bp.route("/delete_album", methods=["DELETE"])
 @jwt_required()
