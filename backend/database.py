@@ -40,6 +40,23 @@ def get_user(user_id):
             )
             user = cursor.fetchone()
             return user
+        
+def delete_user(user_id):
+    with psycopg.connect(_DATABASE_URL, connect_timeout=5) as connection:
+        with connection.cursor(row_factory=dict_row) as cursor:
+            cursor.execute(
+                "DELETE FROM colors WHERE user_id = %s;",
+                [user_id]
+            )
+            cursor.execute(
+                "DELETE FROM albums WHERE user_id = %s;",
+                [user_id]
+            )
+            cursor.execute(
+                "DELETE FROM users WHERE user_id = %s;",
+                [user_id]
+            )
+        connection.commit()
 
 # --------------------------------------------------
 
