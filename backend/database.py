@@ -2,9 +2,18 @@ import os
 from dotenv import load_dotenv
 import psycopg
 from psycopg.rows import dict_row
+import cloudinary
+import cloudinary.uploader
+import json
 
 load_dotenv()
 _DATABASE_URL = os.getenv("DATABASE_URL")
+
+cloudinary.config(
+    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.getenv("CLOUDINARY_API_KEY"),
+    api_secret=os.getenv("CLOUDINARY_API_SECRET"),
+)
 
 
 # --------------------------------------------------
@@ -60,14 +69,52 @@ def delete_user(user_id):
 
 # --------------------------------------------------
 
+def upload_image(file, user_id, album_id):
+    try:
+        # 1. Upload to Cloudinary
+        result = cloudinary.uploader.upload(
+            file,
+            folder=f"users/{user_id}",
+        )
+
+        image_data = {
+            "id": result["public_id"],
+            "caption": "",
+        }
+
+        # 2. Save into DB
+        with psycopg.connect(_DATABASE_URL, connect_timeout=5) as connection:
+            with connection.cursor(row_factory=dict_row) as cursor:
+
+                # Append to pages JSON array
+                cursor.execute(
+                    """
+                    UPDATE albums
+                    SET pages = COALESCE(pages, '[]'::jsonb) || %s::jsonb
+                    WHERE album_id = %s AND user_id = %s;
+                    """,
+                    [json.dumps([image_data]), album_id, user_id],
+                )
+
+            connection.commit()
+
+        return {
+            "id": result["public_id"],
+            "url": result["secure_url"],
+        }
+
+    except Exception as e:
+        print("Upload failed:", e)
+        return None
+
 def add_album(info : dict):
     with psycopg.connect(_DATABASE_URL, connect_timeout=5) as connection:
         with connection.cursor(row_factory=dict_row) as cursor:
             cursor.execute(
                 """
-                INSERT INTO albums (user_id, location_id, notes, start_date, end_date, name)
-                VALUES (%s, %s, %s, %s, %s, %s)
-                RETURNING location_id;
+                INSERT INTO albums (user_id, location_id, notes, start_date, end_date, name, pages)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                RETURNING album_id;
                 """,
                 [
                     info.get("user_id"),
@@ -76,10 +123,12 @@ def add_album(info : dict):
                     info.get("start_date"),
                     info.get("end_date"),
                     info.get("name"),
+                    info.get("pages", []),
                 ]
             )
 
-            location_id = cursor.fetchone()["location_id"]
+            album_id = cursor.fetchone()["album_id"]
+            location_id = info.get("location_id")
 
             # get location information
             cursor.execute(
@@ -135,6 +184,7 @@ def add_album(info : dict):
                 )
                 
         connection.commit()
+    return album_id
 
 
 def update_album(info: dict):
@@ -143,7 +193,7 @@ def update_album(info: dict):
             cursor.execute(
                 """
                 UPDATE albums
-                SET name = %s, notes = %s, start_date = %s, end_date = %s
+                SET name = %s, notes = %s, start_date = %s, end_date = %s, pages = %s
                 WHERE album_id = %s AND user_id = %s;
                 """,
                 [
@@ -151,6 +201,7 @@ def update_album(info: dict):
                     info.get("notes"),
                     info.get("start_date"),
                     info.get("end_date"),
+                    info.get("pages", []),
                     info.get("album_id"),
                     info.get("user_id"),
                 ]

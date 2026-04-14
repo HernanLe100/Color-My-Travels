@@ -22,11 +22,18 @@ export type User = {
     name: string;
 };
 
+export type Page = {
+    // cloudinary public id
+    id: string;
+    caption: string;
+}
+
+
 export type Album = {
     album_id: number;
     user_id: string;
     notes: string;
-    pages: string[];
+    pages: Page[]; // order of array = order of pages in album
     start_date: string;
     end_date: string;
     location_id: number;

@@ -70,7 +70,7 @@ def add_album():
     end_date = data.get("end_date", "")
     name = data.get("name", "")
 
-    db.add_album(
+    album_id = db.add_album(
         {
             "user_id": user_id,
             "location_id": location_id,
@@ -81,7 +81,9 @@ def add_album():
         }
     )
 
-    return jsonify({"success": True})
+    return jsonify({
+        "album_id": album_id
+    })
 
 
 @info_bp.route("/edit_album", methods=["PUT"])
@@ -189,3 +191,21 @@ def update_color():
     })
 
     return jsonify({"success": True})
+
+@info_bp.route("/upload_image", methods=["POST"])
+@jwt_required()
+def upload_image_route():
+    user_id = get_jwt_identity()
+
+    if "file" not in request.files:
+        return jsonify({"error": "No file"}), 400
+
+    file = request.files["file"]
+    album_id = request.form.get("album_id")
+
+    result = db.upload_image(file, user_id, album_id)
+
+    if not result:
+        return jsonify({"error": "Upload failed"}), 500
+
+    return jsonify(result)

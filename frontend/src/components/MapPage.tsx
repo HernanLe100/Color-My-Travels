@@ -73,6 +73,7 @@ export default function MapPage() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSubmitError(null);
+
     if (!token) {
       setSubmitError("You must be signed in.");
       return;
@@ -83,7 +84,9 @@ export default function MapPage() {
     }
 
     setIsSubmitting(true);
+
     try {
+      // 1. Ensure location
       const locRes = await fetch(`${BACKEND_URL}/ensure_location`, {
         method: "POST",
         headers: {
@@ -96,21 +99,66 @@ export default function MapPage() {
           country: selectedLocation.country,
           lat: selectedLocation.lat,
           lng: selectedLocation.lng,
-          state: selectedLocation.state,
         }),
       });
+
       const locData = await locRes.json();
-      if (!locRes.ok) {
-        throw new Error(locData.error || "Could not save location");
-      }
-      const locationId = locData.location_id as number;
-      await handleAddAlbum(locationId);
+      if (!locRes.ok) throw new Error(locData.error);
+
+      const locationId = locData.location_id;
+
+      // 2. Create album
+      const albumRes = await fetch(`${BACKEND_URL}/add_album`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          location_id: locationId,
+          notes,
+          name,
+          start_date: startDate,
+          end_date: endDate,
+        }),
+      });
+
+      const albumData = await albumRes.json();
+      if (!albumRes.ok) throw new Error(albumData.error);
+
+      const albumId = albumData.album_id;
+
+      // 3. Upload images
+      await Promise.all(
+        images.map(async (file) => {
+          const formData = new FormData();
+          formData.append("file", file);
+          formData.append("album_id", albumId);
+
+          const res = await fetch(`${BACKEND_URL}/upload_image`, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            body: formData,
+          });
+
+          if (!res.ok) {
+            console.error("Image upload failed");
+          }
+        }),
+      );
+
+      // reset
       setIsModalOpen(false);
+      setImages([]);
       setNotes("");
       setName("");
       setStartDate("");
       setEndDate("");
       setSelectedLocation(null);
+
+      window.location.reload();
     } catch (e) {
       setSubmitError(e instanceof Error ? e.message : "Something went wrong");
     } finally {

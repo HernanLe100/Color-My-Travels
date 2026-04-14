@@ -4,7 +4,7 @@ import { useZoomLevel } from "@/hooks/useZoomLevel";
 import L from "leaflet";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
-import type { Album, Color, Pin } from "@/types";
+import type { Album, Color, Page, Pin } from "@/types";
 import { useAuth } from "@/App";
 import { Button } from "./ui/button";
 
@@ -15,13 +15,15 @@ const icon = new L.Icon({
   iconAnchor: [12, 41],
 });
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL; 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 type MapContentProps = {
   isTogglePins?: boolean;
 };
 
 export default function MapContent({ isTogglePins = false }: MapContentProps) {
+  const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+
   const zoom = useZoomLevel();
   const [adm0, setAdm0] = useState<any[]>([]);
   const [adm1, setAdm1] = useState<any[]>([]);
@@ -33,10 +35,19 @@ export default function MapContent({ isTogglePins = false }: MapContentProps) {
   const [pinsLoaded, setPinsLoaded] = useState(false);
   const [selectedPin, setSelectedPin] = useState<Pin | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState({ name: "", notes: "", start_date: "", end_date: "" });
+  const [editForm, setEditForm] = useState({
+    name: "",
+    notes: "",
+    start_date: "",
+    end_date: "",
+  });
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
 
   const token = useAuth();
+
+  function getImageUrl(id: string) {
+    return `https://res.cloudinary.com/${cloudName}/image/upload/${id}`;
+  }
 
   useEffect(() => {
     if (!token) return;
@@ -78,7 +89,7 @@ export default function MapContent({ isTogglePins = false }: MapContentProps) {
           album_id: Number(a.album_id),
           user_id: String(a.user_id ?? ""),
           notes: String(a.notes ?? ""),
-          pages: Array.isArray(a.pages) ? (a.pages as string[]) : [],
+          pages: Array.isArray(a.pages) ? (a.pages as Page[]) : [],
           start_date: String(a.start_date ?? ""),
           end_date: String(a.end_date ?? ""),
           location_id: Number(a.location_id),
@@ -298,7 +309,11 @@ export default function MapContent({ isTogglePins = false }: MapContentProps) {
             position={[p.lat, p.lng]}
             icon={icon}
             eventHandlers={{
-              click: () => { setSelectedPin(p); setIsEditing(false); setIsConfirmingDelete(false); },
+              click: () => {
+                setSelectedPin(p);
+                setIsEditing(false);
+                setIsConfirmingDelete(false);
+              },
             }}
           />
         ))}
@@ -322,7 +337,11 @@ export default function MapContent({ isTogglePins = false }: MapContentProps) {
       {selectedPin && (
         <div
           className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/30 p-4"
-          onClick={() => { setSelectedPin(null); setIsEditing(false); setIsConfirmingDelete(false); }}
+          onClick={() => {
+            setSelectedPin(null);
+            setIsEditing(false);
+            setIsConfirmingDelete(false);
+          }}
         >
           <div
             className="w-full max-w-md rounded-lg border-2 border-stone-300 bg-stone-50 p-6 shadow-lg"
@@ -332,7 +351,11 @@ export default function MapContent({ isTogglePins = false }: MapContentProps) {
               <button
                 type="button"
                 className="absolute right-0 top-0 text-stone-400 hover:text-stone-700"
-                onClick={() => { setSelectedPin(null); setIsEditing(false); setIsConfirmingDelete(false); }}
+                onClick={() => {
+                  setSelectedPin(null);
+                  setIsEditing(false);
+                  setIsConfirmingDelete(false);
+                }}
                 aria-label="Close"
               >
                 ✕
@@ -350,6 +373,17 @@ export default function MapContent({ isTogglePins = false }: MapContentProps) {
               </p>
             </header>
 
+            {albumAtLocation?.pages?.map((page, idx) =>
+              page?.id ? (
+                <img
+                  key={idx}
+                  src={getImageUrl(page.id)}
+                  alt={page.caption || "image"}
+                  className="w-full object-cover rounded"
+                />
+              ) : null,
+            )}
+
             <div className="mt-5">
               {!albumAtLocation ? (
                 <p className="text-center text-sm text-stone-600">
@@ -358,40 +392,62 @@ export default function MapContent({ isTogglePins = false }: MapContentProps) {
               ) : isEditing ? (
                 <div className="flex flex-col gap-3">
                   <div className="flex flex-col gap-1">
-                    <label className="text-xs font-medium text-stone-500">Name</label>
+                    <label className="text-xs font-medium text-stone-500">
+                      Name
+                    </label>
                     <input
                       className="rounded border border-stone-300 px-3 py-1.5 text-sm text-stone-800 focus:outline-none focus:ring-1 focus:ring-stone-400"
                       value={editForm.name}
-                      onChange={(e) => setEditForm((f) => ({ ...f, name: e.target.value }))}
+                      onChange={(e) =>
+                        setEditForm((f) => ({ ...f, name: e.target.value }))
+                      }
                     />
                   </div>
                   <div className="flex gap-3">
                     <div className="flex flex-1 flex-col gap-1">
-                      <label className="text-xs font-medium text-stone-500">Start date</label>
+                      <label className="text-xs font-medium text-stone-500">
+                        Start date
+                      </label>
                       <input
                         type="date"
                         className="rounded border border-stone-300 px-3 py-1.5 text-sm text-stone-800 focus:outline-none focus:ring-1 focus:ring-stone-400"
                         value={editForm.start_date}
-                        onChange={(e) => setEditForm((f) => ({ ...f, start_date: e.target.value }))}
+                        onChange={(e) =>
+                          setEditForm((f) => ({
+                            ...f,
+                            start_date: e.target.value,
+                          }))
+                        }
                       />
                     </div>
                     <div className="flex flex-1 flex-col gap-1">
-                      <label className="text-xs font-medium text-stone-500">End date</label>
+                      <label className="text-xs font-medium text-stone-500">
+                        End date
+                      </label>
                       <input
                         type="date"
                         className="rounded border border-stone-300 px-3 py-1.5 text-sm text-stone-800 focus:outline-none focus:ring-1 focus:ring-stone-400"
                         value={editForm.end_date}
-                        onChange={(e) => setEditForm((f) => ({ ...f, end_date: e.target.value }))}
+                        onChange={(e) =>
+                          setEditForm((f) => ({
+                            ...f,
+                            end_date: e.target.value,
+                          }))
+                        }
                       />
                     </div>
                   </div>
                   <div className="flex flex-col gap-1">
-                    <label className="text-xs font-medium text-stone-500">Notes</label>
+                    <label className="text-xs font-medium text-stone-500">
+                      Notes
+                    </label>
                     <textarea
                       rows={4}
                       className="rounded border border-stone-300 px-3 py-1.5 text-sm text-stone-800 focus:outline-none focus:ring-1 focus:ring-stone-400"
                       value={editForm.notes}
-                      onChange={(e) => setEditForm((f) => ({ ...f, notes: e.target.value }))}
+                      onChange={(e) =>
+                        setEditForm((f) => ({ ...f, notes: e.target.value }))
+                      }
                     />
                   </div>
                 </div>
@@ -417,7 +473,11 @@ export default function MapContent({ isTogglePins = false }: MapContentProps) {
               <div className="flex gap-2">
                 {isEditing ? (
                   <>
-                    <Button type="button" variant="outline" onClick={() => setIsEditing(false)}>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setIsEditing(false)}
+                    >
                       Cancel
                     </Button>
                     <Button type="button" onClick={handleSaveEdit}>
@@ -432,17 +492,31 @@ export default function MapContent({ isTogglePins = false }: MapContentProps) {
               </div>
               <div className="flex gap-2">
                 {albumAtLocation && !isEditing && !isConfirmingDelete && (
-                  <Button type="button" variant="destructive" onClick={() => setIsConfirmingDelete(true)}>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    onClick={() => setIsConfirmingDelete(true)}
+                  >
                     Delete
                   </Button>
                 )}
                 {isConfirmingDelete && (
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-stone-600">Delete this album?</span>
-                    <Button type="button" variant="destructive" onClick={handleDeleteAlbum}>
+                    <span className="text-sm text-stone-600">
+                      Delete this album?
+                    </span>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      onClick={handleDeleteAlbum}
+                    >
                       Confirm
                     </Button>
-                    <Button type="button" variant="outline" onClick={() => setIsConfirmingDelete(false)}>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setIsConfirmingDelete(false)}
+                    >
                       Cancel
                     </Button>
                   </div>
