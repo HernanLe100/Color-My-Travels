@@ -4,6 +4,7 @@ import psycopg
 from psycopg.rows import dict_row
 import cloudinary
 import cloudinary.uploader
+import cloudinary.api
 import json
 
 load_dotenv()
@@ -65,6 +66,7 @@ def delete_user(user_id):
             for p in pages:
                 if "id" in p:
                     cloudinary.uploader.destroy(p["id"], invalidate=True)
+            cloudinary.api.delete_folder(f"user/{user_id}")
                     
             cursor.execute(
                 "DELETE FROM colors WHERE user_id = %s;",
