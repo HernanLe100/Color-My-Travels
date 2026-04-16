@@ -12,6 +12,7 @@ import CitySearch from "./CitySearch";
 import { Label } from "./ui/label";
 import type { SearchLocation } from "@/types";
 import { Switch } from "./ui/switch";
+import AddAlbumModal from "./AddAlbumModal";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -196,121 +197,28 @@ export default function MapPage() {
       </Button>
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/30 px-4">
-          <div className="w-full max-w-md rounded-xl bg-white p-5 shadow-2xl">
-            <h2 className="text-lg font-semibold text-slate-900">New Album</h2>
-            <p className="mt-1 text-sm text-slate-600">
-              Create a new album entry for a location.
-            </p>
-
-            <form onSubmit={handleSubmit} className="mt-4 space-y-3">
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="name">Album Name</Label>
-                <Input
-                  id="name"
-                  type="text"
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                  placeholder="Add a name for your album"
-                  required
-                />
-              </div>
-
-              <CitySearch onSelect={handleSelect} />
-              {selectedLocation && (
-                <p className="text-sm text-slate-600">
-                  Selected: {selectedLocation.city}
-                  {selectedLocation.state
-                    ? `, ${selectedLocation.state}`
-                    : ""}, {selectedLocation.country}
-                </p>
-              )}
-
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="startDate">Start Date</Label>
-                <Input
-                  id="startDate"
-                  type="date"
-                  value={startDate}
-                  onChange={(event) => setStartDate(event.target.value)}
-                  placeholder="Add the start date of your trip"
-                  required
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="endDate">End Date</Label>
-                <Input
-                  id="endDate"
-                  type="date"
-                  value={endDate}
-                  onChange={(event) => setEndDate(event.target.value)}
-                  placeholder="Add the end date of your trip"
-                  required
-                />
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="notes">Notes</Label>
-                <Input
-                  id="notes"
-                  type="text"
-                  value={notes}
-                  onChange={(event) => setNotes(event.target.value)}
-                  placeholder="Enter trip notes here..."
-                  required
-                />
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="notes">Images</Label>
-                <input
-                  id="notes"
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  onChange={(e) => {
-                    if (e.target.files) {
-                      setImages(Array.from(e.target.files));
-                    }
-                  }}
-                  required
-                />
-                {images.length > 0 && (
-                  <div className="grid grid-cols-3 gap-2 mt-2">
-                    {images.map((file, idx) => (
-                      <img
-                        key={idx}
-                        src={URL.createObjectURL(file)}
-                        alt="preview"
-                        className="w-full h-24 object-cover rounded"
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {submitError && (
-                <p className="text-sm text-red-600">{submitError}</p>
-              )}
-              <div className="mt-2 flex justify-end gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setSubmitError(null);
-                    setIsModalOpen(false);
-                  }}
-                  size="lg"
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={isSubmitting} size="lg">
-                  {isSubmitting ? "Saving…" : "Add"}
-                </Button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <AddAlbumModal
+          isOpen={isModalOpen}
+          onClose={() => {
+            setSubmitError(null);
+            setIsModalOpen(false);
+          }}
+          onSubmit={handleSubmit}
+          name={name}
+          setName={setName}
+          notes={notes}
+          setNotes={setNotes}
+          startDate={startDate}
+          setStartDate={setStartDate}
+          endDate={endDate}
+          setEndDate={setEndDate}
+          images={images}
+          setImages={setImages}
+          selectedLocation={selectedLocation}
+          handleSelect={handleSelect}
+          submitError={submitError}
+          isSubmitting={isSubmitting}
+        />
       )}
     </div>
   );
