@@ -198,28 +198,26 @@ export default function AlbumDetailModal({
       case "empty":
         return (
           <div className="flex h-full min-h-[18rem] flex-col items-center justify-center text-center">
-            <p className="text-sm text-stone-600">
-              No album for this place yet.
-            </p>
+            <p className="text-sm">No album for this place yet.</p>
           </div>
         );
       case "cover":
         if (!album) return null;
         return (
-          <div className="flex max-h-[28rem] min-h-[18rem] flex-col items-center overflow-y-auto px-2 py-2 text-center">
-            <p className="text-xs font-medium uppercase tracking-wide text-stone-500">
+          <div className="flex max-h-[28rem] min-h-[18rem] flex-col items-center overflow-y-auto px-2 py-2 text-center text-[#5E3023]">
+            <p className="text-xs font-medium uppercase tracking-wide">
               Travel album
             </p>
-            <h3 className="mt-4 font-serif text-2xl text-stone-900">
+            <h3 className="mt-4 font-serif text-2xl">
               {album.name || "Untitled"}
             </h3>
-            <p className="mt-3 text-sm text-stone-600">
+            <p className="mt-3 text-sm">
               {formatAlbumDate(album.start_date)} —{" "}
               {formatAlbumDate(album.end_date)}
             </p>
             {album.notes?.trim() ? (
               <div className="mt-6 w-full max-w-sm text-left">
-                <p className="mt-2 whitespace-pre-wrap border-l-2 border-stone-400 pl-3 text-sm leading-relaxed text-stone-800">
+                <p className="mt-2 whitespace-pre-wrap border-l-2 border-stone-400 pl-3 text-sm leading-relaxed">
                   {album.notes}
                 </p>
               </div>
@@ -229,7 +227,7 @@ export default function AlbumDetailModal({
       case "photo":
         return (
           <div className="flex min-h-[18rem] flex-col gap-3">
-            <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded border border-stone-200 bg-stone-100">
+            <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded">
               <img
                 src={cloudinaryImageUrl(cloudName, slot.page.id)}
                 alt={slot.page.caption || "Album photo"}
@@ -280,7 +278,7 @@ export default function AlbumDetailModal({
       onWheel={stopAndPreventEvent}
     >
       <div
-        className="w-full max-w-lg rounded-lg border-2 border-stone-300 bg-stone-100 p-5 shadow-lg"
+        className="w-full max-w-2xl rounded-lg border-2 border-stone-300 bg-stone-100 p-5 shadow-lg"
         onClick={(e) => e.stopPropagation()}
         onMouseDown={stopEvent}
         onMouseUp={stopEvent}
@@ -293,7 +291,7 @@ export default function AlbumDetailModal({
         <header className="relative border-b border-stone-300 pb-3 text-center">
           <button
             type="button"
-            className="absolute right-0 top-0 text-stone-400 hover:text-stone-700"
+            className="absolute right-0 top-0 text-stone-400 hover:text-stone-700 cursor-pointer"
             onClick={handleClose}
             aria-label="Close"
           >
@@ -372,9 +370,9 @@ export default function AlbumDetailModal({
           </div>
         ) : (
           <>
-            <div className="relative mt-4 min-h-[20rem] rounded-r-md border border-stone-300 bg-amber-50 shadow-inner">
+            <div className="relative mt-4 min-h-[20rem] rounded-r-md border border-stone-300 bg-[#F3E9DC] shadow-inner">
               <div
-                className="absolute bottom-2 left-0 top-2 w-2 rounded-sm bg-amber-900/20"
+                className="absolute bottom-2 left-0 top-2 w-2 rounded-sm bg-[#895737]"
                 aria-hidden
               />
               <div className="min-h-[20rem] pl-5 pr-4 py-4">
