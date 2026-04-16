@@ -4,6 +4,7 @@ import psycopg
 from psycopg.rows import dict_row
 import cloudinary
 import cloudinary.uploader
+import cloudinary.api
 import json
 
 load_dotenv()
@@ -53,6 +54,20 @@ def get_user(user_id):
 def delete_user(user_id):
     with psycopg.connect(_DATABASE_URL, connect_timeout=5) as connection:
         with connection.cursor(row_factory=dict_row) as cursor:
+            cursor.execute(
+                """
+                SELECT pages
+                FROM albums
+                WHERE user_id = %s;  
+                """,
+                [user_id]
+            )
+            pages = cursor.fetchone()["pages"]
+            for p in pages:
+                if "id" in p:
+                    cloudinary.uploader.destroy(p["id"], invalidate=True)
+            cloudinary.api.delete_folder(f"user/{user_id}")
+                    
             cursor.execute(
                 "DELETE FROM colors WHERE user_id = %s;",
                 [user_id]
@@ -214,6 +229,20 @@ def delete_album(info: dict):
 
     with psycopg.connect(_DATABASE_URL, connect_timeout=5) as connection:
         with connection.cursor(row_factory=dict_row) as cursor:
+            cursor.execute(
+                """
+                SELECT pages
+                FROM albums a
+                JOIN locations l ON a.location_id = l.location_id
+                WHERE a.album_id = %s AND a.user_id = %s;  
+                """,
+                [album_id, user_id]
+            )
+            pages = cursor.fetchone()["pages"]
+            for p in pages:
+                if "id" in p:
+                    cloudinary.uploader.destroy(p["id"], invalidate=True)
+            
             cursor.execute(
                 """
                 SELECT l.country, l.adm1
