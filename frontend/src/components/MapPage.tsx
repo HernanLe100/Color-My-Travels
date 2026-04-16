@@ -44,32 +44,6 @@ export default function MapPage() {
     setSelectedLocation(location);
   };
 
-  const handleAddAlbum = async (locationId: number) => {
-    if (!token) return;
-
-    const res = await fetch(`${BACKEND_URL}/add_album`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        location_id: locationId,
-        notes,
-        name,
-        start_date: startDate,
-        end_date: endDate,
-      }),
-    });
-
-    if (!res.ok) {
-      const err = await res.text();
-      throw new Error(err || "Failed to add album");
-    }
-
-    window.location.reload();
-  };
-
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSubmitError(null);
