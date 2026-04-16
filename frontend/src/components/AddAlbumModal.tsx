@@ -105,7 +105,6 @@ export default function AddAlbumModal({
             <Input
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              required
             />
           </div>
 
@@ -120,7 +119,6 @@ export default function AddAlbumModal({
                   setImages(Array.from(e.target.files));
                 }
               }}
-              required
             />
 
             {images.length > 0 && (
