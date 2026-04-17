@@ -9,6 +9,7 @@ import {
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { Album, Page, Pin } from "@/types";
 import { Button } from "../ui/button";
+import AlbumEditForm from "./AlbumEditForm";
 import {
   cloudinaryImageUrl,
   formatAlbumDate,
@@ -303,65 +304,12 @@ export default function AlbumDetailModal({
         </header>
 
         {isEditing && album ? (
-          <div className="mt-4 flex flex-col gap-3">
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-medium text-stone-500">Name</label>
-              <input
-                className="rounded border border-stone-300 bg-white px-3 py-1.5 text-sm text-stone-800 focus:outline-none focus:ring-1 focus:ring-stone-400"
-                value={editForm.name}
-                onChange={(e) =>
-                  setEditForm((f) => ({ ...f, name: e.target.value }))
-                }
-              />
-            </div>
-            <div className="flex gap-3">
-              <div className="flex flex-1 flex-col gap-1">
-                <label className="text-xs font-medium text-stone-500">
-                  Start date
-                </label>
-                <input
-                  type="date"
-                  className="rounded border border-stone-300 bg-white px-3 py-1.5 text-sm text-stone-800 focus:outline-none focus:ring-1 focus:ring-stone-400"
-                  value={editForm.start_date}
-                  onChange={(e) =>
-                    setEditForm((f) => ({
-                      ...f,
-                      start_date: e.target.value,
-                    }))
-                  }
-                />
-              </div>
-              <div className="flex flex-1 flex-col gap-1">
-                <label className="text-xs font-medium text-stone-500">
-                  End date
-                </label>
-                <input
-                  type="date"
-                  className="rounded border border-stone-300 bg-white px-3 py-1.5 text-sm text-stone-800 focus:outline-none focus:ring-1 focus:ring-stone-400"
-                  value={editForm.end_date}
-                  onChange={(e) =>
-                    setEditForm((f) => ({
-                      ...f,
-                      end_date: e.target.value,
-                    }))
-                  }
-                />
-              </div>
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-medium text-stone-500">
-                Notes
-              </label>
-              <textarea
-                rows={4}
-                className="rounded border border-stone-300 bg-white px-3 py-1.5 text-sm text-stone-800 focus:outline-none focus:ring-1 focus:ring-stone-400"
-                value={editForm.notes}
-                onChange={(e) =>
-                  setEditForm((f) => ({ ...f, notes: e.target.value }))
-                }
-              />
-            </div>
-          </div>
+          <AlbumEditForm
+            editForm={editForm}
+            setEditForm={setEditForm}
+            onCancel={() => setIsEditing(false)}
+            onSave={handleSaveEdit}
+          />
         ) : (
           <>
             <div className="relative mt-4 min-h-[20rem] rounded-r-md border border-stone-300 bg-[#F3E9DC] shadow-inner">
@@ -406,7 +354,11 @@ export default function AlbumDetailModal({
           </>
         )}
 
-        <div className="mt-4 flex justify-between border-t border-stone-300 pt-4">
+        <div
+          className={`mt-4 flex justify-between border-t border-stone-300 pt-4 ${
+            isEditing ? "hidden" : ""
+          }`}
+        >
           <div className="flex gap-2">
             {isEditing ? (
               <>
