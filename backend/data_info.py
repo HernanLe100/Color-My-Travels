@@ -97,6 +97,7 @@ def edit_album():
     start_date = data.get("start_date") or None
     end_date = data.get("end_date") or None
     name = data.get("name", "")
+    pages = data.get("pages", [])
 
     db.update_album({
         "album_id": album_id,
@@ -104,7 +105,8 @@ def edit_album():
         "notes": notes,
         "start_date": start_date,
         "end_date": end_date,
-        "name": name
+        "name": name,
+        "pages": pages,
     })
 
     return jsonify({"success": True})

@@ -56,6 +56,7 @@ export default function AlbumDetailModal({
     start_date: "",
     end_date: "",
   });
+  const [editPages, setEditPages] = useState<Page[]>([]);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const [pageIndex, setPageIndex] = useState(0);
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -133,6 +134,7 @@ export default function AlbumDetailModal({
       start_date: toDateInputValue(album.start_date),
       end_date: toDateInputValue(album.end_date),
     });
+    setEditPages(album.pages?.filter((p) => Boolean(p?.id)) ?? []);
     setIsEditing(true);
   }
 
@@ -167,7 +169,11 @@ export default function AlbumDetailModal({
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ album_id: album.album_id, ...editForm }),
+      body: JSON.stringify({
+        album_id: album.album_id,
+        ...editForm,
+        pages: editPages,
+      }),
     });
     if (!res.ok) {
       console.error("Failed to save album:", await res.text());
@@ -175,7 +181,7 @@ export default function AlbumDetailModal({
     }
     setAlbums((prev) =>
       prev.map((a) =>
-        a.album_id === album.album_id ? { ...a, ...editForm } : a,
+        a.album_id === album.album_id ? { ...a, ...editForm, pages: editPages } : a,
       ),
     );
     setIsEditing(false);
@@ -307,6 +313,9 @@ export default function AlbumDetailModal({
           <AlbumEditForm
             editForm={editForm}
             setEditForm={setEditForm}
+            pages={editPages}
+            setPages={setEditPages}
+            cloudName={cloudName}
             onCancel={() => setIsEditing(false)}
             onSave={handleSaveEdit}
           />
