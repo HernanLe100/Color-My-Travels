@@ -70,6 +70,50 @@ def delete_user(user_id):
             cloudinary.api.delete_folder(f"user/{user_id}")
         connection.commit()
 
+def send_friend_request(sender_id, receiver_id):
+    if sender_id == receiver_id:
+        return {"error": "Cannot friend yourself"}
+
+    with psycopg.connect(_DATABASE_URL, connect_timeout=5) as connection:
+        with connection.cursor(row_factory=dict_row) as cursor:
+
+            # Check if already friends
+            cursor.execute(
+                """
+                SELECT 1 FROM friendships
+                WHERE user_id = %s AND friend_id = %s;
+                """,
+                [sender_id, receiver_id]
+            )
+            if cursor.fetchone():
+                return {"error": "Already friends"}
+
+            # Check if request already exists
+            cursor.execute(
+                """
+                SELECT status FROM friend_requests
+                WHERE sender_id = %s AND receiver_id = %s;
+                """,
+                [sender_id, receiver_id]
+            )
+            existing = cursor.fetchone()
+
+            if existing:
+                return {"error": f"Request already {existing['status']}"}
+
+            # Insert new request
+            cursor.execute(
+                """
+                INSERT INTO friend_requests (sender_id, receiver_id, status)
+                VALUES (%s, %s, 'pending');
+                """,
+                [sender_id, receiver_id]
+            )
+
+        connection.commit()
+
+    return {"success": True}
+
 # --------------------------------------------------
 
 def upload_image(file, user_id, album_id, caption=""):
@@ -193,6 +237,7 @@ def add_album(info : dict):
 def update_album(info: dict):
     with psycopg.connect(_DATABASE_URL, connect_timeout=5) as connection:
         with connection.cursor(row_factory=dict_row) as cursor:
+            # Get existing pages (for if the frontend does not send pages)
             cursor.execute(
                 """
                 SELECT pages
@@ -204,42 +249,20 @@ def update_album(info: dict):
             existing_album = cursor.fetchone()
             existing_pages = existing_album["pages"] if existing_album else []
 
-            # If pages were not provided (metadata-only edit), preserve existing pages.
+            # Use incoming pages if provided, otherwise use existing pages
             incoming_pages = info.get("pages")
             if incoming_pages is None:
                 incoming_pages = existing_pages
-            else:
-                # Build lookup for existing pages
-                existing_by_id = {
-                    page["id"]: page
-                    for page in existing_pages or []
-                    if isinstance(page, dict) and page.get("id")
-                }
 
-                merged_pages = []
-
-                # Add all incoming pages (new + updated)
-                for page in incoming_pages:
-                    if isinstance(page, dict):
-                        merged_pages.append(page)
-
-                # Preserve any existing pages NOT included in incoming
-                incoming_ids = {
-                    page.get("id")
-                    for page in incoming_pages
-                    if isinstance(page, dict) and page.get("id")
-                }
-
-                for page_id, page in existing_by_id.items():
-                    if page_id not in incoming_ids:
-                        merged_pages.append(page)
-
-                incoming_pages = merged_pages
-
+            # Update directly
             cursor.execute(
                 """
                 UPDATE albums
-                SET name = %s, notes = %s, start_date = %s, end_date = %s, pages = %s
+                SET name = %s,
+                    notes = %s,
+                    start_date = %s,
+                    end_date = %s,
+                    pages = %s
                 WHERE album_id = %s AND user_id = %s;
                 """,
                 [
@@ -250,7 +273,7 @@ def update_album(info: dict):
                     json.dumps(incoming_pages),
                     info.get("album_id"),
                     info.get("user_id"),
-                ]
+                ],
             )
         connection.commit()
 
