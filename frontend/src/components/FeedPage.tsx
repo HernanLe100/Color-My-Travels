@@ -1,5 +1,5 @@
 import { useAuth } from "@/App";
-import type { Album } from "@/types";
+import type { Album, User } from "@/types";
 import { useEffect, useState } from "react";
 
 export default function FeedPage() {
@@ -7,7 +7,7 @@ export default function FeedPage() {
 
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
   const [friendsAlbums, setFriendsAlbums] = useState<Album[]>([]);
-  const [friends, setFriends] = useState([]);
+  const [friends, setFriends] = useState<User[]>([]);
 
   const fetchFriendsAlbums = async () => {
     const res = await fetch(`${BACKEND_URL}/get_friends_albums`, {

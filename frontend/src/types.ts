@@ -46,3 +46,8 @@ export type Color = {
     region_code: string;
     region_type: string;
 };
+
+export type FriendRequest = {
+    sender_id: string;
+    name: string;
+};
