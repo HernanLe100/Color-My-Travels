@@ -10,6 +10,8 @@ import LoginPage from "./components/LoginPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
 import { jwtDecode } from "jwt-decode";
+import FriendsPage from "./components/FriendsPage";
+import FeedPage from "./components/FeedPage";
 
 type JwtPayload = {
   exp: number;
@@ -94,6 +96,24 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <ColorsPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/friends"
+                element={
+                  <ProtectedRoute>
+                    <FriendsPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/feed"
+                element={
+                  <ProtectedRoute>
+                    <FeedPage />
                   </ProtectedRoute>
                 }
               />
