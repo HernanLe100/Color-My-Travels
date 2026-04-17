@@ -46,6 +46,87 @@ def delete_user():
 
     return jsonify({"success": True})
 
+@info_bp.route("/send_friend_request", methods=["POST"])
+@jwt_required()
+def send_friend_request_route():
+    sender_id = get_jwt_identity()
+    data = request.get_json()
+
+    receiver_id = data.get("receiver_id")
+    if not receiver_id:
+        return jsonify({"error": "receiver_id required"}), 400
+
+    result = db.send_friend_request(sender_id, receiver_id)
+
+    if "error" in result:
+        return jsonify(result), 400
+
+    return jsonify(result)
+
+
+
+@info_bp.route("/accept_friend_request", methods=["POST"])
+@jwt_required()
+def accept_friend_request_route():
+    receiver_id = get_jwt_identity()  # current user
+    data = request.get_json()
+
+    sender_id = data.get("sender_id")
+    if not sender_id:
+        return jsonify({"error": "sender_id required"}), 400
+
+    result = db.accept_friend_request(sender_id, receiver_id)
+
+    if "error" in result:
+        return jsonify(result), 400
+
+    return jsonify(result)
+
+
+@info_bp.route("/reject_friend_request", methods=["POST"])
+@jwt_required()
+def reject_friend_request_route():
+    receiver_id = get_jwt_identity()
+    data = request.get_json()
+
+    sender_id = data.get("sender_id")
+    if not sender_id:
+        return jsonify({"error": "sender_id required"}), 400
+
+    result = db.reject_friend_request(sender_id, receiver_id)
+
+    return jsonify(result)
+
+
+@info_bp.route("/get_friend_requests", methods=["GET"])
+@jwt_required()
+def get_friend_requests():
+    user_id = get_jwt_identity()
+
+    result = db.get_incoming_requests(user_id)
+
+    return jsonify({"requests": result})
+
+
+@info_bp.route("/get_friends", methods=["GET"])
+@jwt_required()
+def get_friends():
+    user_id = get_jwt_identity()
+
+    result = db.get_friends(user_id)
+
+    return jsonify({"friends": result})
+
+
+@info_bp.route("/get_friends_albums", methods=["GET"])
+@jwt_required()
+def get_friends_albums():
+    user_id = get_jwt_identity()
+
+    result = db.get_friends_albums(user_id)
+
+    return jsonify({"albums": result})
+
 # --------------------------------------------------
 
 @info_bp.route("/get_albums", methods=["GET"])
