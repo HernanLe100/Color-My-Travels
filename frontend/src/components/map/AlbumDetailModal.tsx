@@ -59,6 +59,8 @@ export default function AlbumDetailModal({
     end_date: "",
   });
   const [editPages, setEditPages] = useState<Page[]>([]);
+  const [newPageFiles, setNewPageFiles] = useState<File[]>([]);
+  const [newPageCaptions, setNewPageCaptions] = useState<string[]>([]);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const [pageIndex, setPageIndex] = useState(0);
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -172,6 +174,8 @@ export default function AlbumDetailModal({
       end_date: toDateInputValue(album.end_date),
     });
     setEditPages(album.pages?.filter((p) => Boolean(p?.id)) ?? []);
+    setNewPageFiles([]);
+    setNewPageCaptions([]);
     setIsEditing(true);
   }
 
@@ -199,7 +203,33 @@ export default function AlbumDetailModal({
   }
 
   async function handleSaveEdit() {
-    if (!album) return;
+    if (!album || !token) return;
+    const appendedPages: Page[] = [];
+    for (let index = 0; index < newPageFiles.length; index += 1) {
+      const formData = new FormData();
+      formData.append("file", newPageFiles[index]);
+      formData.append("album_id", String(album.album_id));
+      formData.append("caption", newPageCaptions[index] ?? "");
+
+      const uploadRes = await fetch(`${BACKEND_URL}/upload_image`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+      if (!uploadRes.ok) {
+        console.error("Failed to upload new page:", await uploadRes.text());
+        return;
+      }
+      const uploadData = await uploadRes.json();
+      appendedPages.push({
+        id: uploadData.id,
+        caption: newPageCaptions[index] ?? "",
+      });
+    }
+
+    const pagesToSave = [...editPages, ...appendedPages];
     const res = await fetch(`${BACKEND_URL}/edit_album`, {
       method: "PUT",
       headers: {
@@ -209,7 +239,7 @@ export default function AlbumDetailModal({
       body: JSON.stringify({
         album_id: album.album_id,
         ...editForm,
-        pages: editPages,
+        pages: pagesToSave,
       }),
     });
     if (!res.ok) {
@@ -218,9 +248,11 @@ export default function AlbumDetailModal({
     }
     setAlbums((prev) =>
       prev.map((a) =>
-        a.album_id === album.album_id ? { ...a, ...editForm, pages: editPages } : a,
+        a.album_id === album.album_id ? { ...a, ...editForm, pages: pagesToSave } : a,
       ),
     );
+    setNewPageFiles([]);
+    setNewPageCaptions([]);
     setIsEditing(false);
   }
 
@@ -328,6 +360,10 @@ export default function AlbumDetailModal({
             setEditForm={setEditForm}
             pages={editPages}
             setPages={setEditPages}
+            newPageFiles={newPageFiles}
+            setNewPageFiles={setNewPageFiles}
+            newPageCaptions={newPageCaptions}
+            setNewPageCaptions={setNewPageCaptions}
             cloudName={cloudName}
             onCancel={() => setIsEditing(false)}
             onSave={handleSaveEdit}

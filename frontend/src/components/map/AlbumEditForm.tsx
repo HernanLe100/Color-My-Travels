@@ -21,6 +21,10 @@ type AlbumEditFormProps = {
   cloudName: string | undefined;
   onCancel: () => void;
   onSave: () => void;
+  newPageFiles: File[];
+  setNewPageFiles: (value: SetStateAction<File[]>) => void;
+  newPageCaptions: string[];
+  setNewPageCaptions: (value: SetStateAction<string[]>) => void;
 };
 
 export default function AlbumEditForm({
@@ -31,20 +35,29 @@ export default function AlbumEditForm({
   cloudName,
   onCancel,
   onSave,
+  newPageFiles,
+  setNewPageFiles,
+  newPageCaptions,
+  setNewPageCaptions,
 }: AlbumEditFormProps) {
-  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [activeCarouselIndex, setActiveCarouselIndex] = useState(0);
   const [confirmDeleteIndex, setConfirmDeleteIndex] = useState<number | null>(null);
 
+  const totalItems = pages.length + newPageFiles.length;
+  const viewingExisting = activeCarouselIndex < pages.length;
+  const existingIndex = activeCarouselIndex;
+  const newIndex = activeCarouselIndex - pages.length;
+
   useEffect(() => {
-    if (!pages.length) {
-      setActiveImageIndex(0);
+    if (totalItems === 0) {
+      setActiveCarouselIndex(0);
       setConfirmDeleteIndex(null);
       return;
     }
-    if (activeImageIndex > pages.length - 1) {
-      setActiveImageIndex(pages.length - 1);
+    if (activeCarouselIndex > totalItems - 1) {
+      setActiveCarouselIndex(totalItems - 1);
     }
-  }, [pages, activeImageIndex]);
+  }, [totalItems, activeCarouselIndex]);
 
   return (
     <>
@@ -111,28 +124,46 @@ export default function AlbumEditForm({
 
         {/* images */}
         <div className="flex flex-col gap-2">
-          <Label>Images</Label>
-          {pages.length > 0 ? (
+          <Label>Pages</Label>
+          {totalItems > 0 ? (
             <div className="mt-2 rounded-lg border border-slate-200 p-3 flex flex-col gap-3">
               <img
-                src={cloudinaryImageUrl(cloudName, pages[activeImageIndex].id)}
-                alt={`Album page ${activeImageIndex + 1}`}
+                src={
+                  viewingExisting
+                    ? cloudinaryImageUrl(cloudName, pages[existingIndex].id)
+                    : URL.createObjectURL(newPageFiles[newIndex])
+                }
+                alt={`Album page ${activeCarouselIndex + 1}`}
                 className="h-52 w-full rounded-md object-cover"
               />
 
               <Input
                 id="edit-image-caption"
-                value={pages[activeImageIndex].caption ?? ""}
-                onChange={(e) =>
-                  setPages((prev) =>
-                    prev.map((page, idx) =>
-                      idx === activeImageIndex
-                        ? { ...page, caption: e.target.value }
-                        : page,
-                    ),
-                  )
+                value={
+                  viewingExisting
+                    ? pages[existingIndex].caption ?? ""
+                    : newPageCaptions[newIndex] ?? ""
                 }
-                placeholder="Write a caption for this image"
+                onChange={(e) => {
+                  if (viewingExisting) {
+                    setPages((prev) =>
+                      prev.map((page, idx) =>
+                        idx === existingIndex
+                          ? { ...page, caption: e.target.value }
+                          : page,
+                      ),
+                    );
+                    return;
+                  }
+                  const nextCaptions = [...newPageCaptions];
+                  nextCaptions[newIndex] = e.target.value;
+                  setNewPageCaptions(nextCaptions);
+                }}
+                placeholder={
+                  viewingExisting
+                    ? "Write a caption for this image"
+                    : "Write a caption for this new image"
+                }
               />
 
               <div className="flex items-center justify-between gap-2">
@@ -140,26 +171,35 @@ export default function AlbumEditForm({
                   type="button"
                   variant="outline"
                   onClick={() =>
-                    setActiveImageIndex((current) => Math.max(0, current - 1))
+                    setActiveCarouselIndex((current) => Math.max(0, current - 1))
                   }
-                  disabled={activeImageIndex === 0}
+                  disabled={activeCarouselIndex === 0}
                 >
                   Prev
                 </Button>
                 <span className="text-sm text-slate-600">
-                  {activeImageIndex + 1} / {pages.length}
+                  {activeCarouselIndex + 1} / {totalItems}
                 </span>
                 <div className="flex items-center gap-2">
-                  {confirmDeleteIndex === activeImageIndex ? (
+                  {confirmDeleteIndex === activeCarouselIndex ? (
                     <>
                       <span className="text-xs text-stone-600">Are you sure?</span>
                       <Button
                         type="button"
                         variant="destructive"
                         onClick={() => {
-                          setPages((prev) =>
-                            prev.filter((_, idx) => idx !== activeImageIndex),
-                          );
+                          if (viewingExisting) {
+                            setPages((prev) =>
+                              prev.filter((_, idx) => idx !== existingIndex),
+                            );
+                          } else {
+                            setNewPageFiles((prev) =>
+                              prev.filter((_, idx) => idx !== newIndex),
+                            );
+                            setNewPageCaptions((prev) =>
+                              prev.filter((_, idx) => idx !== newIndex),
+                            );
+                          }
                           setConfirmDeleteIndex(null);
                         }}
                       >
@@ -177,7 +217,7 @@ export default function AlbumEditForm({
                     <Button
                       type="button"
                       variant="destructive"
-                      onClick={() => setConfirmDeleteIndex(activeImageIndex)}
+                      onClick={() => setConfirmDeleteIndex(activeCarouselIndex)}
                     >
                       Delete page
                     </Button>
@@ -186,11 +226,11 @@ export default function AlbumEditForm({
                     type="button"
                     variant="outline"
                     onClick={() =>
-                      setActiveImageIndex((current) =>
-                        Math.min(pages.length - 1, current + 1),
+                      setActiveCarouselIndex((current) =>
+                        Math.min(totalItems - 1, current + 1),
                       )
                     }
-                    disabled={activeImageIndex === pages.length - 1}
+                    disabled={activeCarouselIndex === totalItems - 1}
                   >
                     Next
                   </Button>
@@ -200,6 +240,26 @@ export default function AlbumEditForm({
           ) : (
             <p className="text-sm text-slate-600">No images in this album.</p>
           )}
+
+          <input
+            id="edit-add-pages"
+            type="file"
+            multiple
+            accept="image/*"
+            className="mt-2 text-sm"
+            onChange={(e) => {
+              if (!e.target.files) return;
+              const selectedFiles = Array.from(e.target.files);
+              setNewPageFiles((prev) => [...prev, ...selectedFiles]);
+              setNewPageCaptions((prev) => [
+                ...prev,
+                ...selectedFiles.map(() => ""),
+              ]);
+              if (totalItems === 0 && selectedFiles.length > 0) {
+                setActiveCarouselIndex(0);
+              }
+            }}
+          />
         </div>
       </div>
 
