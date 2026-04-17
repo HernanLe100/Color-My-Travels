@@ -1,6 +1,7 @@
 import { useAuth } from "@/App";
 import type { Album, User } from "@/types";
 import { useEffect, useState } from "react";
+import FeedAlbum from "./FeedAlbum";
 
 export default function FeedPage() {
   const token = useAuth();
@@ -17,7 +18,7 @@ export default function FeedPage() {
     });
 
     const data = await res.json();
-    setFriendsAlbums(data.albums);
+    setFriendsAlbums(Array.isArray(data.albums) ? data.albums : []);
   };
 
   const fetchFriends = async () => {
@@ -32,21 +33,20 @@ export default function FeedPage() {
   };
 
   useEffect(() => {
+    if (!token) return;
     fetchFriendsAlbums();
     fetchFriends();
-  }, []);
+  }, [token]);
 
   return (
-    <div>
+    <div className="mx-auto flex max-w-lg flex-col gap-6 px-4 py-6">
+      {friendsAlbums.length === 0 ? (
+        <p className="text-center text-sm text-neutral-500">
+          No albums from friends yet.
+        </p>
+      ) : null}
       {friendsAlbums.map((album) => (
-        <div key={album.album_id}>
-          <h3>{album.name}</h3>
-          <p>
-            By:{" "}
-            {friends.find((friend) => friend.user_id === album.user_id)?.name}
-          </p>
-          <p>{album.notes}</p>
-        </div>
+        <FeedAlbum key={album.album_id} album={album} friends={friends} />
       ))}
     </div>
   );

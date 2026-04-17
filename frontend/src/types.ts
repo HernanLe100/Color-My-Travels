@@ -38,6 +38,12 @@ export type Album = {
     end_date: string;
     location_id: number;
     name: string;
+    created_at: string;
+    /** Present on feed rows from get_friends_albums */
+    friend_name?: string;
+    location_city?: string;
+    location_adm1?: string;
+    location_country?: string;
 };
 
 export type Color = {

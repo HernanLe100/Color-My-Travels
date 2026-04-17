@@ -124,6 +124,7 @@ def get_friends_albums():
     user_id = get_jwt_identity()
 
     result = db.get_friends_albums(user_id)
+    print(result)
 
     return jsonify({"albums": result})
 

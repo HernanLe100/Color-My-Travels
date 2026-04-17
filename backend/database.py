@@ -495,9 +495,13 @@ def get_friends_albums(user_id):
         with connection.cursor(row_factory=dict_row) as cursor:
             cursor.execute(
                 """
-                SELECT a.*, u.name
+                SELECT a.*, u.name AS friend_name,
+                       l.city AS location_city,
+                       l.adm1 AS location_adm1,
+                       l.country AS location_country
                 FROM albums a
                 JOIN users u ON a.user_id = u.user_id
+                JOIN locations l ON a.location_id = l.location_id
                 WHERE a.user_id IN (
                     SELECT friend_id
                     FROM friendships
