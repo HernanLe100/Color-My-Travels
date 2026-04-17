@@ -202,8 +202,9 @@ def upload_image_route():
 
     file = request.files["file"]
     album_id = request.form.get("album_id")
+    caption = request.form.get("caption", "")
 
-    result = db.upload_image(file, user_id, album_id)
+    result = db.upload_image(file, user_id, album_id, caption)
 
     if not result:
         return jsonify({"error": "Upload failed"}), 500

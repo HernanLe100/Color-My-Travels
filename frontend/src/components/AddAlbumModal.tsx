@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -23,6 +24,8 @@ type Props = {
 
   images: File[];
   setImages: (files: File[]) => void;
+  imageCaptions: string[];
+  setImageCaptions: (captions: string[]) => void;
 
   selectedLocation: SearchLocation | null;
   handleSelect: (loc: SearchLocation) => void;
@@ -45,11 +48,25 @@ export default function AddAlbumModal({
   setEndDate,
   images,
   setImages,
+  imageCaptions,
+  setImageCaptions,
   selectedLocation,
   handleSelect,
   submitError,
   isSubmitting,
 }: Props) {
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+
+  useEffect(() => {
+    if (!images.length) {
+      setActiveImageIndex(0);
+      return;
+    }
+    if (activeImageIndex > images.length - 1) {
+      setActiveImageIndex(images.length - 1);
+    }
+  }, [images, activeImageIndex]);
+
   if (!isOpen) return null;
 
   return (
@@ -75,8 +92,9 @@ export default function AddAlbumModal({
           {selectedLocation && (
             <p className="text-sm text-slate-600">
               Selected: {selectedLocation.city}
-              {selectedLocation.state ? `, ${selectedLocation.state}` : ""},{" "}
-              {selectedLocation.country}
+              {selectedLocation.state
+                ? `, ${selectedLocation.state}`
+                : ""}, {selectedLocation.country}
             </p>
           )}
 
@@ -102,10 +120,7 @@ export default function AddAlbumModal({
 
           <div className="flex flex-col gap-2">
             <Label>Notes</Label>
-            <Input
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-            />
+            <Input value={notes} onChange={(e) => setNotes(e.target.value)} />
           </div>
 
           <div className="flex flex-col gap-2">
@@ -116,27 +131,68 @@ export default function AddAlbumModal({
               accept="image/*"
               onChange={(e) => {
                 if (e.target.files) {
-                  setImages(Array.from(e.target.files));
+                  const nextImages = Array.from(e.target.files);
+                  setImages(nextImages);
+                  setImageCaptions(
+                    nextImages.map((_, idx) => imageCaptions[idx] ?? ""),
+                  );
+                  setActiveImageIndex(0);
                 }
               }}
             />
 
             {images.length > 0 && (
-              <div className="grid grid-cols-3 gap-2 mt-2">
-                {images.map((file, idx) => (
-                  <img
-                    key={idx}
-                    src={URL.createObjectURL(file)}
-                    className="w-full h-24 object-cover rounded"
-                  />
-                ))}
+              <div className="mt-2 rounded-lg border border-slate-200 p-3 flex flex-col gap-3">
+                <img
+                  src={URL.createObjectURL(images[activeImageIndex])}
+                  alt={`Selected upload ${activeImageIndex + 1}`}
+                  className="h-52 w-full rounded-md object-cover"
+                />
+
+                <Input
+                  id="image-caption"
+                  value={imageCaptions[activeImageIndex] ?? ""}
+                  onChange={(e) => {
+                    const nextCaptions = [...imageCaptions];
+                    nextCaptions[activeImageIndex] = e.target.value;
+                    setImageCaptions(nextCaptions);
+                  }}
+                  placeholder="Write a caption for this image"
+                />
+
+                {/* Image navigation */}
+                <div className="flex items-center justify-between">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() =>
+                      setActiveImageIndex((current) => Math.max(0, current - 1))
+                    }
+                    disabled={activeImageIndex === 0}
+                  >
+                    Prev
+                  </Button>
+                  <span className="text-sm text-slate-600">
+                    {activeImageIndex + 1} / {images.length}
+                  </span>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() =>
+                      setActiveImageIndex((current) =>
+                        Math.min(images.length - 1, current + 1),
+                      )
+                    }
+                    disabled={activeImageIndex === images.length - 1}
+                  >
+                    Next
+                  </Button>
+                </div>
               </div>
             )}
           </div>
 
-          {submitError && (
-            <p className="text-sm text-red-600">{submitError}</p>
-          )}
+          {submitError && <p className="text-sm text-red-600">{submitError}</p>}
 
           <div className="mt-2 flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={onClose}>

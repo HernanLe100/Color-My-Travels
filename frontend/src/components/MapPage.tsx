@@ -7,8 +7,6 @@ import markerShadow from "leaflet/dist/images/marker-shadow.png";
 import MapContent from "./MapContent";
 import { useAuth } from "@/App";
 import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import CitySearch from "./CitySearch";
 import { Label } from "./ui/label";
 import type { SearchLocation } from "@/types";
 import { Switch } from "./ui/switch";
@@ -33,6 +31,7 @@ export default function MapPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [images, setImages] = useState<File[]>([]);
+  const [imageCaptions, setImageCaptions] = useState<string[]>([]);
 
   const [isTogglePins, setIsTogglePins] = useState(false);
 
@@ -103,30 +102,31 @@ export default function MapPage() {
 
       const albumId = albumData.album_id;
 
-      // 3. Upload images
-      await Promise.all(
-        images.map(async (file) => {
-          const formData = new FormData();
-          formData.append("file", file);
-          formData.append("album_id", albumId);
+      // 3. Upload images in order so album pages remain ordered.
+      for (let index = 0; index < images.length; index += 1) {
+        const file = images[index];
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("album_id", albumId);
+        formData.append("caption", imageCaptions[index] ?? "");
 
-          const res = await fetch(`${BACKEND_URL}/upload_image`, {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-            body: formData,
-          });
+        const res = await fetch(`${BACKEND_URL}/upload_image`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        });
 
-          if (!res.ok) {
-            console.error("Image upload failed");
-          }
-        }),
-      );
+        if (!res.ok) {
+          console.error("Image upload failed");
+        }
+      }
 
       // reset
       setIsModalOpen(false);
       setImages([]);
+      setImageCaptions([]);
       setNotes("");
       setName("");
       setStartDate("");
@@ -214,6 +214,8 @@ export default function MapPage() {
           setEndDate={setEndDate}
           images={images}
           setImages={setImages}
+          imageCaptions={imageCaptions}
+          setImageCaptions={setImageCaptions}
           selectedLocation={selectedLocation}
           handleSelect={handleSelect}
           submitError={submitError}

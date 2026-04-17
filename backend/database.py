@@ -84,7 +84,7 @@ def delete_user(user_id):
 
 # --------------------------------------------------
 
-def upload_image(file, user_id, album_id):
+def upload_image(file, user_id, album_id, caption=""):
     try:
         # 1. Upload to Cloudinary
         result = cloudinary.uploader.upload(
@@ -94,7 +94,7 @@ def upload_image(file, user_id, album_id):
 
         image_data = {
             "id": result["public_id"],
-            "caption": "",
+            "caption": caption or "",
         }
 
         # 2. Save into DB
