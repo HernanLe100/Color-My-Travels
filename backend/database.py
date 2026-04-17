@@ -213,7 +213,13 @@ def upload_image(file, user_id, album_id, caption=""):
                 cursor.execute(
                     """
                     UPDATE albums
-                    SET pages = COALESCE(pages, '[]'::jsonb) || %s::jsonb
+                    SET pages = 
+                        (
+                            CASE 
+                                WHEN jsonb_typeof(pages) = 'array' THEN pages
+                                ELSE '[]'::jsonb
+                            END
+                        ) || %s::jsonb
                     WHERE album_id = %s AND user_id = %s;
                     """,
                     [json.dumps([image_data]), album_id, user_id],

@@ -66,6 +66,7 @@ export function useMapTravelData(
           end_date: String(a.end_date ?? ""),
           location_id: Number(a.location_id),
           name: String(a.name ?? ""),
+          created_at: String(a.created_at ?? ""),
         })),
       );
 
