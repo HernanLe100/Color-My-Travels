@@ -114,6 +114,82 @@ def send_friend_request(sender_id, receiver_id):
 
     return {"success": True}
 
+def accept_friend_request(sender_id, receiver_id):
+    with psycopg.connect(_DATABASE_URL, connect_timeout=5) as connection:
+        with connection.cursor(row_factory=dict_row) as cursor:
+
+            # Update request
+            cursor.execute(
+                """
+                UPDATE friend_requests
+                SET status = 'accepted'
+                WHERE sender_id = %s AND receiver_id = %s
+                RETURNING *;
+                """,
+                [sender_id, receiver_id]
+            )
+
+            if not cursor.fetchone():
+                return {"error": "Request not found"}
+
+            # Insert BOTH directions!!!!!!!!!!
+            cursor.execute(
+                """
+                INSERT INTO friendships (user_id, friend_id)
+                VALUES (%s, %s), (%s, %s)
+                ON CONFLICT DO NOTHING;
+                """,
+                [sender_id, receiver_id, receiver_id, sender_id]
+            )
+
+        connection.commit()
+
+    return {"success": True}
+
+def reject_friend_request(sender_id, receiver_id):
+    with psycopg.connect(_DATABASE_URL, connect_timeout=5) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                UPDATE friend_requests
+                SET status = 'rejected'
+                WHERE sender_id = %s AND receiver_id = %s;
+                """,
+                [sender_id, receiver_id]
+            )
+        connection.commit()
+
+    return {"success": True}
+
+def get_incoming_requests(user_id):
+    with psycopg.connect(_DATABASE_URL, connect_timeout=5) as connection:
+        with connection.cursor(row_factory=dict_row) as cursor:
+            cursor.execute(
+                """
+                SELECT fr.sender_id, u.name
+                FROM friend_requests fr
+                JOIN users u ON fr.sender_id = u.user_id
+                WHERE fr.receiver_id = %s AND fr.status = 'pending';
+                """,
+                [user_id]
+            )
+            return cursor.fetchall()
+
+
+def get_friends(user_id):
+    with psycopg.connect(_DATABASE_URL, connect_timeout=5) as connection:
+        with connection.cursor(row_factory=dict_row) as cursor:
+            cursor.execute(
+                """
+                SELECT u.user_id, u.name
+                FROM friendships f
+                JOIN users u ON f.friend_id = u.user_id
+                WHERE f.user_id = %s;
+                """,
+                [user_id]
+            )
+            return cursor.fetchall()
+
 # --------------------------------------------------
 
 def upload_image(file, user_id, album_id, caption=""):
@@ -405,6 +481,27 @@ def get_albums(user_id):
             )
             result = cursor.fetchall()
             return result
+
+
+# so that users can see albums from friends
+def get_friends_albums(user_id):
+    with psycopg.connect(_DATABASE_URL, connect_timeout=5) as connection:
+        with connection.cursor(row_factory=dict_row) as cursor:
+            cursor.execute(
+                """
+                SELECT a.*, u.name
+                FROM albums a
+                JOIN users u ON a.user_id = u.user_id
+                WHERE a.user_id IN (
+                    SELECT friend_id
+                    FROM friendships
+                    WHERE user_id = %s
+                )
+                ORDER BY a.start_date DESC;
+                """,
+                [user_id]
+            )
+            return cursor.fetchall()
 
 # --------------------------------------------------
 
