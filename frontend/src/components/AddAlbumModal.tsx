@@ -77,7 +77,7 @@ export default function AddAlbumModal({
           Create a new album entry for a location.
         </p>
 
-        <form onSubmit={onSubmit} className="mt-4 space-y-3">
+        <form onSubmit={onSubmit} className="mt-4 space-y-3 max-h-[500px] overflow-y-auto">
           <div className="flex flex-col gap-2">
             <Label htmlFor="name">Album Name</Label>
             <Input
