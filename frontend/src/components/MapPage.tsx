@@ -33,7 +33,7 @@ export default function MapPage() {
   const [images, setImages] = useState<File[]>([]);
   const [imageCaptions, setImageCaptions] = useState<string[]>([]);
 
-  const [isTogglePins, setIsTogglePins] = useState(false);
+  const [isTogglePins, setIsTogglePins] = useState(true);
 
   const token = useAuth();
 
