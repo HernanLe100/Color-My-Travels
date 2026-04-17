@@ -309,26 +309,17 @@ def add_album(info : dict):
         connection.commit()
     return album_id
 
-
-def update_album(info: dict):
+def update_album(original:dict, modified:dict):
     with psycopg.connect(_DATABASE_URL, connect_timeout=5) as connection:
         with connection.cursor(row_factory=dict_row) as cursor:
-            # Get existing pages (for if the frontend does not send pages)
-            cursor.execute(
-                """
-                SELECT pages
-                FROM albums
-                WHERE album_id = %s AND user_id = %s;
-                """,
-                [info.get("album_id"), info.get("user_id")],
-            )
-            existing_album = cursor.fetchone()
-            existing_pages = existing_album["pages"] if existing_album else []
-
-            # Use incoming pages if provided, otherwise use existing pages
-            incoming_pages = info.get("pages")
-            if incoming_pages is None:
-                incoming_pages = existing_pages
+            
+            deleted_pages = []
+            for page in original.get("pages"):
+                if page not in modified.get("pages"):
+                    deleted_pages.append(page)
+            for page in deleted_pages:
+                if "id" in page:
+                    cloudinary.uploader.destroy(page["id"], invalidate=True)
 
             # Update directly
             cursor.execute(
@@ -342,13 +333,14 @@ def update_album(info: dict):
                 WHERE album_id = %s AND user_id = %s;
                 """,
                 [
-                    info.get("name"),
-                    info.get("notes"),
-                    info.get("start_date"),
-                    info.get("end_date"),
-                    json.dumps(incoming_pages),
-                    info.get("album_id"),
-                    info.get("user_id"),
+                    modified.get("name"),
+                    
+                    modified.get("notes"),
+                    modified.get("start_date"),
+                    modified.get("end_date"),
+                    json.dumps(modified.get("pages")),
+                    modified.get("album_id"),
+                    modified.get("user_id"),
                 ],
             )
         connection.commit()
@@ -481,6 +473,20 @@ def get_albums(user_id):
             )
             result = cursor.fetchall()
             return result
+
+# do we need album id AND user id?
+def get_album(user_id, album_id):
+    with psycopg.connect(_DATABASE_URL, connect_timeout=5) as connection:
+        with connection.cursor(row_factory=dict_row) as cursor:
+            cursor.execute(
+                """
+                SELECT user_id, album_id, name, location_id, notes, pages, start_date, end_date
+                FROM albums
+                WHERE album_id = %s AND user_id = %s;
+                """,
+                [album_id, user_id]
+            )
+            return cursor.fetchone()
 
 
 # so that users can see albums from friends

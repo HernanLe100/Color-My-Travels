@@ -174,21 +174,21 @@ def edit_album():
     data = request.get_json()
 
     album_id = data.get("album_id")
-    notes = data.get("notes", "")
-    start_date = data.get("start_date") or None
-    end_date = data.get("end_date") or None
-    name = data.get("name", "")
-    pages = data.get("pages", [])
-
-    db.update_album({
-        "album_id": album_id,
+    
+    modified = {
         "user_id": user_id,
-        "notes": notes,
-        "start_date": start_date,
-        "end_date": end_date,
-        "name": name,
-        "pages": pages,
-    })
+        "album_id": album_id, 
+        "name": data.get("name", ""),
+        
+        "notes": data.get("notes", ""),
+        "pages": data.get("pages", []),
+        "start_date": data.get("start_date") or None,
+        "end_date": data.get("end_date") or None
+    }
+    
+    original = db.get_album(user_id, album_id)
+
+    db.update_album(original, modified)
 
     return jsonify({"success": True})
 
