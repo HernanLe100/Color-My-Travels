@@ -3,6 +3,7 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Button } from "./ui/button";
 import { useAuth } from "@/App";
+import toast from "react-hot-toast";
 
 export default function FriendsPage() {
   const token = useAuth();
@@ -12,7 +13,10 @@ export default function FriendsPage() {
   const [requests, setRequests] = useState([]);
   const [friends, setFriends] = useState([]);
 
+  const [isSendingRequest, setIsSendingRequest] = useState(false);
+
   const sendRequest = async () => {
+    setIsSendingRequest(true);
     const res = await fetch(`${BACKEND_URL}/send_friend_request`, {
       method: "POST",
       headers: {
@@ -25,7 +29,9 @@ export default function FriendsPage() {
     });
 
     const data = await res.json();
+    setIsSendingRequest(false);
     console.log(data);
+    toast.success("Friend request sent");
   };
 
   const fetchRequests = async () => {
@@ -56,6 +62,9 @@ export default function FriendsPage() {
     });
 
     fetchRequests(); // refresh
+    fetchFriends(); // refresh
+
+    toast.success("Friend request accepted");
   };
 
   const rejectRequest = async (sender_id: string) => {
@@ -69,6 +78,9 @@ export default function FriendsPage() {
     });
 
     fetchRequests();
+    fetchFriends(); // refresh
+
+    toast.success("Friend request rejected");
   };
 
   const fetchFriends = async () => {
@@ -94,7 +106,7 @@ export default function FriendsPage() {
         />
 
         <Button className="cursor-pointer" onClick={sendRequest}>
-          Send Request
+          {isSendingRequest ? "Sending..." : "Send Request"}
         </Button>
       </div>
 
