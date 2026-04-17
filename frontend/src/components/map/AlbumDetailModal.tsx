@@ -236,12 +236,6 @@ export default function AlbumDetailModal({
             </div>
 
             {slot.page.caption ? (
-              <p className="text-sm italic text-stone-600">
-                {slot.page.caption}
-              </p>
-            ) : null}
-
-            {slot.page.caption ? (
               <div className="mt-6 w-full max-w-sm text-left">
                 <p className="mt-2 whitespace-pre-wrap border-l-2 border-stone-400 pl-3 text-sm leading-relaxed text-stone-800">
                   {slot.page.caption}

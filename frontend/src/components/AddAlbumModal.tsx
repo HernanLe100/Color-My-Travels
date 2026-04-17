@@ -4,6 +4,7 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import CitySearch from "./CitySearch";
 import type { SearchLocation } from "@/types";
+import { Textarea } from "./ui/textarea";
 
 type Props = {
   isOpen: boolean;
@@ -71,19 +72,23 @@ export default function AddAlbumModal({
 
   return (
     <div className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/30 px-4">
-      <div className="w-full max-w-md rounded-xl bg-white p-5 shadow-2xl">
-        <h2 className="text-lg font-semibold text-slate-900">New Album</h2>
-        <p className="mt-1 text-sm text-slate-600">
+      <div className="w-full max-w-lg rounded-xl bg-white p-5 shadow-2xl">
+        <h2 className="text-lg font-semibold text-slate-900 px-2">New Album</h2>
+        <p className="mt-1 text-sm text-slate-600 px-2">
           Create a new album entry for a location.
         </p>
 
-        <form onSubmit={onSubmit} className="mt-4 space-y-3 max-h-[500px] overflow-y-auto">
+        <form
+          onSubmit={onSubmit}
+          className="mt-4 space-y-3 max-h-[500px] overflow-y-auto px-2"
+        >
           <div className="flex flex-col gap-2">
             <Label htmlFor="name">Album Name</Label>
             <Input
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              placeholder="Enter a name for this album"
               required
             />
           </div>
@@ -120,7 +125,11 @@ export default function AddAlbumModal({
 
           <div className="flex flex-col gap-2">
             <Label>Notes</Label>
-            <Input value={notes} onChange={(e) => setNotes(e.target.value)} />
+            <Textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Write a description for this album"
+            />
           </div>
 
           <div className="flex flex-col gap-2">

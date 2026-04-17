@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import type { SearchLocation } from "@/types";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -15,9 +17,7 @@ export default function CitySearch({
     if (query.length < 3) return;
 
     const timeout = setTimeout(async () => {
-      const res = await fetch(
-        `${BACKEND_URL}/search?q=${query}`
-      );
+      const res = await fetch(`${BACKEND_URL}/search?q=${query}`);
       const data = await res.json();
       setResults(data);
     }, 300);
@@ -26,13 +26,15 @@ export default function CitySearch({
   }, [query]);
 
   return (
-    <div className="w-80">
-      <input
-        className="w-full border p-2 rounded"
-        placeholder="Search city..."
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-      />
+    <div>
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="city-search">City</Label>
+        <Input
+          placeholder="Search for a city..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+      </div>
 
       {results.length > 0 && (
         <div className="bg-white border mt-1 rounded shadow max-h-60 overflow-y-auto">
