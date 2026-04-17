@@ -29,9 +29,17 @@ export default function FriendsPage() {
     });
 
     const data = await res.json();
+
+    if (data.error) {
+      toast.error(data.error);
+      setIsSendingRequest(false);
+      setFriendId("");
+      return;
+    }
+
     setIsSendingRequest(false);
-    console.log(data);
     toast.success("Friend request sent");
+    setFriendId("");
   };
 
   const fetchRequests = async () => {
