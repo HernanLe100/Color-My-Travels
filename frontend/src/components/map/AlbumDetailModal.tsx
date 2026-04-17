@@ -7,6 +7,7 @@ import {
   type SetStateAction,
 } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useMap } from "react-leaflet";
 import type { Album, Page, Pin } from "@/types";
 import { Button } from "../ui/button";
 import AlbumEditForm from "./AlbumEditForm";
@@ -49,6 +50,7 @@ export default function AlbumDetailModal({
   onClose,
   setAlbums,
 }: AlbumDetailModalProps) {
+  const map = useMap();
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({
     name: "",
@@ -126,6 +128,41 @@ export default function AlbumDetailModal({
     }
   }, [pageIndex, slots.length]);
 
+  // Prevent map pan/zoom while modal is open.
+  useEffect(() => {
+    const wasDraggingEnabled = map.dragging.enabled();
+    const wasScrollWheelEnabled = map.scrollWheelZoom.enabled();
+    const wasDoubleClickEnabled = map.doubleClickZoom.enabled();
+    const wasTouchZoomEnabled = map.touchZoom.enabled();
+    const wasBoxZoomEnabled = map.boxZoom.enabled();
+    const wasKeyboardEnabled = map.keyboard.enabled();
+    const wasTapEnabled =
+      "tap" in map &&
+      Boolean((map as { tap?: { enabled: () => boolean } }).tap?.enabled());
+
+    map.dragging.disable();
+    map.scrollWheelZoom.disable();
+    map.doubleClickZoom.disable();
+    map.touchZoom.disable();
+    map.boxZoom.disable();
+    map.keyboard.disable();
+    if ("tap" in map) {
+      (map as { tap?: { disable: () => void } }).tap?.disable();
+    }
+
+    return () => {
+      if (wasDraggingEnabled) map.dragging.enable();
+      if (wasScrollWheelEnabled) map.scrollWheelZoom.enable();
+      if (wasDoubleClickEnabled) map.doubleClickZoom.enable();
+      if (wasTouchZoomEnabled) map.touchZoom.enable();
+      if (wasBoxZoomEnabled) map.boxZoom.enable();
+      if (wasKeyboardEnabled) map.keyboard.enable();
+      if (wasTapEnabled) {
+        (map as { tap?: { enable: () => void } }).tap?.enable();
+      }
+    };
+  }, [map]);
+
   function openEdit() {
     if (!album) return;
     setEditForm({
@@ -191,13 +228,6 @@ export default function AlbumDetailModal({
   const totalPages = slots.length;
   const canPrev = pageIndex > 0;
   const canNext = pageIndex < totalPages - 1;
-  const stopEvent = (e: React.SyntheticEvent) => {
-    e.stopPropagation();
-  };
-  const stopAndPreventEvent = (e: React.SyntheticEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
 
   function renderPageBody() {
     if (!slot) return null;
@@ -268,26 +298,9 @@ export default function AlbumDetailModal({
       aria-modal="true"
       aria-labelledby="album-dialog-title"
       className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/30 p-4 outline-none"
-      onClick={handleClose}
-      // to make sure the map doesn't move
-      onMouseDown={stopEvent}
-      onMouseUp={stopEvent}
-      onMouseMove={stopEvent}
-      onDoubleClick={stopEvent}
-      onTouchStart={stopEvent}
-      onTouchMove={stopAndPreventEvent}
-      onWheel={stopAndPreventEvent}
     >
       <div
         className="w-full max-w-2xl rounded-lg border-2 border-stone-300 bg-stone-100 p-5 shadow-lg"
-        onClick={(e) => e.stopPropagation()}
-        onMouseDown={stopEvent}
-        onMouseUp={stopEvent}
-        onMouseMove={stopEvent}
-        onDoubleClick={stopEvent}
-        onTouchStart={stopEvent}
-        onTouchMove={stopAndPreventEvent}
-        onWheel={stopAndPreventEvent}
       >
         <header className="relative border-b border-stone-300 pb-3 text-center">
           <button

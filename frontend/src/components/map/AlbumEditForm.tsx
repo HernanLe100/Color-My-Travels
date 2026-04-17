@@ -46,7 +46,7 @@ export default function AlbumEditForm({
 
   return (
     <>
-      <div className="mt-4 space-y-3 px-2">
+      <div className="mt-4 space-y-3 px-2 max-h-[500px] overflow-y-auto">
         {/* name */}
         <div className="flex flex-col gap-2">
           <Label htmlFor="edit-album-name">Album Name</Label>
