@@ -10,6 +10,14 @@ export default function FeedPage() {
   const [friendsAlbums, setFriendsAlbums] = useState<Album[]>([]);
   const [friends, setFriends] = useState<User[]>([]);
 
+  const sortedAlbums = [...friendsAlbums].sort((a, b) => {
+    if (!a.created_at && !b.created_at) return 0;
+    if (!a.created_at) return 1; // nulls last
+    if (!b.created_at) return -1;
+
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
+
   const fetchFriendsAlbums = async () => {
     const res = await fetch(`${BACKEND_URL}/get_friends_albums`, {
       headers: {
@@ -45,7 +53,7 @@ export default function FeedPage() {
           No albums from friends yet.
         </p>
       ) : null}
-      {friendsAlbums.map((album) => (
+      {sortedAlbums.map((album) => (
         <FeedAlbum key={album.album_id} album={album} friends={friends} />
       ))}
     </div>
