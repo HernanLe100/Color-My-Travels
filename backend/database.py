@@ -55,20 +55,6 @@ def delete_user(user_id):
     with psycopg.connect(_DATABASE_URL, connect_timeout=5) as connection:
         with connection.cursor(row_factory=dict_row) as cursor:
             cursor.execute(
-                """
-                SELECT pages
-                FROM albums
-                WHERE user_id = %s;  
-                """,
-                [user_id]
-            )
-            pages = cursor.fetchone()["pages"]
-            for p in pages:
-                if "id" in p:
-                    cloudinary.uploader.destroy(p["id"], invalidate=True)
-            cloudinary.api.delete_folder(f"user/{user_id}")
-                    
-            cursor.execute(
                 "DELETE FROM colors WHERE user_id = %s;",
                 [user_id]
             )
@@ -80,6 +66,8 @@ def delete_user(user_id):
                 "DELETE FROM users WHERE user_id = %s;",
                 [user_id]
             )
+            cloudinary.api.delete_resources_by_prefix(f"user/{user_id}/")
+            cloudinary.api.delete_folder(f"user/{user_id}")
         connection.commit()
 
 # --------------------------------------------------
