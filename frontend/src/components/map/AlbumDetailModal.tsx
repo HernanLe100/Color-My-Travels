@@ -204,7 +204,10 @@ export default function AlbumDetailModal({
 
   async function handleSaveEdit() {
     if (!album || !token) return;
+
     const appendedPages: Page[] = [];
+
+    // 1. Upload images FIRST
     for (let index = 0; index < newPageFiles.length; index += 1) {
       const formData = new FormData();
       formData.append("file", newPageFiles[index]);
@@ -218,10 +221,12 @@ export default function AlbumDetailModal({
         },
         body: formData,
       });
+
       if (!uploadRes.ok) {
-        console.error("Failed to upload new page:", await uploadRes.text());
+        console.error("Failed to upload:", await uploadRes.text());
         return;
       }
+
       const uploadData = await uploadRes.json();
       appendedPages.push({
         id: uploadData.id,
@@ -229,7 +234,10 @@ export default function AlbumDetailModal({
       });
     }
 
-    const pagesToSave = [...editPages, ...appendedPages];
+    // 2. Merge ALL pages
+    const finalPages = [...editPages, ...appendedPages];
+
+    // 3. THEN update album (single source of truth)
     const res = await fetch(`${BACKEND_URL}/edit_album`, {
       method: "PUT",
       headers: {
@@ -239,18 +247,24 @@ export default function AlbumDetailModal({
       body: JSON.stringify({
         album_id: album.album_id,
         ...editForm,
-        pages: pagesToSave,
+        pages: finalPages,
       }),
     });
+
     if (!res.ok) {
       console.error("Failed to save album:", await res.text());
       return;
     }
+
+    // 4. Update UI
     setAlbums((prev) =>
       prev.map((a) =>
-        a.album_id === album.album_id ? { ...a, ...editForm, pages: pagesToSave } : a,
+        a.album_id === album.album_id
+          ? { ...a, ...editForm, pages: finalPages }
+          : a,
       ),
     );
+
     setNewPageFiles([]);
     setNewPageCaptions([]);
     setIsEditing(false);
@@ -331,9 +345,7 @@ export default function AlbumDetailModal({
       aria-labelledby="album-dialog-title"
       className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/30 p-4 outline-none"
     >
-      <div
-        className="w-full max-w-2xl rounded-lg border-2 border-stone-300 bg-stone-100 p-5 shadow-lg"
-      >
+      <div className="w-full max-w-2xl rounded-lg border-2 border-stone-300 bg-stone-100 p-5 shadow-lg">
         <header className="relative border-b border-stone-300 pb-3 text-center">
           <button
             type="button"

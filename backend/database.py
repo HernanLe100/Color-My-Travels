@@ -216,16 +216,37 @@ def update_album(info: dict):
             existing_album = cursor.fetchone()
             existing_pages = existing_album["pages"] if existing_album else []
 
-            incoming_pages = info.get("pages", [])
-            incoming_page_ids = {
-                page.get("id")
-                for page in incoming_pages
-                if isinstance(page, dict) and page.get("id")
-            }
-            for page in existing_pages or []:
-                page_id = page.get("id") if isinstance(page, dict) else None
-                if page_id and page_id not in incoming_page_ids:
-                    cloudinary.uploader.destroy(page_id, invalidate=True)
+            # If pages were not provided (metadata-only edit), preserve existing pages.
+            incoming_pages = info.get("pages")
+            if incoming_pages is None:
+                incoming_pages = existing_pages
+            else:
+                # Build lookup for existing pages
+                existing_by_id = {
+                    page["id"]: page
+                    for page in existing_pages or []
+                    if isinstance(page, dict) and page.get("id")
+                }
+
+                merged_pages = []
+
+                # Add all incoming pages (new + updated)
+                for page in incoming_pages:
+                    if isinstance(page, dict):
+                        merged_pages.append(page)
+
+                # Preserve any existing pages NOT included in incoming
+                incoming_ids = {
+                    page.get("id")
+                    for page in incoming_pages
+                    if isinstance(page, dict) and page.get("id")
+                }
+
+                for page_id, page in existing_by_id.items():
+                    if page_id not in incoming_ids:
+                        merged_pages.append(page)
+
+                incoming_pages = merged_pages
 
             cursor.execute(
                 """
@@ -238,7 +259,7 @@ def update_album(info: dict):
                     info.get("notes"),
                     info.get("start_date"),
                     info.get("end_date"),
-                    incoming_pages,
+                    json.dumps(incoming_pages),
                     info.get("album_id"),
                     info.get("user_id"),
                 ]
