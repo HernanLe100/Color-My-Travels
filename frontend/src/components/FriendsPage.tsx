@@ -4,14 +4,15 @@ import { Label } from "./ui/label";
 import { Button } from "./ui/button";
 import { useAuth } from "@/App";
 import toast from "react-hot-toast";
+import type { FriendRequest, User } from "@/types";
 
 export default function FriendsPage() {
   const token = useAuth();
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
   const [friendId, setFriendId] = useState("");
-  const [requests, setRequests] = useState([]);
-  const [friends, setFriends] = useState([]);
+  const [requests, setRequests] = useState<FriendRequest[]>([]);
+  const [friends, setFriends] = useState<User[]>([]);
 
   const [isSendingRequest, setIsSendingRequest] = useState(false);
 
@@ -29,9 +30,17 @@ export default function FriendsPage() {
     });
 
     const data = await res.json();
+
+    if (data.error) {
+      toast.error(data.error);
+      setIsSendingRequest(false);
+      setFriendId("");
+      return;
+    }
+
     setIsSendingRequest(false);
-    console.log(data);
     toast.success("Friend request sent");
+    setFriendId("");
   };
 
   const fetchRequests = async () => {
