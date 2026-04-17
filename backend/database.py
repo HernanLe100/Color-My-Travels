@@ -207,6 +207,28 @@ def update_album(info: dict):
         with connection.cursor(row_factory=dict_row) as cursor:
             cursor.execute(
                 """
+                SELECT pages
+                FROM albums
+                WHERE album_id = %s AND user_id = %s;
+                """,
+                [info.get("album_id"), info.get("user_id")],
+            )
+            existing_album = cursor.fetchone()
+            existing_pages = existing_album["pages"] if existing_album else []
+
+            incoming_pages = info.get("pages", [])
+            incoming_page_ids = {
+                page.get("id")
+                for page in incoming_pages
+                if isinstance(page, dict) and page.get("id")
+            }
+            for page in existing_pages or []:
+                page_id = page.get("id") if isinstance(page, dict) else None
+                if page_id and page_id not in incoming_page_ids:
+                    cloudinary.uploader.destroy(page_id, invalidate=True)
+
+            cursor.execute(
+                """
                 UPDATE albums
                 SET name = %s, notes = %s, start_date = %s, end_date = %s, pages = %s
                 WHERE album_id = %s AND user_id = %s;
@@ -216,7 +238,7 @@ def update_album(info: dict):
                     info.get("notes"),
                     info.get("start_date"),
                     info.get("end_date"),
-                    info.get("pages", []),
+                    incoming_pages,
                     info.get("album_id"),
                     info.get("user_id"),
                 ]

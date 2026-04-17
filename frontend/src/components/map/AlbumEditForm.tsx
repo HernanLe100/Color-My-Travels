@@ -33,10 +33,12 @@ export default function AlbumEditForm({
   onSave,
 }: AlbumEditFormProps) {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [confirmDeleteIndex, setConfirmDeleteIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (!pages.length) {
       setActiveImageIndex(0);
+      setConfirmDeleteIndex(null);
       return;
     }
     if (activeImageIndex > pages.length - 1) {
@@ -133,7 +135,7 @@ export default function AlbumEditForm({
                 placeholder="Write a caption for this image"
               />
 
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-2">
                 <Button
                   type="button"
                   variant="outline"
@@ -147,18 +149,52 @@ export default function AlbumEditForm({
                 <span className="text-sm text-slate-600">
                   {activeImageIndex + 1} / {pages.length}
                 </span>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() =>
-                    setActiveImageIndex((current) =>
-                      Math.min(pages.length - 1, current + 1),
-                    )
-                  }
-                  disabled={activeImageIndex === pages.length - 1}
-                >
-                  Next
-                </Button>
+                <div className="flex items-center gap-2">
+                  {confirmDeleteIndex === activeImageIndex ? (
+                    <>
+                      <span className="text-xs text-stone-600">Are you sure?</span>
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        onClick={() => {
+                          setPages((prev) =>
+                            prev.filter((_, idx) => idx !== activeImageIndex),
+                          );
+                          setConfirmDeleteIndex(null);
+                        }}
+                      >
+                        Confirm
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setConfirmDeleteIndex(null)}
+                      >
+                        Cancel
+                      </Button>
+                    </>
+                  ) : (
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      onClick={() => setConfirmDeleteIndex(activeImageIndex)}
+                    >
+                      Delete page
+                    </Button>
+                  )}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() =>
+                      setActiveImageIndex((current) =>
+                        Math.min(pages.length - 1, current + 1),
+                      )
+                    }
+                    disabled={activeImageIndex === pages.length - 1}
+                  >
+                    Next
+                  </Button>
+                </div>
               </div>
             </div>
           ) : (
