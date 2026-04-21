@@ -1,15 +1,13 @@
 import type { Album, User } from "@/types";
 import { useState, useEffect } from "react";
-// @ts-ignore
-import CitySearch from "./CitySearch";
 import { Button } from "./ui/button";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 export default function UserPage() {
   const [user, setUser] = useState<User>();
-  // @ts-ignore
   const [albums, setAlbums] = useState<Album[]>([]);
+  const [friendCount, setFriendCount] = useState<number>(0);
 
   const token = localStorage.getItem("token");
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
@@ -42,14 +40,14 @@ export default function UserPage() {
       });
   }, [token]);
 
-  // @ts-ignore
-  const [selectedLocation, setSelectedLocation] = useState<any>(null);
-
-  // @ts-ignore
-  const handleSelect = (location: any) => {
-    console.log(location);
-    setSelectedLocation(location);
-  };
+  useEffect(() => {
+    if (!token) return;
+    fetch(`${BACKEND_URL}/get_friends`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => res.json())
+      .then((data) => setFriendCount(data.friends?.length ?? 0));
+  }, [token]);
 
   function logout() {
     localStorage.removeItem("token");
@@ -77,6 +75,10 @@ export default function UserPage() {
     <div className="flex flex-col gap-4 p-4">
       <h1 className="text-lg font-bold">{user?.name}'s User Page</h1>
 
+      Albums: {albums.length}
+      <br></br>
+      Friends: {friendCount}
+
       <Button onClick={logout} className="w-fit cursor-pointer" size="lg">
         Logout
       </Button>
@@ -100,7 +102,7 @@ export default function UserPage() {
         </div>
       )}
 
-      <p className="text-neutral-400 text-xs">User Id: {user?.user_id}</p>
+      <p className="text-neutral-400 text-xs">User ID: {user?.user_id}</p>
     </div>
   );
 }

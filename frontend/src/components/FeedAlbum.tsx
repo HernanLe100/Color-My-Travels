@@ -162,11 +162,7 @@ export default function FeedAlbum({
             </p>
           ) : null}
         </div>
-      ) : (
-        <div className="flex aspect-video items-center justify-center bg-neutral-100 text-sm text-neutral-500">
-          No photos yet
-        </div>
-      )}
+      ) : null}
     </article>
   );
 }

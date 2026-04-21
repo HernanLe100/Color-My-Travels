@@ -57,3 +57,8 @@ export type FriendRequest = {
     sender_id: string;
     name: string;
 };
+
+export type SentRequest = {
+    receiver_id: string;
+    name: string;
+};

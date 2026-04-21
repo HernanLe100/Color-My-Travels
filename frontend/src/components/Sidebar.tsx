@@ -8,7 +8,7 @@ import {
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
 
-import { Map, User, Paintbrush, Users } from "lucide-react";
+import { Map, User, Paintbrush, Users, Newspaper } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 export default function AppSidebar() {
@@ -49,7 +49,7 @@ export default function AppSidebar() {
               isActive={location.pathname === "/feed"}
             >
               <Link to="/feed">
-                <Users className="w-4 h-4 mr-2" />
+                <Newspaper className="w-4 h-4 mr-2" />
                 Feed
               </Link>
             </SidebarMenuButton>

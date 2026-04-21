@@ -118,6 +118,32 @@ def get_friends():
     return jsonify({"friends": result})
 
 
+@info_bp.route("/get_sent_requests", methods=["GET"])
+@jwt_required()
+def get_sent_requests():
+    user_id = get_jwt_identity()
+    result = db.get_sent_requests(user_id)
+    return jsonify({"requests": result})
+
+
+@info_bp.route("/cancel_friend_request", methods=["DELETE"])
+@jwt_required()
+def cancel_friend_request():
+    user_id = get_jwt_identity()
+    receiver_id = request.args.get("receiver_id")
+    result = db.cancel_friend_request(user_id, receiver_id)
+    return jsonify(result)
+
+
+@info_bp.route("/delete_friend", methods=["DELETE"])
+@jwt_required()
+def delete_friend():
+    user_id = get_jwt_identity()
+    friend_id = request.args.get("friend_id")
+    result = db.delete_friend(user_id, friend_id)
+    return jsonify(result)
+
+
 @info_bp.route("/get_friends_albums", methods=["GET"])
 @jwt_required()
 def get_friends_albums():
