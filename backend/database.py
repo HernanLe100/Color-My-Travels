@@ -176,6 +176,58 @@ def get_incoming_requests(user_id):
             return cursor.fetchall()
 
 
+def get_sent_requests(user_id):
+    with psycopg.connect(_DATABASE_URL, connect_timeout=5) as connection:
+        with connection.cursor(row_factory=dict_row) as cursor:
+            cursor.execute(
+                """
+                SELECT fr.receiver_id, u.name
+                FROM friend_requests fr
+                JOIN users u ON fr.receiver_id = u.user_id
+                WHERE fr.sender_id = %s AND fr.status = 'pending';
+                """,
+                [user_id]
+            )
+            return cursor.fetchall()
+
+
+def cancel_friend_request(sender_id, receiver_id):
+    with psycopg.connect(_DATABASE_URL, connect_timeout=5) as connection:
+        with connection.cursor(row_factory=dict_row) as cursor:
+            cursor.execute(
+                """
+                DELETE FROM friend_requests
+                WHERE sender_id = %s AND receiver_id = %s AND status = 'pending';
+                """,
+                [sender_id, receiver_id]
+            )
+        connection.commit()
+    return {"success": True}
+
+
+def delete_friend(user_id, friend_id):
+    with psycopg.connect(_DATABASE_URL, connect_timeout=5) as connection:
+        with connection.cursor(row_factory=dict_row) as cursor:
+            cursor.execute(
+                """
+                DELETE FROM friendships
+                WHERE (user_id = %s AND friend_id = %s)
+                   OR (user_id = %s AND friend_id = %s);
+                """,
+                [user_id, friend_id, friend_id, user_id]
+            )
+            cursor.execute(
+                """
+                DELETE FROM friend_requests
+                WHERE (sender_id = %s AND receiver_id = %s)
+                   OR (sender_id = %s AND receiver_id = %s);
+                """,
+                [user_id, friend_id, friend_id, user_id]
+            )
+        connection.commit()
+    return {"success": True}
+
+
 def get_friends(user_id):
     with psycopg.connect(_DATABASE_URL, connect_timeout=5) as connection:
         with connection.cursor(row_factory=dict_row) as cursor:

@@ -3,7 +3,7 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { useAuth } from "@/App";
 import toast from "react-hot-toast";
-import type { FriendRequest, User } from "@/types";
+import type { FriendRequest, SentRequest, User } from "@/types";
 
 export default function FriendsPage() {
   const token = useAuth();
@@ -11,9 +11,40 @@ export default function FriendsPage() {
 
   const [friendId, setFriendId] = useState("");
   const [requests, setRequests] = useState<FriendRequest[]>([]);
+  const [sentRequests, setSentRequests] = useState<SentRequest[]>([]);
   const [friends, setFriends] = useState<User[]>([]);
-
   const [isSendingRequest, setIsSendingRequest] = useState(false);
+  const [confirmingFriendId, setConfirmingFriendId] = useState<string | null>(null);
+
+  const fetchRequests = async () => {
+    const res = await fetch(`${BACKEND_URL}/get_friend_requests`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+    setRequests(data.requests);
+  };
+
+  const fetchSentRequests = async () => {
+    const res = await fetch(`${BACKEND_URL}/get_sent_requests`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+    setSentRequests(data.requests);
+  };
+
+  const fetchFriends = async () => {
+    const res = await fetch(`${BACKEND_URL}/get_friends`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+    setFriends(data.friends);
+  };
+
+  useEffect(() => {
+    fetchRequests();
+    fetchSentRequests();
+    fetchFriends();
+  }, []);
 
   const sendRequest = async () => {
     setIsSendingRequest(true);
@@ -23,41 +54,29 @@ export default function FriendsPage() {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({
-        receiver_id: friendId,
-      }),
+      body: JSON.stringify({ receiver_id: friendId }),
     });
-
     const data = await res.json();
-
     if (data.error) {
       toast.error(data.error);
       setIsSendingRequest(false);
       setFriendId("");
       return;
     }
-
+    await fetchSentRequests();
     setIsSendingRequest(false);
     toast.success("Friend request sent");
     setFriendId("");
   };
 
-  const fetchRequests = async () => {
-    const res = await fetch(`${BACKEND_URL}/get_friend_requests`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+  const cancelRequest = async (receiver_id: string) => {
+    await fetch(`${BACKEND_URL}/cancel_friend_request?receiver_id=${receiver_id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
     });
-
-    const data = await res.json();
-    setRequests(data.requests);
+    fetchSentRequests();
+    toast.success("Friend request cancelled");
   };
-
-  useEffect(() => {
-    fetchRequests();
-    fetchFriends();
-  }, []);
 
   const acceptRequest = async (sender_id: string) => {
     await fetch(`${BACKEND_URL}/accept_friend_request`, {
@@ -68,10 +87,8 @@ export default function FriendsPage() {
       },
       body: JSON.stringify({ sender_id }),
     });
-
-    fetchRequests(); // refresh
-    fetchFriends(); // refresh
-
+    fetchRequests();
+    fetchFriends();
     toast.success("Friend request accepted");
   };
 
@@ -84,22 +101,17 @@ export default function FriendsPage() {
       },
       body: JSON.stringify({ sender_id }),
     });
-
     fetchRequests();
-    fetchFriends(); // refresh
-
     toast.success("Friend request rejected");
   };
 
-  const fetchFriends = async () => {
-    const res = await fetch(`${BACKEND_URL}/get_friends`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+  const deleteFriend = async (friend_id: string) => {
+    await fetch(`${BACKEND_URL}/delete_friend?friend_id=${friend_id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
     });
-
-    const data = await res.json();
-    setFriends(data.friends);
+    fetchFriends();
+    toast.success("Friend removed");
   };
 
   return (
@@ -108,43 +120,80 @@ export default function FriendsPage() {
         <p className="text-lg font-bold">Add Friend</p>
         <Input
           type="text"
-          placeholder="Enter friend user id"
+          placeholder="Enter Friend User ID"
           value={friendId}
           onChange={(e) => setFriendId(e.target.value)}
         />
-
         <Button className="cursor-pointer" onClick={sendRequest}>
           {isSendingRequest ? "Sending..." : "Send Request"}
         </Button>
       </div>
 
+      {sentRequests.length > 0 && (
+        <div className="flex flex-col gap-2">
+          <p className="text-lg font-bold">Sent Requests</p>
+          {sentRequests.map((req) => (
+            <div key={req.receiver_id} className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">{req.name}</p>
+                <p className="text-xs text-stone-400">User ID: {req.receiver_id}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-stone-500 bg-stone-100 px-2 py-0.5 rounded-full">Pending</span>
+                <Button size="sm" variant="outline" onClick={() => cancelRequest(req.receiver_id)}>
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       <div className="flex flex-col gap-2">
         <p className="text-lg font-bold">Friend Requests</p>
-        {requests?.map((request, index) => {
-          return (
-            <div key={index}>
-              <p>{request.name}</p>
-              <Button onClick={() => acceptRequest(request.sender_id)}>
+        {requests?.map((request) => (
+          <div key={request.sender_id} className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium">{request.name}</p>
+              <p className="text-xs text-stone-400">User ID: {request.sender_id}</p>
+            </div>
+            <div className="flex gap-2">
+              <Button size="sm" onClick={() => acceptRequest(request.sender_id)}>
                 Accept
               </Button>
-              <Button onClick={() => rejectRequest(request.sender_id)}>
+              <Button size="sm" variant="outline" onClick={() => rejectRequest(request.sender_id)}>
                 Reject
               </Button>
             </div>
-          );
-        })}
+          </div>
+        ))}
       </div>
 
       <div className="flex flex-col gap-2">
         <p className="text-lg font-bold">Friends</p>
-        {friends?.map((friend, index) => {
-          return (
-            <div key={index}>
-              <p>{friend?.name}</p>
-              <p>{friend?.user_id}</p>
+        {friends?.map((friend) => (
+          <div key={friend.user_id} className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium">{friend.name}</p>
+              <p className="text-xs text-stone-400">User ID: {friend.user_id}</p>
             </div>
-          );
-        })}
+            {confirmingFriendId === friend.user_id ? (
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-stone-500">Remove friend?</span>
+                <Button size="sm" variant="destructive" onClick={() => { deleteFriend(friend.user_id); setConfirmingFriendId(null); }}>
+                  Confirm
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => setConfirmingFriendId(null)}>
+                  Cancel
+                </Button>
+              </div>
+            ) : (
+              <Button size="sm" variant="destructive" onClick={() => setConfirmingFriendId(friend.user_id)}>
+                Remove
+              </Button>
+            )}
+          </div>
+        ))}
       </div>
     </div>
   );
