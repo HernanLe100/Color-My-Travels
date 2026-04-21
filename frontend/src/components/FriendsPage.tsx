@@ -14,7 +14,9 @@ export default function FriendsPage() {
   const [sentRequests, setSentRequests] = useState<SentRequest[]>([]);
   const [friends, setFriends] = useState<User[]>([]);
   const [isSendingRequest, setIsSendingRequest] = useState(false);
-  const [confirmingFriendId, setConfirmingFriendId] = useState<string | null>(null);
+  const [confirmingFriendId, setConfirmingFriendId] = useState<string | null>(
+    null,
+  );
 
   const fetchRequests = async () => {
     const res = await fetch(`${BACKEND_URL}/get_friend_requests`, {
@@ -70,10 +72,13 @@ export default function FriendsPage() {
   };
 
   const cancelRequest = async (receiver_id: string) => {
-    await fetch(`${BACKEND_URL}/cancel_friend_request?receiver_id=${receiver_id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    await fetch(
+      `${BACKEND_URL}/cancel_friend_request?receiver_id=${receiver_id}`,
+      {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
     fetchSentRequests();
     toast.success("Friend request cancelled");
   };
@@ -115,8 +120,8 @@ export default function FriendsPage() {
   };
 
   return (
-    <div className="p-4 flex flex-col gap-5">
-      <div className="flex flex-col gap-2">
+    <div className="px-14 py-6 flex flex-col gap-5">
+      <div className="flex flex-col gap-2 max-w-md">
         <p className="text-lg font-bold">Add Friend</p>
         <Input
           type="text"
@@ -133,14 +138,25 @@ export default function FriendsPage() {
         <div className="flex flex-col gap-2">
           <p className="text-lg font-bold">Sent Requests</p>
           {sentRequests.map((req) => (
-            <div key={req.receiver_id} className="flex items-center justify-between">
+            <div
+              key={req.receiver_id}
+              className="flex items-center justify-between"
+            >
               <div>
                 <p className="text-sm font-medium">{req.name}</p>
-                <p className="text-xs text-stone-400">User ID: {req.receiver_id}</p>
+                <p className="text-xs text-stone-400">
+                  User ID: {req.receiver_id}
+                </p>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-stone-500 bg-stone-100 px-2 py-0.5 rounded-full">Pending</span>
-                <Button size="sm" variant="outline" onClick={() => cancelRequest(req.receiver_id)}>
+                <span className="text-xs text-stone-500 bg-stone-100 px-2 py-0.5 rounded-full">
+                  Pending
+                </span>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => cancelRequest(req.receiver_id)}
+                >
                   Cancel
                 </Button>
               </div>
@@ -149,19 +165,32 @@ export default function FriendsPage() {
         </div>
       )}
 
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 max-w-md">
         <p className="text-lg font-bold">Friend Requests</p>
         {requests?.map((request) => (
-          <div key={request.sender_id} className="flex items-center justify-between">
+          <div
+            key={request.sender_id}
+            className="flex items-center justify-between border border-neutral-200 rounded-lg px-4 py-2"
+          >
             <div>
               <p className="text-sm font-medium">{request.name}</p>
-              <p className="text-xs text-stone-400">User ID: {request.sender_id}</p>
+              <p className="text-xs text-stone-400">
+                User ID: {request.sender_id}
+              </p>
             </div>
             <div className="flex gap-2">
-              <Button size="sm" onClick={() => acceptRequest(request.sender_id)}>
+              <Button
+                size="sm"
+                className="bg-green-600 cursor-pointer hover:bg-green-700"
+                onClick={() => acceptRequest(request.sender_id)}
+              >
                 Accept
               </Button>
-              <Button size="sm" variant="outline" onClick={() => rejectRequest(request.sender_id)}>
+              <Button
+                size="sm"
+                className="bg-red-600 cursor-pointer hover:bg-red-700"
+                onClick={() => rejectRequest(request.sender_id)}
+              >
                 Reject
               </Button>
             </div>
@@ -169,26 +198,46 @@ export default function FriendsPage() {
         ))}
       </div>
 
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 max-w-md">
         <p className="text-lg font-bold">Friends</p>
         {friends?.map((friend) => (
-          <div key={friend.user_id} className="flex items-center justify-between">
+          <div
+            key={friend.user_id}
+            className="flex items-center justify-between border border-neutral-200 rounded-lg px-4 py-2"
+          >
             <div>
               <p className="text-sm font-medium">{friend.name}</p>
-              <p className="text-xs text-stone-400">User ID: {friend.user_id}</p>
+              <p className="text-xs text-stone-400">
+                User ID: {friend.user_id}
+              </p>
             </div>
             {confirmingFriendId === friend.user_id ? (
               <div className="flex items-center gap-2">
                 <span className="text-xs text-stone-500">Remove friend?</span>
-                <Button size="sm" variant="destructive" onClick={() => { deleteFriend(friend.user_id); setConfirmingFriendId(null); }}>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={() => {
+                    deleteFriend(friend.user_id);
+                    setConfirmingFriendId(null);
+                  }}
+                >
                   Confirm
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => setConfirmingFriendId(null)}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setConfirmingFriendId(null)}
+                >
                   Cancel
                 </Button>
               </div>
             ) : (
-              <Button size="sm" variant="destructive" onClick={() => setConfirmingFriendId(friend.user_id)}>
+              <Button
+                size="sm"
+                className="bg-red-600 cursor-pointer hover:bg-red-700"
+                onClick={() => setConfirmingFriendId(friend.user_id)}
+              >
                 Remove
               </Button>
             )}
