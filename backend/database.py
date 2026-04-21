@@ -294,7 +294,7 @@ def add_album(info : dict):
             cursor.execute(
                 """
                 INSERT INTO albums (user_id, location_id, notes, start_date, end_date, name, pages)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s, %s::jsonb)
                 RETURNING album_id;
                 """,
                 [
@@ -304,7 +304,7 @@ def add_album(info : dict):
                     info.get("start_date"),
                     info.get("end_date"),
                     info.get("name"),
-                    info.get("pages", []),
+                    info.get("pages", "[]"),
                 ]
             )
 

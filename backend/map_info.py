@@ -91,7 +91,7 @@ def search():
             or addr.get("state_district")
         )
 
-        adm1_code = addr.get("ISO3166-2-lvl4")
+        adm1_code = addr.get("ISO3166-2-lvl4") or addr.get("ISO3166-2-lvl5")
 
         if not city:
             city = state
