@@ -135,7 +135,7 @@ export default function FriendsPage() {
       </div>
 
       {sentRequests.length > 0 && (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 max-w-md">
           <p className="text-lg font-bold">Sent Requests</p>
           {sentRequests.map((req) => (
             <div
@@ -155,6 +155,7 @@ export default function FriendsPage() {
                 <Button
                   size="sm"
                   variant="outline"
+                  className="cursor-pointer"
                   onClick={() => cancelRequest(req.receiver_id)}
                 >
                   Cancel
