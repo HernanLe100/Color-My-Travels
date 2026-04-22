@@ -196,6 +196,7 @@ export default function MapPage() {
       map.mouseEventToContainerPoint(e as unknown as MouseEvent)
     );
     console.log("Dropped at:", point.lat, point.lng);
+    setIsModalOpen(true)
     hasStartedDrag.current = false;
   };
   // --------------------------------------------------
