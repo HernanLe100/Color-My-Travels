@@ -145,17 +145,47 @@ export default function MapPage() {
   // drag and drop pins:
   const [dragging, setDragging] = useState(false);
   const [dragPos, setDragPos] = useState({ x: 0, y: 0 });
+  const hasStartedDrag = useRef(false);
+  const dragStart = useRef<{ x: number; y: number } | null>(null);
+  
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
   const handlePointerMove = (e: PointerEvent) => {
+    const btn = buttonRef.current;
+    if (!btn) return;
+
+    const rect = btn.getBoundingClientRect();
+    const isOutside =
+    e.clientX < rect.left ||
+    e.clientX > rect.right ||
+    e.clientY < rect.top ||
+    e.clientY > rect.bottom;
+
+    // start drag once outside button bounds
+    if (!hasStartedDrag.current && isOutside) {
+      hasStartedDrag.current = true;
+      setDragging(true);
+  
+      mapRef.current?.dragging.disable();
+    }
+    if (!hasStartedDrag.current) return;
+
     setDragPos({
       x: e.clientX,
       y: e.clientY,
     });
   };
+
   const mapRef = useRef<L.Map | null>(null);
   const handlePointerUp = (e: PointerEvent) => {
-    setDragging(false);
     window.removeEventListener("pointermove", handlePointerMove);
     window.removeEventListener("pointerup", handlePointerUp);
+
+    mapRef.current?.dragging.enable();
+    dragStart.current = null;
+
+    if (!hasStartedDrag.current) return;
+    
+    setDragging(false);
 
     if (!mapRef.current) return;
   
@@ -166,6 +196,7 @@ export default function MapPage() {
       map.mouseEventToContainerPoint(e as unknown as MouseEvent)
     );
     console.log("Dropped at:", point.lat, point.lng);
+    hasStartedDrag.current = false;
   };
   // --------------------------------------------------
 
@@ -219,10 +250,11 @@ export default function MapPage() {
         onClick={() => setIsModalOpen(true)}
 
         // detect drags
+        ref={buttonRef}
         onPointerDown={(e) => {
           e.preventDefault();
-          setDragging(true);
-          setDragPos({ x: e.clientX, y: e.clientY });
+          dragStart.current = { x: e.clientX, y: e.clientY };
+          hasStartedDrag.current = false;
           window.addEventListener("pointermove", handlePointerMove);
           window.addEventListener("pointerup", handlePointerUp);
         }}
