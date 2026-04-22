@@ -114,7 +114,7 @@ def search():
 
     results = []
 
-    print(data)
+    #print(data)
 
     for p in data:
         addr = p.get("address", {})
