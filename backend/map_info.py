@@ -100,9 +100,6 @@ def coord_location():
         })
 
     return results
-    
-    
-    
 
 @map_bp.route("/search")
 def search():
