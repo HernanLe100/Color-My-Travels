@@ -1,7 +1,7 @@
 import { MapContainer, TileLayer } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
 import MapContent from "./MapContent";
@@ -141,6 +141,66 @@ export default function MapPage() {
     }
   };
 
+  // --------------------------------------------------
+  // drag and drop pins:
+  const [dragging, setDragging] = useState(false);
+  const [dragPos, setDragPos] = useState({ x: 0, y: 0 });
+  const hasStartedDrag = useRef(false);
+  const dragStart = useRef<{ x: number; y: number } | null>(null);
+  
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
+  const handlePointerMove = (e: PointerEvent) => {
+    const btn = buttonRef.current;
+    if (!btn) return;
+
+    const rect = btn.getBoundingClientRect();
+    const isOutside =
+    e.clientX < rect.left ||
+    e.clientX > rect.right ||
+    e.clientY < rect.top ||
+    e.clientY > rect.bottom;
+
+    // start drag once outside button bounds
+    if (!hasStartedDrag.current && isOutside) {
+      hasStartedDrag.current = true;
+      setDragging(true);
+  
+      mapRef.current?.dragging.disable();
+    }
+    if (!hasStartedDrag.current) return;
+
+    setDragPos({
+      x: e.clientX,
+      y: e.clientY,
+    });
+  };
+
+  const mapRef = useRef<L.Map | null>(null);
+  const handlePointerUp = (e: PointerEvent) => {
+    window.removeEventListener("pointermove", handlePointerMove);
+    window.removeEventListener("pointerup", handlePointerUp);
+
+    mapRef.current?.dragging.enable();
+    dragStart.current = null;
+
+    if (!hasStartedDrag.current) return;
+    
+    setDragging(false);
+
+    if (!mapRef.current) return;
+  
+    const map = mapRef.current;
+  
+    // Convert screen coords -> map coords
+    const point = map.containerPointToLatLng(
+      map.mouseEventToContainerPoint(e as unknown as MouseEvent)
+    );
+    console.log("Dropped at:", point.lat, point.lng);
+    hasStartedDrag.current = false;
+  };
+  // --------------------------------------------------
+
+
   return (
     <div className="h-screen w-full">
       <div className="pointer-events-auto absolute top-6 right-6 z-[1000]">
@@ -168,6 +228,7 @@ export default function MapPage() {
         minZoom={2}
         scrollWheelZoom={true}
         className="h-full w-full"
+        ref={mapRef}
       >
         <TileLayer
           attribution="&copy; OpenStreetMap & Carto"
@@ -187,6 +248,17 @@ export default function MapPage() {
 
       <Button
         onClick={() => setIsModalOpen(true)}
+
+        // detect drags
+        ref={buttonRef}
+        onPointerDown={(e) => {
+          e.preventDefault();
+          dragStart.current = { x: e.clientX, y: e.clientY };
+          hasStartedDrag.current = false;
+          window.addEventListener("pointermove", handlePointerMove);
+          window.addEventListener("pointerup", handlePointerUp);
+        }}
+
         className="absolute bottom-6 right-6 z-[1000] cursor-pointer
              w-14 h-14 rounded-full 
              text-white text-2xl
@@ -195,6 +267,24 @@ export default function MapPage() {
       >
         +
       </Button>
+
+      {dragging &&
+        (<div
+          style={{
+            position: "fixed",
+            left: dragPos.x,
+            top: dragPos.y,
+            transform: "translate(-50%, -100%)", 
+            pointerEvents: "none",
+            zIndex: 2000,
+          }}
+        >
+          <img
+            src={markerIcon}
+            style={{width: 28, height: 41}}
+          />
+        </div>)
+      }
 
       {isModalOpen && (
         <AddAlbumModal
