@@ -58,6 +58,48 @@ def iso2_to_iso3(code):
     except:
         return None
     
+@map_bp.route("/coord_location", methods=["GET"])
+def coord_location():
+    lat = request.args.get("lat", None)
+    lng = request.args.get("lng", None)
+    
+    url = f"https://nominatim.openstreetmap.org/reverse?format=json&zoom=10&lat={lat}&lon={lng}"
+    res = requests.get(url, headers={"User-Agent": "color-my-travels"})
+    data = res.json()
+    
+    results = []
+    
+    addr = data.get("address", {})
+    city = (
+            addr.get("city")
+            or addr.get("town")
+            or addr.get("village")
+            or addr.get("municipality")
+            or addr.get("county")
+            or addr.get("province")
+        )
+    state = (
+            addr.get("state")
+            or addr.get("region")
+            or addr.get("state_district")
+        )
+    adm1_code = addr.get("ISO3166-2-lvl4") or addr.get("ISO3166-2-lvl5")
+
+    if not city:
+        city = state
+
+    country_iso3 = iso2_to_iso3(addr.get("country_code", "").upper())
+
+    results.append({
+            "city": city,
+            "state": state,
+            "adm1": adm1_code,
+            "country": country_iso3,
+            "lat": float(lat),
+            "lng": float(lng)
+        })
+
+    return results
 
 @map_bp.route("/search")
 def search():
@@ -69,7 +111,7 @@ def search():
 
     results = []
 
-    print(data)
+    #print(data)
 
     for p in data:
         addr = p.get("address", {})
