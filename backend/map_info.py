@@ -59,30 +59,68 @@ def iso2_to_iso3(code):
         return None
     
 @map_bp.route("/coord_location", methods=["GET"])
+@map_bp.route("/coord_location", methods=["GET"])
 def coord_location():
-    lat = request.args.get("lat", None)
-    lng = request.args.get("lng", None)
-    
-    url = f"https://nominatim.openstreetmap.org/reverse?format=json&zoom=10&lat={lat}&lon={lng}"
-    res = requests.get(url, headers={"User-Agent": "color-my-travels"})
-    data = res.json()
-    
-    results = []
-    
+    lat = request.args.get("lat")
+    lng = request.args.get("lng")
+
+    if lat is None or lng is None:
+        return jsonify({"error": "Missing lat/lng"}), 400
+
+    try:
+        lat = float(lat)
+        lng = float(lng)
+    except ValueError:
+        return jsonify({"error": "Invalid lat/lng"}), 400
+
+    url = "https://nominatim.openstreetmap.org/reverse"
+
+    res = requests.get(
+        url,
+        params={
+            "format": "json",
+            "zoom": 10,
+            "lat": lat,
+            "lon": lng,
+        },
+        headers={"User-Agent": "color-my-travels"},
+        timeout=5,
+    )
+
+    print("STATUS:", res.status_code)
+    print("BODY:", res.text[:300])
+
+    if res.status_code != 200:
+        return jsonify({
+            "error": "Reverse geocoding failed",
+            "status": res.status_code
+        }), 500
+
+    try:
+        data = res.json()
+    except Exception as e:
+        print("JSON ERROR:", e)
+        return jsonify({
+            "error": "Invalid response from geocoder"
+        }), 500
+
     addr = data.get("address", {})
+
     city = (
-            addr.get("city")
-            or addr.get("town")
-            or addr.get("village")
-            or addr.get("municipality")
-            or addr.get("county")
-            or addr.get("province")
-        )
+        addr.get("city")
+        or addr.get("town")
+        or addr.get("village")
+        or addr.get("municipality")
+        or addr.get("county")
+        or addr.get("province")
+    )
+
     state = (
-            addr.get("state")
-            or addr.get("region")
-            or addr.get("state_district")
-        )
+        addr.get("state")
+        or addr.get("region")
+        or addr.get("state_district")
+    )
+
     adm1_code = addr.get("ISO3166-2-lvl4") or addr.get("ISO3166-2-lvl5")
 
     if not city:
@@ -90,24 +128,54 @@ def coord_location():
 
     country_iso3 = iso2_to_iso3(addr.get("country_code", "").upper())
 
-    results.append({
-            "city": city,
-            "state": state,
-            "adm1": adm1_code,
-            "country": country_iso3,
-            "lat": float(lat),
-            "lng": float(lng)
-        })
-
-    return results
+    return jsonify([{
+        "city": city,
+        "state": state,
+        "adm1": adm1_code,
+        "country": country_iso3,
+        "lat": lat,
+        "lng": lng
+    }])
 
 @map_bp.route("/search")
 def search():
     q = request.args.get("q")
 
-    url = f"https://nominatim.openstreetmap.org/search?q={q}&format=json&addressdetails=1&limit=5"
-    res = requests.get(url, headers={"User-Agent": "color-my-travels"})
-    data = res.json()
+    if not q:
+        return jsonify({"error": "Missing query"}), 400
+
+    url = "https://nominatim.openstreetmap.org/search"
+
+    res = requests.get(
+        url,
+        params={
+            "q": q,
+            "format": "json",
+            "addressdetails": 1,
+            "limit": 5,
+        },
+        headers={"User-Agent": "color-my-travels"},
+    )
+
+    print("STATUS:", res.status_code)
+    print("HEADERS:", res.headers.get("content-type"))
+    print("BODY:", res.text[:500])  # only first 500 chars
+
+    if res.status_code != 200:
+        return jsonify({
+            "error": "Upstream failed",
+            "status": res.status_code,
+            "body": res.text[:200]
+        }), 500
+
+    try:
+        data = res.json()
+    except Exception as e:
+        print("JSON PARSE ERROR:", e)
+        return jsonify({
+            "error": "Invalid JSON from upstream",
+            "body": res.text[:200]
+        }), 500
 
     results = []
 
