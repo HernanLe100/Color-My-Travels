@@ -2,6 +2,9 @@ from flask import jsonify, request, Blueprint
 
 import requests
 import pycountry
+import os
+
+_MAPBOX_TOKEN = os.getenv("MAPBOX_TOKEN")
 
 # --------------------------------------------------
 
@@ -73,60 +76,47 @@ def coord_location():
     except ValueError:
         return jsonify({"error": "Invalid lat/lng"}), 400
 
-    url = "https://nominatim.openstreetmap.org/reverse"
+    url = f"https://api.mapbox.com/geocoding/v5/mapbox.places/{lng},{lat}.json"
 
     res = requests.get(
         url,
         params={
-            "format": "json",
-            "zoom": 10,
-            "lat": lat,
-            "lon": lng,
+            "access_token": _MAPBOX_TOKEN,
+            "types": "place,locality"
         },
-        headers={"User-Agent": "color-my-travels"},
-        timeout=5,
+        timeout=5
     )
-
-    print("STATUS:", res.status_code)
-    print("BODY:", res.text[:300])
 
     if res.status_code != 200:
         return jsonify({
-            "error": "Reverse geocoding failed",
-            "status": res.status_code
+            "error": "Mapbox reverse failed",
+            "status": res.status_code,
+            "body": res.text[:200]
         }), 500
 
-    try:
-        data = res.json()
-    except Exception as e:
-        print("JSON ERROR:", e)
-        return jsonify({
-            "error": "Invalid response from geocoder"
-        }), 500
+    data = res.json()
 
-    addr = data.get("address", {})
+    features = data.get("features", [])
 
-    city = (
-        addr.get("city")
-        or addr.get("town")
-        or addr.get("village")
-        or addr.get("municipality")
-        or addr.get("county")
-        or addr.get("province")
-    )
+    if not features:
+        return jsonify([])
 
-    state = (
-        addr.get("state")
-        or addr.get("region")
-        or addr.get("state_district")
-    )
+    feature = features[0]
+    context = feature.get("context", [])
 
-    adm1_code = addr.get("ISO3166-2-lvl4") or addr.get("ISO3166-2-lvl5")
+    city = feature.get("text")
 
-    if not city:
-        city = state
+    state = None
+    country_iso3 = None
+    adm1_code = None
 
-    country_iso3 = iso2_to_iso3(addr.get("country_code", "").upper())
+    for c in context:
+        if "region" in c["id"]:
+            state = c.get("text")
+            adm1_code = c.get("short_code")
+        if "country" in c["id"]:
+            iso2 = c.get("short_code", "").upper()
+            country_iso3 = iso2_to_iso3(iso2)
 
     return jsonify([{
         "city": city,
@@ -144,77 +134,55 @@ def search():
     if not q:
         return jsonify({"error": "Missing query"}), 400
 
-    url = "https://nominatim.openstreetmap.org/search"
+    url = f"https://api.mapbox.com/geocoding/v5/mapbox.places/{q}.json"
 
     res = requests.get(
         url,
         params={
-            "q": q,
-            "format": "json",
-            "addressdetails": 1,
+            "access_token": _MAPBOX_TOKEN,
             "limit": 5,
+            "types": "place,locality"
         },
-        headers={"User-Agent": "color-my-travels"},
+        timeout=5
     )
-
-    print("STATUS:", res.status_code)
-    print("HEADERS:", res.headers.get("content-type"))
-    print("BODY:", res.text[:500])  # only first 500 chars
 
     if res.status_code != 200:
         return jsonify({
-            "error": "Upstream failed",
+            "error": "Mapbox failed",
             "status": res.status_code,
             "body": res.text[:200]
         }), 500
 
-    try:
-        data = res.json()
-    except Exception as e:
-        print("JSON PARSE ERROR:", e)
-        return jsonify({
-            "error": "Invalid JSON from upstream",
-            "body": res.text[:200]
-        }), 500
+    data = res.json()
 
     results = []
 
-    #print(data)
+    for feature in data.get("features", []):
+        context = feature.get("context", [])
 
-    for p in data:
-        addr = p.get("address", {})
+        city = feature.get("text")
 
-        print(addr)
+        state = None
+        country_iso3 = None
+        adm1_code = None
 
-        city = (
-            addr.get("city")
-            or addr.get("town")
-            or addr.get("village")
-            or addr.get("municipality")
-            or addr.get("county")
-            or addr.get("province")
-        )
+        for c in context:
+            if "region" in c["id"]:
+                state = c.get("text")
+                adm1_code = c.get("short_code")  # like "US-PA"
+            if "country" in c["id"]:
+                iso2 = c.get("short_code", "").upper()
+                country_iso3 = iso2_to_iso3(iso2)
 
-        state = (
-            addr.get("state")
-            or addr.get("region")
-            or addr.get("state_district")
-        )
-
-        adm1_code = addr.get("ISO3166-2-lvl4") or addr.get("ISO3166-2-lvl5")
-
-        if not city:
-            city = state
-
-        country_iso3 = iso2_to_iso3(addr.get("country_code", "").upper())
+        lng, lat = feature["center"]
 
         results.append({
             "city": city,
             "state": state,
             "adm1": adm1_code,
             "country": country_iso3,
-            "lat": float(p["lat"]),
-            "lng": float(p["lon"])
+            "lat": lat,
+            "lng": lng
         })
 
-    return results
+    return jsonify(results)
