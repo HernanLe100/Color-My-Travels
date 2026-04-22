@@ -46,6 +46,8 @@ def delete_user():
 
     return jsonify({"success": True})
 
+# --------------------------------------------------
+
 @info_bp.route("/send_friend_request", methods=["POST"])
 @jwt_required()
 def send_friend_request_route():
@@ -62,8 +64,6 @@ def send_friend_request_route():
         return jsonify(result), 400
 
     return jsonify(result)
-
-
 
 @info_bp.route("/accept_friend_request", methods=["POST"])
 @jwt_required()

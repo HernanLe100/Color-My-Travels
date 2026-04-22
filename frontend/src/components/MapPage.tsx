@@ -176,7 +176,7 @@ export default function MapPage() {
   };
 
   const mapRef = useRef<L.Map | null>(null);
-  const handlePointerUp = (e: PointerEvent) => {
+  const handlePointerUp = async (e: PointerEvent) => {
     window.removeEventListener("pointermove", handlePointerMove);
     window.removeEventListener("pointerup", handlePointerUp);
 
@@ -195,8 +195,20 @@ export default function MapPage() {
     const point = map.containerPointToLatLng(
       map.mouseEventToContainerPoint(e as unknown as MouseEvent)
     );
-    console.log("Dropped at:", point.lat, point.lng);
     setIsModalOpen(true)
+
+    const res = await fetch(`${BACKEND_URL}/coord_location?lat=${point.lat}&lng=${point.lng}`);
+    const data = await res.json();
+
+    handleSelect({
+      adm1: data[0].adm1,
+      city: data[0].city,
+      country: data[0].country,
+      lat: data[0].lat,
+      lng: data[0].lng,
+      state: data[0].state
+    });
+
     hasStartedDrag.current = false;
   };
   // --------------------------------------------------
