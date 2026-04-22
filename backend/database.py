@@ -16,7 +16,6 @@ cloudinary.config(
     api_secret=os.getenv("CLOUDINARY_API_SECRET"),
 )
 
-
 # --------------------------------------------------
 
 # handles escape sequences in input string <s> to prep for SQL queries,
