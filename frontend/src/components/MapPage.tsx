@@ -1,7 +1,7 @@
 import { MapContainer, TileLayer } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
 import MapContent from "./MapContent";
@@ -141,6 +141,35 @@ export default function MapPage() {
     }
   };
 
+  // --------------------------------------------------
+  // drag and drop pins:
+  const [dragging, setDragging] = useState(false);
+  const [dragPos, setDragPos] = useState({ x: 0, y: 0 });
+  const handlePointerMove = (e: PointerEvent) => {
+    setDragPos({
+      x: e.clientX,
+      y: e.clientY,
+    });
+  };
+  const mapRef = useRef<L.Map | null>(null);
+  const handlePointerUp = (e: PointerEvent) => {
+    setDragging(false);
+    window.removeEventListener("pointermove", handlePointerMove);
+    window.removeEventListener("pointerup", handlePointerUp);
+
+    if (!mapRef.current) return;
+  
+    const map = mapRef.current;
+  
+    // Convert screen coords -> map coords
+    const point = map.containerPointToLatLng(
+      map.mouseEventToContainerPoint(e as unknown as MouseEvent)
+    );
+    console.log("Dropped at:", point.lat, point.lng);
+  };
+  // --------------------------------------------------
+
+
   return (
     <div className="h-screen w-full">
       <div className="pointer-events-auto absolute top-6 right-6 z-[1000]">
@@ -168,6 +197,7 @@ export default function MapPage() {
         minZoom={2}
         scrollWheelZoom={true}
         className="h-full w-full"
+        ref={mapRef}
       >
         <TileLayer
           attribution="&copy; OpenStreetMap & Carto"
@@ -187,6 +217,16 @@ export default function MapPage() {
 
       <Button
         onClick={() => setIsModalOpen(true)}
+
+        // detect drags
+        onPointerDown={(e) => {
+          e.preventDefault();
+          setDragging(true);
+          setDragPos({ x: e.clientX, y: e.clientY });
+          window.addEventListener("pointermove", handlePointerMove);
+          window.addEventListener("pointerup", handlePointerUp);
+        }}
+
         className="absolute bottom-6 right-6 z-[1000] cursor-pointer
              w-14 h-14 rounded-full 
              text-white text-2xl
@@ -195,6 +235,24 @@ export default function MapPage() {
       >
         +
       </Button>
+
+      {dragging &&
+        (<div
+          style={{
+            position: "fixed",
+            left: dragPos.x,
+            top: dragPos.y,
+            transform: "translate(-50%, -100%)", 
+            pointerEvents: "none",
+            zIndex: 2000,
+          }}
+        >
+          <img
+            src={markerIcon}
+            style={{width: 28, height: 41}}
+          />
+        </div>)
+      }
 
       {isModalOpen && (
         <AddAlbumModal
