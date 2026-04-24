@@ -201,12 +201,12 @@ export default function MapPage() {
     const data = await res.json();
 
     handleSelect({
-      adm1: data[0].adm1,
-      city: data[0].city,
-      country: data[0].country,
-      lat: data[0].lat,
-      lng: data[0].lng,
-      state: data[0].state
+      adm1: data.adm1,
+      city: data.city,
+      country: data.country,
+      lat: data.lat,
+      lng: data.lng,
+      state: data.state
     });
 
     hasStartedDrag.current = false;
