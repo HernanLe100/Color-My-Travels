@@ -110,55 +110,7 @@ def coord_location():
     state = feature.get("state") or feature.get("state_district") or feature.get("county") 
     country_iso3 = iso2_to_iso3( feature.get("country_code") )
     adm1_code = feature.get("iso3166_2")
-        
-    print(city)
-    print(state)
-    print(country_iso3)
-    print(adm1_code)
-    print(lat)
-    print(lng)
-    print()
 
-    """
-    url = f"https://api.mapbox.com/search/geocode/v6/reverse?longitude={lng}&latitude={lat}"
-    print(url)
-
-    res = requests.get(
-        url,
-        params={
-            "access_token": _MAPBOX_TOKEN,
-            "types": "place,locality"
-        },
-        timeout=5
-    )
-
-    if res.status_code != 200:
-        return jsonify({
-            "error": "Mapbox reverse failed",
-            "status": res.status_code,
-            "body": res.text[:200]
-        }), 500
-
-    data = res.json()
-    print(data)
-
-    features = data.get("features", [])
-    print(features)
-
-    if not features:
-        return jsonify({})
-    
-    feature = features[0]
-    
-    context = feature.get("properties", {}).get("context", {})
-        
-    city = context.get("place", {}).get("name", "")
-    state = context.get("region").get("name")
-    country_iso3 = context.get("country").get("country_code_alpha_3")
-    adm1_code = context.get("region").get("region_code_full")
-    
-
-    """
     return jsonify({
         "city": city,
         "state": state,
@@ -176,7 +128,6 @@ def search():
         return jsonify({"error": "Missing query"}), 400
     
     
-    #url = f"https://api.geoapify.com/v1/geocode/search?text={q}"
     url = f"https://api.geoapify.com/v1/geocode/autocomplete?text={q}"
     
     res = requests.get(
@@ -231,48 +182,3 @@ def search():
     
     return jsonify(results)
     
-    """
-    url=f"https://api.mapbox.com/search/geocode/v6/forward?q={q}"
-
-    res = requests.get(
-        url,
-        params={
-            "access_token": _MAPBOX_TOKEN,
-            "limit": 5,
-            "types": "place,locality"
-        },
-        timeout=5
-    )
-
-    if res.status_code != 200:
-        return jsonify({
-            "error": "Mapbox failed",
-            "status": res.status_code,
-            "body": res.text[:200]
-        }), 500
-
-    data = res.json()
-
-    results = []
-
-    for feature in data.get("features", []):
-        context = feature.get("properties", {}).get("context", {})
-        
-        city = context.get("place").get("name")
-        state = context.get("region").get("name")
-        country_iso3 = context.get("country").get("country_code_alpha_3")
-        adm1_code = context.get("region").get("region_code_full")
-        lat = feature.get("properties").get("coordinates").get("latitude")
-        lng = feature.get("properties").get("coordinates").get("longitude")
-
-        results.append({
-            "city": city,
-            "state": state,
-            "adm1": adm1_code,
-            "country": country_iso3,
-            "lat": lat,
-            "lng": lng
-        })
-    
-    return jsonify(results)
-    """
