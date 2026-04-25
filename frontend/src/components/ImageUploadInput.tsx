@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useMemo } from "react";
 
 type Props = {
   onFilesAdded: (files: File[]) => void;
@@ -13,9 +13,15 @@ export default function ImageUploadInput({
   multiple = true,
   className = "",
   label = "Click to upload or drag & drop",
-  sublabel = "PNG, JPG, GIF",
+  sublabel,
 }: Props) {
   const inputRef = useRef<HTMLInputElement | null>(null);
+
+  const multiSelectHint = useMemo(() => {
+    if (!multiple) return "";
+    const isMac = navigator.platform.toUpperCase().includes("MAC");
+    return `Hold ${isMac ? "⌘" : "Ctrl"} to select multiple`;
+  }, [multiple]);
 
   const handleFiles = (files: FileList | null) => {
     if (!files) return;
@@ -38,7 +44,16 @@ export default function ImageUploadInput({
       }}
     >
       <span className="text-sm text-gray-600">{label}</span>
-      <span className="text-xs text-gray-400 mt-1">{sublabel}</span>
+
+      <span className="text-xs text-gray-400 mt-1 text-center">
+        {sublabel ?? "PNG, JPG, GIF"}
+      </span>
+
+      {multiple && (
+        <span className="text-[11px] text-gray-400">
+          {multiSelectHint}
+        </span>
+      )}
 
       <input
         ref={inputRef}
