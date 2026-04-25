@@ -51,23 +51,27 @@ def get_user(user_id):
             return user
         
 def delete_user(user_id):
-    with psycopg.connect(_DATABASE_URL, connect_timeout=5) as connection:
-        with connection.cursor(row_factory=dict_row) as cursor:
-            cursor.execute(
-                "DELETE FROM colors WHERE user_id = %s;",
-                [user_id]
-            )
-            cursor.execute(
-                "DELETE FROM albums WHERE user_id = %s;",
-                [user_id]
-            )
-            cursor.execute(
-                "DELETE FROM users WHERE user_id = %s;",
-                [user_id]
-            )
+    try:
+        with psycopg.connect(_DATABASE_URL, connect_timeout=5) as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "DELETE FROM users WHERE user_id = %s;",
+                    [user_id]
+                )
+            connection.commit()
+
+        # Run Cloudinary AFTER commit
+        try:
             cloudinary.api.delete_resources_by_prefix(f"user/{user_id}/")
             cloudinary.api.delete_folder(f"user/{user_id}")
-        connection.commit()
+        except Exception as e:
+            print("Cloudinary error:", e)
+
+        return {"message": "User deleted"}, 200
+
+    except Exception as e:
+        print("DELETE USER ERROR:", e)
+        return {"error": str(e)}, 500
 
 def send_friend_request(sender_id, receiver_id):
     if sender_id == receiver_id:

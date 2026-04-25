@@ -11,6 +11,7 @@ import { Label } from "./ui/label";
 import type { SearchLocation } from "@/types";
 import { Switch } from "./ui/switch";
 import AddAlbumModal from "./AddAlbumModal";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -147,7 +148,7 @@ export default function MapPage() {
   const [dragPos, setDragPos] = useState({ x: 0, y: 0 });
   const hasStartedDrag = useRef(false);
   const dragStart = useRef<{ x: number; y: number } | null>(null);
-  
+
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const handlePointerMove = (e: PointerEvent) => {
     const btn = buttonRef.current;
@@ -155,16 +156,16 @@ export default function MapPage() {
 
     const rect = btn.getBoundingClientRect();
     const isOutside =
-    e.clientX < rect.left ||
-    e.clientX > rect.right ||
-    e.clientY < rect.top ||
-    e.clientY > rect.bottom;
+      e.clientX < rect.left ||
+      e.clientX > rect.right ||
+      e.clientY < rect.top ||
+      e.clientY > rect.bottom;
 
     // start drag once outside button bounds
     if (!hasStartedDrag.current && isOutside) {
       hasStartedDrag.current = true;
       setDragging(true);
-  
+
       mapRef.current?.dragging.disable();
     }
     if (!hasStartedDrag.current) return;
@@ -184,35 +185,45 @@ export default function MapPage() {
     dragStart.current = null;
 
     if (!hasStartedDrag.current) return;
-    
+
     setDragging(false);
 
     if (!mapRef.current) return;
-  
+
     const map = mapRef.current;
-  
+
     // Convert screen coords -> map coords
     const point = map.containerPointToLatLng(
-      map.mouseEventToContainerPoint(e as unknown as MouseEvent)
+      map.mouseEventToContainerPoint(e as unknown as MouseEvent),
     );
-    setIsModalOpen(true)
+    setIsModalOpen(true);
 
-    const res = await fetch(`${BACKEND_URL}/coord_location?lat=${point.lat}&lng=${point.lng}`);
+    const res = await fetch(
+      `${BACKEND_URL}/coord_location?lat=${point.lat}&lng=${point.lng}`,
+    );
     const data = await res.json();
 
     handleSelect({
+<<<<<<< HEAD
       adm1: data.adm1,
       city: data.city,
       country: data.country,
       lat: data.lat,
       lng: data.lng,
       state: data.state
+=======
+      adm1: data[0].adm1,
+      city: data[0].city,
+      country: data[0].country,
+      lat: data[0].lat,
+      lng: data[0].lng,
+      state: data[0].state,
+>>>>>>> 7be7740be15fbfbcbe6909868ca3c3b4b8f64cdb
     });
 
     hasStartedDrag.current = false;
   };
   // --------------------------------------------------
-
 
   return (
     <div className="h-screen w-full">
@@ -259,45 +270,45 @@ export default function MapPage() {
         <MapContent isTogglePins={isTogglePins} />
       </MapContainer>
 
-      <Button
-        onClick={() => setIsModalOpen(true)}
-
-        // detect drags
-        ref={buttonRef}
-        onPointerDown={(e) => {
-          e.preventDefault();
-          dragStart.current = { x: e.clientX, y: e.clientY };
-          hasStartedDrag.current = false;
-          window.addEventListener("pointermove", handlePointerMove);
-          window.addEventListener("pointerup", handlePointerUp);
-        }}
-
-        className="absolute bottom-6 right-6 z-[1000] cursor-pointer
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            onClick={() => setIsModalOpen(true)}
+            // detect drags
+            ref={buttonRef}
+            onPointerDown={(e) => {
+              e.preventDefault();
+              dragStart.current = { x: e.clientX, y: e.clientY };
+              hasStartedDrag.current = false;
+              window.addEventListener("pointermove", handlePointerMove);
+              window.addEventListener("pointerup", handlePointerUp);
+            }}
+            className="absolute bottom-6 right-6 z-[1000] cursor-pointer
              w-14 h-14 rounded-full 
              text-white text-2xl
              flex items-center justify-center
              shadow-xl"
-      >
-        +
-      </Button>
+          >
+            +
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent className="z-[2000]">Add a new album</TooltipContent>
+      </Tooltip>
 
-      {dragging &&
-        (<div
+      {dragging && (
+        <div
           style={{
             position: "fixed",
             left: dragPos.x,
             top: dragPos.y,
-            transform: "translate(-50%, -100%)", 
+            transform: "translate(-50%, -100%)",
             pointerEvents: "none",
             zIndex: 2000,
           }}
         >
-          <img
-            src={markerIcon}
-            style={{width: 28, height: 41}}
-          />
-        </div>)
-      }
+          <img src={markerIcon} style={{ width: 28, height: 41 }} />
+        </div>
+      )}
 
       {isModalOpen && (
         <AddAlbumModal

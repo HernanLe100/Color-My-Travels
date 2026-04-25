@@ -178,6 +178,7 @@ export default function AddAlbumModal({
                       setActiveImageIndex((current) => Math.max(0, current - 1))
                     }
                     disabled={activeImageIndex === 0}
+                    className="cursor-pointer"
                   >
                     Prev
                   </Button>
@@ -193,6 +194,7 @@ export default function AddAlbumModal({
                       )
                     }
                     disabled={activeImageIndex === images.length - 1}
+                    className="cursor-pointer"
                   >
                     Next
                   </Button>
@@ -204,11 +206,22 @@ export default function AddAlbumModal({
           {submitError && <p className="text-sm text-red-600">{submitError}</p>}
 
           <div className="mt-2 flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button
+              size="lg"
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              className="cursor-pointer"
+            >
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Saving…" : "Add"}
+            <Button
+              size="lg"
+              type="submit"
+              disabled={isSubmitting}
+              className="cursor-pointer hover:bg-neutral-700"
+            >
+              {isSubmitting ? "Saving…" : "Add Album"}
             </Button>
           </div>
         </form>

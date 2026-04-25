@@ -5,6 +5,8 @@ import { Label } from "../ui/label";
 import { Textarea } from "../ui/textarea";
 import type { Page } from "@/types";
 import { cloudinaryImageUrl } from "./albumModalUtils";
+import ImageUploadInput from "../ImageUploadInput";
+import toast from "react-hot-toast";
 
 type EditFormState = {
   name: string;
@@ -41,7 +43,9 @@ export default function AlbumEditForm({
   setNewPageCaptions,
 }: AlbumEditFormProps) {
   const [activeCarouselIndex, setActiveCarouselIndex] = useState(0);
-  const [confirmDeleteIndex, setConfirmDeleteIndex] = useState<number | null>(null);
+  const [confirmDeleteIndex, setConfirmDeleteIndex] = useState<number | null>(
+    null,
+  );
 
   const totalItems = pages.length + newPageFiles.length;
   const viewingExisting = activeCarouselIndex < pages.length;
@@ -58,6 +62,15 @@ export default function AlbumEditForm({
       setActiveCarouselIndex(totalItems - 1);
     }
   }, [totalItems, activeCarouselIndex]);
+
+  const [showNewTag, setShowNewTag] = useState(false);
+
+  function handleShowNewTag() {
+    setShowNewTag(true)
+    setTimeout(() => {
+      setShowNewTag(false)
+    }, 2000) // Hide the message after 2 seconds
+  }
 
   return (
     <>
@@ -123,147 +136,158 @@ export default function AlbumEditForm({
         </div>
 
         {/* images */}
-        <div className="flex flex-col gap-2">
-          <Label>Pages</Label>
-          {totalItems > 0 ? (
-            <div className="mt-2 rounded-lg border border-slate-200 p-3 flex flex-col gap-3">
-              <img
-                src={
-                  viewingExisting
-                    ? cloudinaryImageUrl(cloudName, pages[existingIndex].id)
-                    : URL.createObjectURL(newPageFiles[newIndex])
-                }
-                alt={`Album page ${activeCarouselIndex + 1}`}
-                className="h-52 w-full rounded-md object-cover"
-              />
-
-              <Input
-                id="edit-image-caption"
-                value={
-                  viewingExisting
-                    ? pages[existingIndex].caption ?? ""
-                    : newPageCaptions[newIndex] ?? ""
-                }
-                onChange={(e) => {
-                  if (viewingExisting) {
-                    setPages((prev) =>
-                      prev.map((page, idx) =>
-                        idx === existingIndex
-                          ? { ...page, caption: e.target.value }
-                          : page,
-                      ),
-                    );
-                    return;
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2">
+            <Label>Pages</Label>
+            {totalItems > 0 ? (
+              <div className="mt-2 rounded-lg border border-slate-200 p-3 flex flex-col gap-3">
+                <img
+                  src={
+                    viewingExisting
+                      ? cloudinaryImageUrl(cloudName, pages[existingIndex].id)
+                      : URL.createObjectURL(newPageFiles[newIndex])
                   }
-                  const nextCaptions = [...newPageCaptions];
-                  nextCaptions[newIndex] = e.target.value;
-                  setNewPageCaptions(nextCaptions);
-                }}
-                placeholder={
-                  viewingExisting
-                    ? "Write a caption for this image"
-                    : "Write a caption for this new image"
-                }
-              />
+                  alt={`Album page ${activeCarouselIndex + 1}`}
+                  className="h-52 w-full rounded-md object-cover"
+                />
 
-              <div className="flex items-center justify-between gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() =>
-                    setActiveCarouselIndex((current) => Math.max(0, current - 1))
+                <Input
+                  id="edit-image-caption"
+                  value={
+                    viewingExisting
+                      ? (pages[existingIndex].caption ?? "")
+                      : (newPageCaptions[newIndex] ?? "")
                   }
-                  disabled={activeCarouselIndex === 0}
-                >
-                  Prev
-                </Button>
-                <span className="text-sm text-slate-600">
-                  {activeCarouselIndex + 1} / {totalItems}
-                </span>
-                <div className="flex items-center gap-2">
-                  {confirmDeleteIndex === activeCarouselIndex ? (
-                    <>
-                      <span className="text-xs text-stone-600">Are you sure?</span>
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        onClick={() => {
-                          if (viewingExisting) {
-                            setPages((prev) =>
-                              prev.filter((_, idx) => idx !== existingIndex),
-                            );
-                          } else {
-                            setNewPageFiles((prev) =>
-                              prev.filter((_, idx) => idx !== newIndex),
-                            );
-                            setNewPageCaptions((prev) =>
-                              prev.filter((_, idx) => idx !== newIndex),
-                            );
-                          }
-                          setConfirmDeleteIndex(null);
-                        }}
-                      >
-                        Confirm
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => setConfirmDeleteIndex(null)}
-                      >
-                        Cancel
-                      </Button>
-                    </>
-                  ) : (
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      onClick={() => setConfirmDeleteIndex(activeCarouselIndex)}
-                    >
-                      Delete page
-                    </Button>
-                  )}
+                  onChange={(e) => {
+                    if (viewingExisting) {
+                      setPages((prev) =>
+                        prev.map((page, idx) =>
+                          idx === existingIndex
+                            ? { ...page, caption: e.target.value }
+                            : page,
+                        ),
+                      );
+                      return;
+                    }
+                    const nextCaptions = [...newPageCaptions];
+                    nextCaptions[newIndex] = e.target.value;
+                    setNewPageCaptions(nextCaptions);
+                  }}
+                  placeholder={
+                    viewingExisting
+                      ? "Write a caption for this image"
+                      : "Write a caption for this new image"
+                  }
+                />
+
+                <div className="flex items-center justify-between gap-2">
                   <Button
                     type="button"
                     variant="outline"
                     onClick={() =>
                       setActiveCarouselIndex((current) =>
-                        Math.min(totalItems - 1, current + 1),
+                        Math.max(0, current - 1),
                       )
                     }
-                    disabled={activeCarouselIndex === totalItems - 1}
+                    disabled={activeCarouselIndex === 0}
+                    className="cursor-pointer"
                   >
-                    Next
+                    Prev
                   </Button>
+                  <span className="text-sm text-slate-600 flex items-center gap-1">
+                    {activeCarouselIndex + 1} / {totalItems}
+                    {showNewTag && <span className="text-sm text-green-700">(New!)</span>}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    {confirmDeleteIndex === activeCarouselIndex ? (
+                      <>
+                        <span className="text-xs text-stone-600">
+                          Are you sure?
+                        </span>
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          onClick={() => {
+                            if (viewingExisting) {
+                              setPages((prev) =>
+                                prev.filter((_, idx) => idx !== existingIndex),
+                              );
+                            } else {
+                              setNewPageFiles((prev) =>
+                                prev.filter((_, idx) => idx !== newIndex),
+                              );
+                              setNewPageCaptions((prev) =>
+                                prev.filter((_, idx) => idx !== newIndex),
+                              );
+                            }
+                            setConfirmDeleteIndex(null);
+                          }}
+                        >
+                          Confirm
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setConfirmDeleteIndex(null)}
+                          className="cursor-pointer"
+                        >
+                          Cancel
+                        </Button>
+                      </>
+                    ) : (
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        onClick={() =>
+                          setConfirmDeleteIndex(activeCarouselIndex)
+                        }
+                        className="cursor-pointer"
+                      >
+                        Delete page
+                      </Button>
+                    )}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() =>
+                        setActiveCarouselIndex((current) =>
+                          Math.min(totalItems - 1, current + 1),
+                        )
+                      }
+                      disabled={activeCarouselIndex === totalItems - 1}
+                      className="cursor-pointer"
+                    >
+                      Next
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ) : (
-            <p className="text-sm text-slate-600">No images in this album.</p>
-          )}
+            ) : (
+              <p className="text-sm text-slate-600">No images in this album.</p>
+            )}
+          </div>
 
-          <input
-            id="edit-add-pages"
-            type="file"
-            multiple
-            accept="image/*"
-            className="mt-2 text-sm"
-            onChange={(e) => {
-              if (!e.target.files) return;
-              const selectedFiles = Array.from(e.target.files);
-              setNewPageFiles((prev) => [...prev, ...selectedFiles]);
-              setNewPageCaptions((prev) => [
-                ...prev,
-                ...selectedFiles.map(() => ""),
-              ]);
-              if (totalItems === 0 && selectedFiles.length > 0) {
-                setActiveCarouselIndex(0);
-              }
-            }}
-          />
+          <div className="flex flex-col gap-2">
+            <Label>Add new pages by uploading new images</Label>
+            <ImageUploadInput
+              onFilesAdded={(selectedFiles) => {
+                setNewPageFiles((prev) => [...prev, ...selectedFiles]);
+                setNewPageCaptions((prev) => [
+                  ...prev,
+                  ...selectedFiles.map(() => ""),
+                ]);
+
+                if (totalItems === 0 && selectedFiles.length > 0) {
+                  setActiveCarouselIndex(0);
+                }
+
+                toast.success("New pages added successfully");
+                handleShowNewTag();
+              }}
+            />
+          </div>
         </div>
       </div>
-
-
 
       <div className="mt-4 flex justify-end gap-2 border-t border-stone-300 pt-4">
         <Button type="button" variant="outline" onClick={onCancel}>
