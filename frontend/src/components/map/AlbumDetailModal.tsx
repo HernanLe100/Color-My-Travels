@@ -402,7 +402,7 @@ export default function AlbumDetailModal({
                 aria-label="Previous page"
               >
                 <ChevronLeft className="size-4" />
-                <span className="ml-1 hidden sm:inline">Prev</span>
+                <span className="ml-1 hidden sm:inline cursor-pointer">Prev</span>
               </Button>
               <p className="text-center text-xs text-stone-600">
                 Page {totalPages === 0 ? 0 : pageIndex + 1} of {totalPages}
@@ -417,7 +417,7 @@ export default function AlbumDetailModal({
                 }
                 aria-label="Next page"
               >
-                <span className="mr-1 hidden sm:inline">Next</span>
+                <span className="mr-1 hidden sm:inline cursor-pointer">Next</span>
                 <ChevronRight className="size-4" />
               </Button>
             </div>
@@ -444,7 +444,12 @@ export default function AlbumDetailModal({
                 </Button>
               </>
             ) : album && !isConfirmingDelete ? (
-              <Button type="button" variant="outline" onClick={openEdit}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={openEdit}
+                className="cursor-pointer"
+              >
                 Edit
               </Button>
             ) : null}
@@ -455,6 +460,7 @@ export default function AlbumDetailModal({
                 type="button"
                 variant="destructive"
                 onClick={() => setIsConfirmingDelete(true)}
+                className="cursor-pointer"
               >
                 Delete
               </Button>

@@ -178,6 +178,7 @@ export default function AddAlbumModal({
                       setActiveImageIndex((current) => Math.max(0, current - 1))
                     }
                     disabled={activeImageIndex === 0}
+                    className="cursor-pointer"
                   >
                     Prev
                   </Button>
@@ -193,6 +194,7 @@ export default function AddAlbumModal({
                       )
                     }
                     disabled={activeImageIndex === images.length - 1}
+                    className="cursor-pointer"
                   >
                     Next
                   </Button>
