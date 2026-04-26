@@ -204,21 +204,12 @@ export default function MapPage() {
     const data = await res.json();
 
     handleSelect({
-<<<<<<< HEAD
       adm1: data.adm1,
       city: data.city,
       country: data.country,
       lat: data.lat,
       lng: data.lng,
       state: data.state
-=======
-      adm1: data[0].adm1,
-      city: data[0].city,
-      country: data[0].country,
-      lat: data[0].lat,
-      lng: data[0].lng,
-      state: data[0].state,
->>>>>>> 7be7740be15fbfbcbe6909868ca3c3b4b8f64cdb
     });
 
     hasStartedDrag.current = false;
