@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type SetStateAction } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import CitySearch from "./CitySearch";
 import type { SearchLocation } from "@/types";
 import { Textarea } from "./ui/textarea";
+import ImageUploadInput from "./ImageUploadInput";
 
 type Props = {
   isOpen: boolean;
@@ -24,9 +25,9 @@ type Props = {
   setEndDate: (v: string) => void;
 
   images: File[];
-  setImages: (files: File[]) => void;
+  setImages: (value: SetStateAction<File[]>) => void;
+  setImageCaptions: (value: SetStateAction<string[]>) => void;
   imageCaptions: string[];
-  setImageCaptions: (captions: string[]) => void;
 
   selectedLocation: SearchLocation | null;
   handleSelect: (loc: SearchLocation) => void;
@@ -134,19 +135,22 @@ export default function AddAlbumModal({
 
           <div className="flex flex-col gap-2">
             <Label>Images</Label>
-            <input
-              type="file"
-              multiple
-              accept="image/*"
-              onChange={(e) => {
-                if (e.target.files) {
-                  const nextImages = Array.from(e.target.files);
-                  setImages(nextImages);
-                  setImageCaptions(
-                    nextImages.map((_, idx) => imageCaptions[idx] ?? ""),
-                  );
-                  setActiveImageIndex(0);
-                }
+            <ImageUploadInput
+              onFilesAdded={(selectedFiles) => {
+                // append images
+                setImages((prev) => {
+                  const next = [...prev, ...selectedFiles];
+
+                  // jump to first newly added image
+                  setActiveImageIndex(prev.length);
+
+                  return next;
+                });
+
+                setImageCaptions((prev) => [
+                  ...prev,
+                  ...selectedFiles.map(() => ""),
+                ]);
               }}
             />
 
