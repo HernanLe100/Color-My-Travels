@@ -379,7 +379,7 @@ def update_album(original:dict, modified:dict):
             # Update directly
             cursor.execute(
                 """
-                UPDATE albums
+                UPDATE albums2
                 SET name = %s,
                     notes = %s,
                     start_date = %s,
@@ -409,8 +409,8 @@ def delete_album(info: dict):
             cursor.execute(
                 """
                 SELECT pages
-                FROM albums a
-                JOIN locations l ON a.location_id = l.location_id
+                FROM albums2 a
+                JOIN locations2 l ON a.place_id = l.place_id
                 WHERE a.album_id = %s AND a.user_id = %s;  
                 """,
                 [album_id, user_id]
@@ -419,67 +419,55 @@ def delete_album(info: dict):
             for p in pages:
                 if "id" in p:
                     cloudinary.uploader.destroy(p["id"], invalidate=True)
+
+            cursor.execute(
+                """
+                DELETE FROM albums2 
+                WHERE album_id = %s AND user_id = %s
+                RETURNING place_id;
+                """,
+                [album_id, user_id]
+            )
+            place_id = cursor.fetchone()[0]
             
-            cursor.execute(
-                """
-                SELECT l.country, l.adm1
-                FROM albums a
-                JOIN locations l ON a.location_id = l.location_id
-                WHERE a.album_id = %s AND a.user_id = %s;
-                """,
-                [album_id, user_id]
-            )
-            location = cursor.fetchone()
-
-            cursor.execute(
-                """
-                DELETE FROM albums 
-                WHERE album_id = %s AND user_id = %s;
-                """,
-                [album_id, user_id]
-            )
-
-            if location:
-                country = location["country"]
-                adm1 = location["adm1"]
-
+            if place_id:
+                # check/delete location from colors table
                 cursor.execute(
                     """
-                    SELECT COUNT(*) AS cnt 
-                    FROM albums a
-                    JOIN locations l ON a.location_id = l.location_id
-                    WHERE a.user_id = %s AND l.country = %s;
+                    SELECT COUNT(*) as cnt, l.part_of as country
+                    FROM albums2 a
+                    JOIN locations2 l ON a.place_id = l.place_id
+                    WHERE a.user_id = %s AND a.place_id = %s
+                    GROUP BY l.part_of;
                     """,
-                    [user_id, country]
+                    [user_id, place_id]
                 )
-                if cursor.fetchone()["cnt"] == 0:
+                result = cursor.fetchone()
+                if result["cnt"] == 0:
                     cursor.execute(
-                        """
-                        DELETE FROM colors 
-                        WHERE user_id = %s AND region_code = %s 
-                        AND region_type = 'country';
+                        """DELETE FROM colors2 
+                        WHERE user_id = %s AND place_id = %s;
                         """,
-                        [user_id, country]
+                        [user_id, place_id]
                     )
-
-                if adm1:
+                
+                country_place_id = result["country"]
+                cursor.execute(
+                    """
+                    SELECT COUNT(*) as cnt
+                    FROM albums2 a
+                    JOIN locations2 l ON a.place_id = l.place_id
+                    WHERE a.user_id = %s AND l.part_of = %s;
+                    """,
+                    [user_id, country_place_id]
+                )
+                if cursor.fetchone()["cnt"]:
                     cursor.execute(
-                        """
-                        SELECT COUNT(*) AS cnt 
-                        FROM albums a
-                        JOIN locations l ON a.location_id = l.location_id
-                        WHERE a.user_id = %s AND l.adm1 = %s;
+                        """DELETE FROM colors2 
+                        WHERE user_id = %s AND place_id = %s;
                         """,
-                        [user_id, adm1]
+                        [user_id, country_place_id]
                     )
-                    if cursor.fetchone()["cnt"] == 0:
-                        cursor.execute(
-                            """DELETE FROM colors 
-                            WHERE user_id = %s AND region_code = %s 
-                            AND region_type = 'adm1';
-                            """,
-                            [user_id, adm1]
-                        )
 
         connection.commit()
 
