@@ -296,70 +296,76 @@ def add_album(info : dict):
         with connection.cursor(row_factory=dict_row) as cursor:
             cursor.execute(
                 """
-                INSERT INTO albums2 (user_id, lat, lng, place_id, name, notes, pages, start_date, end_date)
-                VALUES (%s, %s, %s, %s, %s, %s, %s::jsonb, %s, %s)
+                INSERT INTO albums (user_id, location_id, notes, start_date, end_date, name, pages)
+                VALUES (%s, %s, %s, %s, %s, %s, %s::jsonb)
                 RETURNING album_id;
                 """,
                 [
                     info.get("user_id"),
-                    info.get("lat"),
-                    info.get("lng"),
-                    info.get("place_id"),
-                    info.get("name"),
+                    info.get("location_id"),
                     info.get("notes"),
-                    info.get("pages", "[]"),
                     info.get("start_date"),
                     info.get("end_date"),
+                    info.get("name"),
+                    info.get("pages", "[]"),
                 ]
             )
 
             album_id = cursor.fetchone()["album_id"]
-            place_id = info.get("place_id")
+            location_id = info.get("location_id")
 
-            # get location information 
+            # get location information
             cursor.execute(
                 """
-                SELECT part_of
-                FROM locations2
-                WHERE place_id = %s;
+                SELECT country, adm1
+                FROM locations
+                WHERE location_id = %s;
                 """,
-                [place_id]
+                [location_id]
             )
-            
-            country = cursor.fetchone()
-            country_place_id = country["part_of"]
-            
+
+            location = cursor.fetchone()
+            country = location["country"]
+            adm1 = location["adm1"]
             user_id = info.get("user_id")
+
+            if adm1:
+                region_code = adm1
+                region_type = "adm1"
+            else:
+                region_code = country
+                region_type = "country"
 
             # insert country if it does not already exist
             cursor.execute(
                 """
-                INSERT INTO colors2 (place_id, user_id, color, type)
+                INSERT INTO colors (region_code, color, region_type, user_id)
                 VALUES (%s, %s, %s, %s)
-                ON CONFLICT (user_id, place_id) DO NOTHING;
+                ON CONFLICT (user_id, region_code) DO NOTHING;
                 """,
                 [
-                    country_place_id,
-                    user_id,
+                    country,
                     "#FF5733",
-                    0
+                    "country",
+                    user_id,
                 ]
             )
 
             # insert adm1 if it does not already exist
-            cursor.execute(
-                """
-                INSERT INTO colors2 (place_id, user_id, color, type)
-                VALUES (%s, %s, %s, %s)
-                ON CONFLICT (user_id, place_id) DO NOTHING;
-                """,
-                [
-                    place_id,
-                    user_id,
-                    "#FF5733",
-                    1
-                ]
-            )
+            if adm1:
+                cursor.execute(
+                    """
+                    INSERT INTO colors (region_code, color, region_type, user_id)
+                    VALUES (%s, %s, %s, %s)
+                    ON CONFLICT (user_id, region_code) DO NOTHING;
+                    """,
+                    [
+                        adm1,
+                        "#FF5733",
+                        "adm1",
+                        user_id,
+                    ]
+                )
                 
         connection.commit()
     return album_id
