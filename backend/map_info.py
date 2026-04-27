@@ -51,6 +51,7 @@ def get_geo():
         print("Geo fetch error:", e)
         return jsonify({"error": str(e)}), 500
 
+
 def iso2_to_iso3(code):
     if not code:
         return None
@@ -126,6 +127,7 @@ def search():
     if not q:
         return jsonify({"error": "Missing query"}), 400
     
+    
     url = f"https://api.geoapify.com/v1/geocode/autocomplete?text={q}"
     
     res = requests.get(
@@ -179,7 +181,6 @@ def search():
         })
     
     return jsonify(results)
-    
     
 """
 def place_part_of(place_id):

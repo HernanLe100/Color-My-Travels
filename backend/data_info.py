@@ -172,24 +172,20 @@ def add_album():
     user_id = get_jwt_identity()
     data = request.get_json()
 
-    place_id = data.get("place_id")
+    location_id = data.get("location_id")
     notes = data.get("notes", "")
     start_date = data.get("start_date", "")
     end_date = data.get("end_date", "")
     name = data.get("name", "")
-    lat = data.get("lat")
-    lng = data.get("lng")
 
     album_id = db.add_album(
         {
             "user_id": user_id,
-            "place_id": place_id,
-            "name": name,
+            "location_id": location_id,
             "notes": notes,
             "start_date": start_date,
             "end_date": end_date,
-            "lat": lat,
-            "lng": lng
+            "name": name
         }
     )
 
