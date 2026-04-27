@@ -52,6 +52,37 @@ def get_geo():
         return jsonify({"error": str(e)}), 500
 
 
+@map_bp.route("/geo2", methods=["GET"])
+def get_geo2():
+    place_id = request.args.get("place_id")
+
+    if not place_id:
+        return jsonify({"error": "Missing place ID"}), 400
+
+    try:
+        # call Geoapify Place API
+        url = f"https://api.geoapify.com/v2/place-details?id={place_id}"
+        res = requests.get(
+            url, 
+            headers={"Accept": "application/json"}, 
+            params={
+                "apiKey": _GEOAPIFY_KEY,
+                "features": "details", 
+            }
+        )
+
+        if res.status_code != 200:
+            return jsonify({"error": "Failed to fetch data"}), 500
+        
+        result = res.json()
+        return jsonify(result)
+
+    except Exception as e:
+        print("Geo fetch error:", e)
+        return jsonify({"error": str(e)}), 500
+    
+    
+
 def iso2_to_iso3(code):
     if not code:
         return None
@@ -182,9 +213,8 @@ def search():
     
     return jsonify(results)
     
-"""
+
 def place_part_of(place_id):
-    
     url = f"https://api.geoapify.com/v1/boundaries/part-of?id={place_id}"
     
     res = requests.get(
@@ -211,9 +241,7 @@ def place_part_of(place_id):
             state = places[i]
             break
     
-    results = []
-    
-    
-"""
+    results = country, state
+
     
     
