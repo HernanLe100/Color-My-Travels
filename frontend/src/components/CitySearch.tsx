@@ -7,8 +7,10 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 export default function CitySearch({
   onSelect,
+  isRequired,
 }: {
   onSelect: (location: SearchLocation) => void;
+  isRequired: boolean;
 }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchLocation[]>([]);
@@ -28,8 +30,11 @@ export default function CitySearch({
   return (
     <div>
       <div className="flex flex-col gap-2">
-        <Label htmlFor="city-search">City</Label>
+        <Label htmlFor="city-search" className="flex gap-0">
+          City<span className="text-xs text-red-600">*</span>
+        </Label>
         <Input
+          required={isRequired}
           placeholder="Search for a city..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}

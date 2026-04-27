@@ -84,7 +84,9 @@ export default function AddAlbumModal({
           className="mt-4 space-y-3 max-h-[500px] overflow-y-auto px-2"
         >
           <div className="flex flex-col gap-2">
-            <Label htmlFor="name">Album Name</Label>
+            <Label htmlFor="name" className="flex gap-0">
+              Album Name<span className="text-xs text-red-600">*</span>
+            </Label>
             <Input
               id="name"
               value={name}
@@ -94,7 +96,7 @@ export default function AddAlbumModal({
             />
           </div>
 
-          <CitySearch onSelect={handleSelect} />
+          <CitySearch onSelect={handleSelect} isRequired={!selectedLocation} />
           {selectedLocation && (
             <p className="text-sm text-slate-600">
               Selected: {selectedLocation.city}
@@ -105,7 +107,9 @@ export default function AddAlbumModal({
           )}
 
           <div className="flex flex-col gap-2">
-            <Label>Start Date</Label>
+            <Label className="flex gap-0">
+              Start Date<span className="text-xs text-red-600">*</span>
+            </Label>
             <Input
               type="date"
               value={startDate}
@@ -115,7 +119,9 @@ export default function AddAlbumModal({
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label>End Date</Label>
+            <Label className="flex gap-0">
+              End Date<span className="text-xs text-red-600">*</span>
+            </Label>
             <Input
               type="date"
               value={endDate}

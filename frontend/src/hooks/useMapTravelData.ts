@@ -202,5 +202,6 @@ export function useMapTravelData(
     filteredGeo,
     countryColorMap,
     adm1ColorMap,
+    setColors,
   };
 }
