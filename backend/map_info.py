@@ -186,12 +186,13 @@ def search():
     
     for feature in data.get("results", []):
         
-        city = feature.get("city")
+        city = feature.get("city") or feature.get("county") 
         state = feature.get("state") or feature.get("state_district") or feature.get("county") 
         country_iso3 = iso2_to_iso3( feature.get("country_code") )
         adm1_code = feature.get("iso3166_2")
         lat = feature.get("lat")
         lng = feature.get("lon")
+        place_id = feature.get("place_id")
         
         print(city)
         print(state)
@@ -199,6 +200,7 @@ def search():
         print(adm1_code)
         print(lat)
         print(lng)
+        print(place_id)
         print()
         
 
