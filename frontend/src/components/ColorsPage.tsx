@@ -55,7 +55,7 @@ export default function ColorsPage() {
   };
 
   return (
-    <div>
+    <div className="pb-4">
       <h1 className="text-lg font-bold px-4 pt-4">Edit Colors</h1>
       <div className="px-4 pt-4 flex flex-col gap-2 max-w-lg">
         {colors.map((row, i) => (
