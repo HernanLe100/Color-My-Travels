@@ -8,7 +8,7 @@ import {
 } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useMap } from "react-leaflet";
-import type { Album, Page, Pin } from "@/types";
+import type { Album, Color, Page, Pin } from "@/types";
 import { Button } from "../ui/button";
 import AlbumEditForm from "./AlbumEditForm";
 import {
@@ -16,6 +16,7 @@ import {
   formatAlbumDate,
   toDateInputValue,
 } from "./albumModalUtils";
+import toast from "react-hot-toast";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -40,6 +41,7 @@ type AlbumDetailModalProps = {
   cloudName: string | undefined;
   onClose: () => void;
   setAlbums: Dispatch<SetStateAction<Album[]>>;
+  setColors: Dispatch<SetStateAction<Color[]>>;
 };
 
 export default function AlbumDetailModal({
@@ -49,6 +51,7 @@ export default function AlbumDetailModal({
   cloudName,
   onClose,
   setAlbums,
+  setColors,
 }: AlbumDetailModalProps) {
   const map = useMap();
   const [isEditing, setIsEditing] = useState(false);
@@ -336,6 +339,103 @@ export default function AlbumDetailModal({
     }
   }
 
+  const [localColors, setLocalColors] = useState<Color[]>([]);
+
+  const handleColorChange = async (
+    region_code: string,
+    newColor: string,
+    region_type: string,
+    prevColor: string,
+  ) => {
+    if (!token) return;
+    if (prevColor.toLowerCase() === newColor.toLowerCase()) return;
+
+    // from useMapTravelData!!
+    setColors((prev) =>
+      prev.map((row) =>
+        row.region_code === region_code && row.region_type === region_type
+          ? { ...row, color: newColor }
+          : row,
+      ),
+    );
+
+    try {
+      const res = await fetch(`${BACKEND_URL}/update_color`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          region_code,
+          color: newColor,
+          region_type,
+        }),
+      });
+
+      if (!res.ok) throw new Error();
+
+      toast.success("Color updated");
+    } catch (err) {
+      console.error(err);
+
+      // rollback
+      setLocalColors((prev) =>
+        prev.map((row) =>
+          row.region_code === region_code && row.region_type === region_type
+            ? { ...row, color: prevColor }
+            : row,
+        ),
+      );
+
+      setColors((prev) =>
+        prev.map((row) =>
+          row.region_code === region_code && row.region_type === region_type
+            ? { ...row, color: prevColor }
+            : row,
+        ),
+      );
+    }
+  };
+
+  useEffect(() => {
+    if (!location) return;
+
+    fetch(`${BACKEND_URL}/get_colors`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        const all = data.db_response;
+
+        const filtered = all.filter((row: Color) => {
+          // match country
+          if (row.region_type === "country") {
+            return row.region_code === pin.country;
+          }
+
+          // match adm1 (must start with country code)
+          if (row.region_type === "adm1" && pin.adm1) {
+            return row.region_code === pin.adm1;
+          }
+
+          return false;
+        });
+
+        setLocalColors(filtered);
+      });
+  }, [location]);
+
+  const countryColor = localColors.find(
+    (c) => c.region_type === "country" && c.region_code === pin.country,
+  );
+
+  const adm1Color = localColors.find(
+    (c) => c.region_type === "adm1" && c.region_code === pin.adm1,
+  );
+
   return (
     <div
       ref={overlayRef}
@@ -357,13 +457,118 @@ export default function AlbumDetailModal({
           </button>
           <h2
             id="album-dialog-title"
-            className="pr-8 font-serif text-xl text-stone-900"
+            className="font-serif text-xl text-stone-900"
           >
             {pin.city || "Somewhere"}
           </h2>
-          <p className="mt-1 text-sm text-stone-600">
-            {[pin.adm1, pin.country].filter(Boolean).join(" · ")}
-          </p>
+          <div className="mt-1 text-sm text-stone-600 flex items-center gap-2 justify-center">
+            {/* ADM1 */}
+            {pin.adm1 && (
+              <span className="flex items-center gap-1 relative group">
+                {pin.adm1}
+                {adm1Color && (
+                  <div className="relative group">
+                    <input
+                      type="color"
+                      value={adm1Color.color}
+                      onFocus={(e) => {
+                        e.currentTarget.dataset.prev = adm1Color.color;
+                      }}
+                      onChange={(e) => {
+                        const newColor = e.target.value;
+
+                        setLocalColors((prev) =>
+                          prev.map((c) =>
+                            c.region_code === adm1Color.region_code &&
+                            c.region_type === adm1Color.region_type
+                              ? { ...c, color: newColor }
+                              : c,
+                          ),
+                        );
+                      }}
+                      onBlur={(e) => {
+                        const prev =
+                          e.currentTarget.dataset.prev || adm1Color.color;
+
+                        handleColorChange(
+                          adm1Color.region_code,
+                          e.target.value,
+                          adm1Color.region_type,
+                          prev,
+                        );
+                      }}
+                      className="w-6 h-6 p-0 border-none cursor-pointer"
+                    />
+
+                    {/* overlay */}
+                    <div
+                      className="absolute inset-0 flex items-center justify-center
+               rounded-md bg-black/30 text-white text-[10px]
+               opacity-0 group-hover:opacity-100 transition
+               pointer-events-none"
+                    >
+                      Edit
+                    </div>
+                  </div>
+                )}
+              </span>
+            )}
+
+            {/* separator */}
+            {pin.adm1 && pin.country && <span>·</span>}
+
+            {/* COUNTRY */}
+            {pin.country && (
+              <span className="flex items-center gap-1">
+                {pin.country}
+                {countryColor && (
+                  <div className="relative group">
+                    <input
+                      type="color"
+                      value={countryColor.color}
+                      onFocus={(e) => {
+                        e.currentTarget.dataset.prev = countryColor.color;
+                      }}
+                      onChange={(e) => {
+                        const newColor = e.target.value;
+
+                        setLocalColors((prev) =>
+                          prev.map((c) =>
+                            c.region_code === countryColor.region_code &&
+                            c.region_type === countryColor.region_type
+                              ? { ...c, color: newColor }
+                              : c,
+                          ),
+                        );
+                      }}
+                      onBlur={(e) => {
+                        const prev =
+                          e.currentTarget.dataset.prev || countryColor.color;
+
+                        handleColorChange(
+                          countryColor.region_code,
+                          e.target.value,
+                          countryColor.region_type,
+                          prev,
+                        );
+                      }}
+                      className="w-6 h-6 p-0 border-none cursor-pointer"
+                    />
+
+                    {/* overlay */}
+                    <div
+                      className="absolute inset-0 flex items-center justify-center
+               rounded-md bg-black/30 text-white text-[10px]
+               opacity-0 group-hover:opacity-100 transition
+               pointer-events-none"
+                    >
+                      Edit
+                    </div>
+                  </div>
+                )}
+              </span>
+            )}
+          </div>
         </header>
 
         {isEditing && album ? (
@@ -402,7 +607,9 @@ export default function AlbumDetailModal({
                 aria-label="Previous page"
               >
                 <ChevronLeft className="size-4" />
-                <span className="ml-1 hidden sm:inline cursor-pointer">Prev</span>
+                <span className="ml-1 hidden sm:inline cursor-pointer">
+                  Prev
+                </span>
               </Button>
               <p className="text-center text-xs text-stone-600">
                 Page {totalPages === 0 ? 0 : pageIndex + 1} of {totalPages}
@@ -417,7 +624,9 @@ export default function AlbumDetailModal({
                 }
                 aria-label="Next page"
               >
-                <span className="mr-1 hidden sm:inline cursor-pointer">Next</span>
+                <span className="mr-1 hidden sm:inline cursor-pointer">
+                  Next
+                </span>
                 <ChevronRight className="size-4" />
               </Button>
             </div>

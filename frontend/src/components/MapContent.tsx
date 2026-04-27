@@ -27,6 +27,7 @@ export default function MapContent({ isTogglePins = false }: MapContentProps) {
     filteredGeo,
     countryColorMap,
     adm1ColorMap,
+    setColors,
   } = useMapTravelData(token, isTogglePins);
 
   const [selectedPin, setSelectedPin] = useState<Pin | null>(null);
@@ -66,6 +67,7 @@ export default function MapContent({ isTogglePins = false }: MapContentProps) {
           cloudName={cloudName}
           onClose={() => setSelectedPin(null)}
           setAlbums={setAlbums}
+          setColors={setColors}
         />
       )}
     </>

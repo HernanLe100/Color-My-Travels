@@ -3,10 +3,12 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Textarea } from "../ui/textarea";
-import type { Page } from "@/types";
+import type { Color, Page, Pin } from "@/types";
 import { cloudinaryImageUrl } from "./albumModalUtils";
 import ImageUploadInput from "../ImageUploadInput";
 import toast from "react-hot-toast";
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 type EditFormState = {
   name: string;
@@ -66,10 +68,10 @@ export default function AlbumEditForm({
   const [showNewTag, setShowNewTag] = useState(false);
 
   function handleShowNewTag() {
-    setShowNewTag(true)
+    setShowNewTag(true);
     setTimeout(() => {
-      setShowNewTag(false)
-    }, 2000) // Hide the message after 2 seconds
+      setShowNewTag(false);
+    }, 2000); // Hide the message after 2 seconds
   }
 
   return (
@@ -196,7 +198,9 @@ export default function AlbumEditForm({
                   </Button>
                   <span className="text-sm text-slate-600 flex items-center gap-1">
                     {activeCarouselIndex + 1} / {totalItems}
-                    {showNewTag && <span className="text-sm text-green-700">(New!)</span>}
+                    {showNewTag && (
+                      <span className="text-sm text-green-700">(New!)</span>
+                    )}
                   </span>
                   <div className="flex items-center gap-2">
                     {confirmDeleteIndex === activeCarouselIndex ? (
