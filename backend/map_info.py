@@ -62,6 +62,7 @@ def iso2_to_iso3(code):
     except:
         return None
     
+# gets location info from coords
 @map_bp.route("/coord_location", methods=["GET"])
 def coord_location():
     lat = request.args.get("lat")
@@ -83,7 +84,6 @@ def coord_location():
         params={
             "apiKey": _GEOAPIFY_KEY,
             "format": "json", 
-            "type": "city",
             "limit": 1
         },
         timeout=5
@@ -99,24 +99,24 @@ def coord_location():
     data = res.json()
     
     features = data.get("results", [])
-    print(features)
 
     if not features:
         return jsonify({})
     
     feature = features[0]
     
-    city = feature.get("city")
+    city = feature.get("city") or feature.get("county") 
     state = feature.get("state") or feature.get("state_district") or feature.get("county") 
     country_iso3 = iso2_to_iso3( feature.get("country_code") )
     adm1_code = feature.get("iso3166_2")
+    place_id = feature.get("place_id")
 
     return jsonify({
         "city": city,
         "state": state,
         "adm1": adm1_code,
         "country": country_iso3,
-        "lat": lat,
+        "lat": lat, # use the queried coords, not returned coords
         "lng": lng
     })
 
@@ -181,4 +181,39 @@ def search():
         })
     
     return jsonify(results)
+    
+"""
+def place_part_of(place_id):
+    
+    url = f"https://api.geoapify.com/v1/boundaries/part-of?id={place_id}"
+    
+    res = requests.get(
+        url, 
+        headers={"Accept": "application/json"}, 
+        params={
+            "apiKey": _GEOAPIFY_KEY, 
+            "geometry": "point"
+        },
+        timeout=5
+    )
+    if res.status_code != 200:
+        pass
+    
+    data = res.json()
+    
+    # last place is country
+    places = data.get("features")
+    country = places[-1]
+    # last place with an ADM1 code is state
+    state = None
+    for i in range(len(places)-2, -1, -1):
+        if places[i].get("iso3166_2"):
+            state = places[i]
+            break
+    
+    results = []
+    
+    
+"""
+    
     
