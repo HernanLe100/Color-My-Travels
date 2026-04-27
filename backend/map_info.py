@@ -241,6 +241,7 @@ def place_part_of(place_id):
             state = places[i]
             break
     
+    # note: this returns full dict of info of country and state, not just place_id
     results = country, state
 
     
