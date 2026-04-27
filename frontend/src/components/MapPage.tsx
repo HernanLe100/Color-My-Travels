@@ -244,6 +244,11 @@ export default function MapPage() {
         scrollWheelZoom={true}
         className="h-full w-full"
         ref={mapRef}
+        maxBounds={[
+          [-90, -180], // southwest corner
+          [90, 180],   // northeast corner
+        ]}
+        maxBoundsViscosity={0.8}
       >
         <TileLayer
           attribution="&copy; OpenStreetMap & Carto"
