@@ -3,12 +3,10 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Textarea } from "../ui/textarea";
-import type { Color, Page, Pin } from "@/types";
+import type { Page } from "@/types";
 import { cloudinaryImageUrl } from "./albumModalUtils";
 import ImageUploadInput from "../ImageUploadInput";
 import toast from "react-hot-toast";
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 type EditFormState = {
   name: string;

@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import type { Color } from "@/types";
 import toast from "react-hot-toast";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
