@@ -70,7 +70,7 @@ export default function ColorsPage() {
                 <input
                   type="color"
                   value={row.color}
-                  onBlur={(e) =>
+                  onChange={(e) =>
                     handleColorChange(
                       row.region_code,
                       e.target.value,
