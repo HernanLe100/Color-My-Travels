@@ -54,7 +54,7 @@ export default function ColorsPage() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-lg md:mx-0 md:max-w-none px-4 py-4">
+    <div className="mx-auto w-full max-w-lg md:mx-0 md:max-w-none px-6 py-6">
       <h1 className="text-lg font-bold mb-4">Edit Colors</h1>
       <div className="flex flex-col gap-2">
         {colors.map((row, i) => (

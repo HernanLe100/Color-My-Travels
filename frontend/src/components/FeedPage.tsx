@@ -47,7 +47,7 @@ export default function FeedPage() {
   }, [token]);
 
   return (
-    <div className="mx-auto flex max-w-lg flex-col gap-6 px-4 py-6">
+    <div className="mx-auto flex max-w-lg flex-col gap-6 py-6">
       {friendsAlbums.length === 0 ? (
         <p className="text-center text-sm text-neutral-500">
           No albums from friends yet.
