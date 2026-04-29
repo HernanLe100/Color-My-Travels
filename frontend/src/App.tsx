@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
-import { SidebarProvider } from "./components/ui/sidebar";
+import { SidebarProvider, useSidebar } from "./components/ui/sidebar";
+import { Menu } from "lucide-react";
 import MapPage from "./components/MapPage";
 import UserPage from "./components/UserPage";
 import ColorsPage from "./components/ColorsPage";
@@ -51,6 +52,20 @@ export function useAuth() {
   return token;
 }
 
+function MobileMenuButton() {
+  const { toggleSidebar } = useSidebar();
+  return (
+    <button
+      type="button"
+      onClick={toggleSidebar}
+      className="fixed left-4 top-4 z-[1200] flex md:hidden items-center justify-center rounded-md bg-white p-2 shadow-md border border-stone-200"
+      aria-label="Open menu"
+    >
+      <Menu className="h-5 w-5 text-stone-700" />
+    </button>
+  );
+}
+
 function App() {
   const token = useAuth();
 
@@ -61,6 +76,7 @@ function App() {
           {token && <Sidebar />}
 
           <main className="flex-1">
+            {token && <MobileMenuButton />}
             <Routes>
               <Route
                 path="/login"
