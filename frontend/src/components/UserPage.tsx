@@ -72,7 +72,7 @@ export default function UserPage() {
   }
 
   return (
-    <div className="flex flex-col gap-4 p-4">
+    <div className="mx-auto w-full max-w-lg md:mx-0 md:max-w-none px-4 py-4 flex flex-col gap-4">
       <h1 className="text-lg font-bold">{user?.name}'s User Page</h1>
 
       Albums: {albums.length}
