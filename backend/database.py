@@ -154,9 +154,8 @@ def reject_friend_request(sender_id, receiver_id):
         with connection.cursor() as cursor:
             cursor.execute(
                 """
-                UPDATE friend_requests
-                SET status = 'rejected'
-                WHERE sender_id = %s AND receiver_id = %s;
+                DELETE FROM friend_requests
+                WHERE sender_id = %s AND receiver_id = %s AND status = 'pending';
                 """,
                 [sender_id, receiver_id]
             )
