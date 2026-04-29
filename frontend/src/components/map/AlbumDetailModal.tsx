@@ -6,7 +6,7 @@ import {
   type Dispatch,
   type SetStateAction,
 } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Pencil } from "lucide-react";
 import { useMap } from "react-leaflet";
 import type { Album, Color, Page, Pin } from "@/types";
 import { Button } from "../ui/button";
@@ -290,10 +290,8 @@ export default function AlbumDetailModal({
       case "cover":
         if (!album) return null;
         return (
-          <div className="flex max-h-[28rem] min-h-[18rem] flex-col items-center overflow-y-auto px-2 py-2 text-center text-[#5E3023]">
-            <p className="text-xs font-medium uppercase tracking-wide">
-              Travel album
-            </p>
+          <div className="flex max-h-[28rem] flex-col items-center overflow-y-auto px-2 pt-2 pb-6 text-center text-[#5E3023]">
+            
             <h3 className="mt-4 font-serif text-2xl">
               {album.name || "Untitled"}
             </h3>
@@ -507,7 +505,7 @@ export default function AlbumDetailModal({
                opacity-0 group-hover:opacity-100 transition
                pointer-events-none"
                     >
-                      Edit
+                      <Pencil className="w-3 h-3" />
                     </div>
                   </div>
                 )}
@@ -562,7 +560,7 @@ export default function AlbumDetailModal({
                opacity-0 group-hover:opacity-100 transition
                pointer-events-none"
                     >
-                      Edit
+                      <Pencil className="w-3 h-3" />
                     </div>
                   </div>
                 )}
@@ -587,12 +585,12 @@ export default function AlbumDetailModal({
           />
         ) : (
           <>
-            <div className="relative mt-4 min-h-[20rem] rounded-r-md border border-stone-300 bg-[#F3E9DC] shadow-inner">
+            <div className="relative mt-4 rounded-r-md border border-stone-300 bg-[#F3E9DC] shadow-inner">
               <div
                 className="absolute bottom-2 left-0 top-2 w-2 rounded-sm bg-[#895737]"
                 aria-hidden
               />
-              <div className="min-h-[20rem] pl-5 pr-4 py-4">
+              <div className="pl-5 pr-4 py-4">
                 {renderPageBody()}
               </div>
             </div>

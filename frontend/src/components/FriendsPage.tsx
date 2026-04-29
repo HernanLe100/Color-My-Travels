@@ -4,6 +4,7 @@ import { Button } from "./ui/button";
 import { useAuth } from "@/App";
 import toast from "react-hot-toast";
 import type { FriendRequest, SentRequest, User } from "@/types";
+import Loading from "./Loading";
 
 export default function FriendsPage() {
   const token = useAuth();
@@ -13,6 +14,7 @@ export default function FriendsPage() {
   const [requests, setRequests] = useState<FriendRequest[]>([]);
   const [sentRequests, setSentRequests] = useState<SentRequest[]>([]);
   const [friends, setFriends] = useState<User[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isSendingRequest, setIsSendingRequest] = useState(false);
   const [confirmingFriendId, setConfirmingFriendId] = useState<string | null>(
     null,
@@ -43,10 +45,21 @@ export default function FriendsPage() {
   };
 
   useEffect(() => {
-    fetchRequests();
-    fetchSentRequests();
-    fetchFriends();
-  }, []);
+    const load = async () => {
+      const [reqData, sentData, friendsData] = await Promise.all([
+        fetch(`${BACKEND_URL}/get_friend_requests`, { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json()),
+        fetch(`${BACKEND_URL}/get_sent_requests`, { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json()),
+        fetch(`${BACKEND_URL}/get_friends`, { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json()),
+      ]);
+      setRequests(reqData.requests);
+      setSentRequests(sentData.requests);
+      setFriends(friendsData.friends);
+      setIsLoading(false);
+    };
+    load();
+  }, [token, BACKEND_URL]);
+
+  if (isLoading) return <Loading />;
 
   const sendRequest = async () => {
     setIsSendingRequest(true);
@@ -121,7 +134,7 @@ export default function FriendsPage() {
 
   return (
     <div className="mx-auto w-full max-w-lg md:mx-0 md:max-w-none px-6 py-6 flex flex-col gap-5">
-      <div className="flex flex-col gap-2 max-w-md">
+      <div className="flex flex-col gap-2 max-w-lg">
         <p className="text-lg font-bold">Add Friend</p>
         <Input
           type="text"
@@ -135,7 +148,7 @@ export default function FriendsPage() {
       </div>
 
       {sentRequests.length > 0 && (
-        <div className="flex flex-col gap-2 max-w-md">
+        <div className="flex flex-col gap-2 max-w-lg">
           <p className="text-lg font-bold">Sent Requests</p>
           {sentRequests.map((req) => (
             <div
@@ -166,7 +179,7 @@ export default function FriendsPage() {
         </div>
       )}
 
-      <div className="flex flex-col gap-2 max-w-md">
+      <div className="flex flex-col gap-2 max-w-lg">
         <p className="text-lg font-bold">Friend Requests</p>
         {requests?.map((request) => (
           <div
@@ -199,7 +212,7 @@ export default function FriendsPage() {
         ))}
       </div>
 
-      <div className="flex flex-col gap-2 max-w-md">
+      <div className="flex flex-col gap-2 max-w-lg">
         <p className="text-lg font-bold">Friends</p>
         {friends?.map((friend) => (
           <div

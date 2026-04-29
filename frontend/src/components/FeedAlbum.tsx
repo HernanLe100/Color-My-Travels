@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { Album, Page, User } from "@/types";
 import { cloudinaryImageUrl, formatAlbumDate } from "./map/albumModalUtils";
+import Loading from "./Loading";
 
 const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
 

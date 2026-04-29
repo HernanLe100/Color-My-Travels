@@ -2,6 +2,7 @@ import { useAuth } from "@/App";
 import type { Album, User } from "@/types";
 import { useEffect, useState } from "react";
 import FeedAlbum from "./FeedAlbum";
+import Loading from "./Loading";
 
 export default function FeedPage() {
   const token = useAuth();
@@ -9,6 +10,7 @@ export default function FeedPage() {
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
   const [friendsAlbums, setFriendsAlbums] = useState<Album[]>([]);
   const [friends, setFriends] = useState<User[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const sortedAlbums = [...friendsAlbums].sort((a, b) => {
     if (!a.created_at && !b.created_at) return 0;
@@ -18,33 +20,21 @@ export default function FeedPage() {
     return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
   });
 
-  const fetchFriendsAlbums = async () => {
-    const res = await fetch(`${BACKEND_URL}/get_friends_albums`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    const data = await res.json();
-    setFriendsAlbums(Array.isArray(data.albums) ? data.albums : []);
-  };
-
-  const fetchFriends = async () => {
-    const res = await fetch(`${BACKEND_URL}/get_friends`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    const data = await res.json();
-    setFriends(data.friends);
-  };
-
   useEffect(() => {
     if (!token) return;
-    fetchFriendsAlbums();
-    fetchFriends();
-  }, [token]);
+    const load = async () => {
+      const [albumsData, friendsData] = await Promise.all([
+        fetch(`${BACKEND_URL}/get_friends_albums`, { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json()),
+        fetch(`${BACKEND_URL}/get_friends`, { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json()),
+      ]);
+      setFriendsAlbums(Array.isArray(albumsData.albums) ? albumsData.albums : []);
+      setFriends(friendsData.friends);
+      setIsLoading(false);
+    };
+    load();
+  }, [token, BACKEND_URL]);
+
+  if (isLoading) return <Loading />;
 
   return (
     <div className="mx-auto flex max-w-lg flex-col gap-6 py-6">

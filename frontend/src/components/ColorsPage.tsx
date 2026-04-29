@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react";
+import { Pencil } from "lucide-react";
 import type { Color } from "@/types";
 import toast from "react-hot-toast";
+import Loading from "./Loading";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 export default function ColorsPage() {
   const [colors, setColors] = useState<Color[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const token = localStorage.getItem("token");
 
   useEffect(() => {
@@ -19,6 +22,7 @@ export default function ColorsPage() {
       .then((res) => res.json())
       .then((data) => {
         setColors(data.db_response);
+        setIsLoading(false);
       });
   }, [token]);
 
@@ -53,14 +57,17 @@ export default function ColorsPage() {
     toast.success("Color updated successfully");
   };
 
+  if (isLoading) return <Loading />;
+
   return (
     <div className="mx-auto w-full max-w-lg md:mx-0 md:max-w-none px-6 py-6">
       <h1 className="text-lg font-bold mb-4">Edit Colors</h1>
       <div className="flex flex-col gap-2">
         {colors.map((row, i) => (
-          <div
+          <label
             key={i}
-            className="flex items-center justify-between p-3 rounded-lg border 
+            htmlFor={`color-${i}`}
+            className="flex items-center justify-between p-3 rounded-lg border
                      hover:bg-slate-50 transition cursor-pointer group"
           >
             <span className="text-sm font-medium">{row.region_code}</span>
@@ -68,6 +75,7 @@ export default function ColorsPage() {
             <div className="flex items-center gap-3 group">
               <div className="relative">
                 <input
+                  id={`color-${i}`}
                   type="color"
                   value={row.color}
                   onBlur={(e) =>
@@ -87,11 +95,11 @@ export default function ColorsPage() {
              opacity-0 group-hover:opacity-100 transition
              pointer-events-none"
                 >
-                  Edit
+                  <Pencil className="w-4 h-4" />
                 </div>
               </div>
             </div>
-          </div>
+          </label>
         ))}
       </div>
     </div>
