@@ -63,6 +63,7 @@ export default function AddAlbumModal({
     startDate?: boolean;
     endDate?: boolean;
     city?: "required" | "unselected";
+    dateRange?: boolean;
   }>({});
   const cityQueryRef = useRef("");
 
@@ -74,6 +75,7 @@ export default function AddAlbumModal({
     if (!startDate) errors.startDate = true;
     if (!endDate) errors.endDate = true;
     if (!selectedLocation) errors.city = cityTyped ? "unselected" : "required";
+    if (startDate && endDate && endDate < startDate) errors.dateRange = true;
 
     setFieldErrors(errors);
 
@@ -98,7 +100,9 @@ export default function AddAlbumModal({
           ? "Start date is required."
           : fieldErrors.endDate
             ? "End date is required."
-            : null;
+            : fieldErrors.dateRange
+              ? "End date should be on or after start date."
+              : null;
 
   if (!isOpen) return null;
 

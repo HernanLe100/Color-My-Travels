@@ -47,13 +47,26 @@ export default function AlbumEditForm({
     null,
   );
   const [titleError, setTitleError] = useState(false);
+  const [dateRangeError, setDateRangeError] = useState(false);
 
   const handleSave = () => {
+    const badDateRange =
+      editForm.start_date &&
+      editForm.end_date &&
+      editForm.end_date < editForm.start_date;
+
     if (!editForm.name.trim()) {
       setTitleError(true);
+      setDateRangeError(false);
+      return;
+    }
+    if (badDateRange) {
+      setTitleError(false);
+      setDateRangeError(true);
       return;
     }
     setTitleError(false);
+    setDateRangeError(false);
     onSave();
   };
 
@@ -303,6 +316,9 @@ export default function AlbumEditForm({
 
       {titleError && (
         <p className="text-sm text-red-600 px-2 mt-2">Album name is required.</p>
+      )}
+      {dateRangeError && (
+        <p className="text-sm text-red-600 px-2 mt-2">End date should be on or after start date.</p>
       )}
       <div className="mt-4 flex justify-end gap-2 border-t border-stone-300 pt-4">
         <Button type="button" variant="outline" onClick={onCancel}>
