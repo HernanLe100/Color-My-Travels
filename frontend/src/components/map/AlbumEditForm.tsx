@@ -131,7 +131,7 @@ export default function AlbumEditForm({
   
   const imageSrc = viewingExisting
   ? cloudinaryImageUrl(cloudName, pages[existingIndex].id)
-  : previewUrl;
+  : previewUrl as string | undefined;
 
   return (
     <>
