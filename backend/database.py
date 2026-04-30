@@ -302,7 +302,7 @@ def add_album(info : dict):
                 [info.get("user_id"), info.get("location_id")]
             )
             if cursor.fetchone():
-                return {"error": "An album already exists for this location."}
+                return {"error": "Album already exists for this location."}
 
             cursor.execute(
                 """

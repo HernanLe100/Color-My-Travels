@@ -46,6 +46,16 @@ export default function AlbumEditForm({
   const [confirmDeleteIndex, setConfirmDeleteIndex] = useState<number | null>(
     null,
   );
+  const [titleError, setTitleError] = useState(false);
+
+  const handleSave = () => {
+    if (!editForm.name.trim()) {
+      setTitleError(true);
+      return;
+    }
+    setTitleError(false);
+    onSave();
+  };
 
   const totalItems = pages.length + newPageFiles.length;
   const viewingExisting = activeCarouselIndex < pages.length;
@@ -291,11 +301,14 @@ export default function AlbumEditForm({
         </div>
       </div>
 
+      {titleError && (
+        <p className="text-sm text-red-600 px-2 mt-2">Album name is required.</p>
+      )}
       <div className="mt-4 flex justify-end gap-2 border-t border-stone-300 pt-4">
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
-        <Button type="button" onClick={onSave}>
+        <Button type="button" onClick={handleSave}>
           Save
         </Button>
       </div>

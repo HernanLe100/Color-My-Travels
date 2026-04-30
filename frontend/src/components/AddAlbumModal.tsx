@@ -1,4 +1,4 @@
-import { useEffect, useState, type SetStateAction } from "react";
+import { useRef, useState, type SetStateAction } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -58,16 +58,47 @@ export default function AddAlbumModal({
   isSubmitting,
 }: Props) {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [fieldErrors, setFieldErrors] = useState<{
+    name?: boolean;
+    startDate?: boolean;
+    endDate?: boolean;
+    city?: "required" | "unselected";
+  }>({});
+  const cityQueryRef = useRef("");
 
-  useEffect(() => {
-    if (!images.length) {
-      setActiveImageIndex(0);
+  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const cityTyped = cityQueryRef.current.trim().length > 0;
+    const errors: typeof fieldErrors = {};
+
+    if (!name) errors.name = true;
+    if (!startDate) errors.startDate = true;
+    if (!endDate) errors.endDate = true;
+    if (!selectedLocation) errors.city = cityTyped ? "unselected" : "required";
+
+    setFieldErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
+      e.preventDefault();
       return;
     }
-    if (activeImageIndex > images.length - 1) {
-      setActiveImageIndex(images.length - 1);
-    }
-  }, [images, activeImageIndex]);
+
+    onSubmit(e);
+  };
+
+  const effectiveImageIndex =
+    images.length === 0 ? 0 : Math.min(activeImageIndex, images.length - 1);
+
+  const firstError = fieldErrors.name
+    ? "Album name is required."
+    : fieldErrors.city === "unselected"
+      ? "Choose a city from search."
+      : fieldErrors.city === "required"
+        ? "City is required."
+        : fieldErrors.startDate
+          ? "Start date is required."
+          : fieldErrors.endDate
+            ? "End date is required."
+            : null;
 
   if (!isOpen) return null;
 
@@ -90,7 +121,8 @@ export default function AddAlbumModal({
         </div>
 
         <form
-          onSubmit={onSubmit}
+          onSubmit={handleFormSubmit}
+          noValidate
           className="mt-4 space-y-3 max-h-[500px] overflow-y-auto px-2"
         >
           <div className="flex flex-col gap-2">
@@ -102,17 +134,13 @@ export default function AddAlbumModal({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Enter a name for this album"
-              required
             />
           </div>
 
-          <CitySearch onSelect={handleSelect} isRequired={!selectedLocation} />
-          <input
-            required
-            tabIndex={-1}
-            value={selectedLocation ? "selected" : ""}
-            onChange={() => {}}
-            style={{ opacity: 0, height: 0, padding: 0, border: "none", display: "block", width: "100%" }}
+          <CitySearch
+            onSelect={handleSelect}
+            isRequired={!selectedLocation}
+            onQueryChange={(q) => { cityQueryRef.current = q; }}
           />
           {selectedLocation && (
             <p className="text-sm text-slate-600">
@@ -131,7 +159,6 @@ export default function AddAlbumModal({
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              required
             />
           </div>
 
@@ -143,7 +170,6 @@ export default function AddAlbumModal({
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              required
             />
           </div>
 
@@ -180,17 +206,17 @@ export default function AddAlbumModal({
             {images.length > 0 && (
               <div className="mt-2 rounded-lg border border-slate-200 p-3 flex flex-col gap-3">
                 <img
-                  src={URL.createObjectURL(images[activeImageIndex])}
-                  alt={`Selected upload ${activeImageIndex + 1}`}
+                  src={URL.createObjectURL(images[effectiveImageIndex])}
+                  alt={`Selected upload ${effectiveImageIndex + 1}`}
                   className="h-52 w-full rounded-md object-cover"
                 />
 
                 <Input
                   id="image-caption"
-                  value={imageCaptions[activeImageIndex] ?? ""}
+                  value={imageCaptions[effectiveImageIndex] ?? ""}
                   onChange={(e) => {
                     const nextCaptions = [...imageCaptions];
-                    nextCaptions[activeImageIndex] = e.target.value;
+                    nextCaptions[effectiveImageIndex] = e.target.value;
                     setImageCaptions(nextCaptions);
                   }}
                   placeholder="Write a caption for this image"
@@ -204,13 +230,13 @@ export default function AddAlbumModal({
                     onClick={() =>
                       setActiveImageIndex((current) => Math.max(0, current - 1))
                     }
-                    disabled={activeImageIndex === 0}
+                    disabled={effectiveImageIndex === 0}
                     className="cursor-pointer"
                   >
                     Prev
                   </Button>
                   <span className="text-sm text-slate-600">
-                    {activeImageIndex + 1} / {images.length}
+                    {effectiveImageIndex + 1} / {images.length}
                   </span>
                   <Button
                     type="button"
@@ -220,7 +246,7 @@ export default function AddAlbumModal({
                         Math.min(images.length - 1, current + 1),
                       )
                     }
-                    disabled={activeImageIndex === images.length - 1}
+                    disabled={effectiveImageIndex === images.length - 1}
                     className="cursor-pointer"
                   >
                     Next
@@ -230,7 +256,10 @@ export default function AddAlbumModal({
             )}
           </div>
 
-          {submitError && submitError !== "Choose a city from search." && (
+          {firstError && (
+            <p className="text-sm text-red-600">{firstError}</p>
+          )}
+          {submitError && (
             <p className="text-sm text-red-600">{submitError}</p>
           )}
 

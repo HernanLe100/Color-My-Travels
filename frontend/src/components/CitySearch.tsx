@@ -8,9 +8,11 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 export default function CitySearch({
   onSelect,
   isRequired,
+  onQueryChange,
 }: {
   onSelect: (location: SearchLocation) => void;
   isRequired: boolean;
+  onQueryChange?: (q: string) => void;
 }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchLocation[]>([]);
@@ -37,7 +39,10 @@ export default function CitySearch({
           required={isRequired}
           placeholder="Search for a city..."
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            onQueryChange?.(e.target.value);
+          }}
         />
       </div>
 
