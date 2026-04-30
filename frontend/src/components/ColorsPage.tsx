@@ -40,23 +40,38 @@ export default function ColorsPage() {
     );
   };
 
-  const handleColorSave = (
+  const handleColorSave = async (
     region_code: string,
-    color: string,
+    newColor: string,
     region_type: string,
+    prevColor: string,
   ) => {
     if (!token) return;
+    if (prevColor.toLowerCase() === newColor.toLowerCase()) return;
 
-    fetch(`${BACKEND_URL}/update_color`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ region_code, color, region_type }),
-    });
+    try {
+      const res = await fetch(`${BACKEND_URL}/update_color`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ region_code, color: newColor, region_type }),
+      });
 
-    toast.success("Color updated successfully");
+      if (!res.ok) throw new Error();
+
+      toast.success("Color updated successfully");
+    } catch {
+      setColors((prev) =>
+        prev.map((row) =>
+          row.region_code === region_code && row.region_type === region_type
+            ? { ...row, color: prevColor }
+            : row,
+        ),
+      );
+      toast.error("Failed to update color");
+    }
   };
 
   if (isLoading) return <Loading />;
@@ -80,6 +95,9 @@ export default function ColorsPage() {
                 id={`color-${i}`}
                 type="color"
                 value={row.color}
+                onFocus={(e) => {
+                  e.currentTarget.dataset.prev = row.color;
+                }}
                 onChange={(e) =>
                   handleColorPreview(
                     row.region_code,
@@ -92,6 +110,7 @@ export default function ColorsPage() {
                     row.region_code,
                     e.target.value,
                     row.region_type,
+                    e.currentTarget.dataset.prev ?? row.color,
                   )
                 }
                 className="w-10 h-10 rounded-md border shadow cursor-pointer"
