@@ -64,7 +64,7 @@ export default function FriendsPage() {
 
   const sendRequest = async () => {
     if (!friendId.trim()) {
-      toast.error("User ID is required");
+      toast.error("User ID is required.");
       return;
     }
     setIsSendingRequest(true);
