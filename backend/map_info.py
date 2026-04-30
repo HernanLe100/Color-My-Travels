@@ -51,38 +51,6 @@ def get_geo():
         print("Geo fetch error:", e)
         return jsonify({"error": str(e)}), 500
 
-
-@map_bp.route("/geo2", methods=["GET"])
-def get_geo2():
-    place_id = request.args.get("place_id")
-
-    if not place_id:
-        return jsonify({"error": "Missing place ID"}), 400
-
-    try:
-        # call Geoapify Place API
-        url = f"https://api.geoapify.com/v2/place-details?id={place_id}"
-        res = requests.get(
-            url, 
-            headers={"Accept": "application/json"}, 
-            params={
-                "apiKey": _GEOAPIFY_KEY,
-                "features": "details", 
-            }
-        )
-
-        if res.status_code != 200:
-            return jsonify({"error": "Failed to fetch data"}), 500
-        
-        result = res.json()
-        return jsonify(result)
-
-    except Exception as e:
-        print("Geo fetch error:", e)
-        return jsonify({"error": str(e)}), 500
-    
-    
-
 def iso2_to_iso3(code):
     if not code:
         return None
@@ -140,7 +108,6 @@ def coord_location():
     state = feature.get("state") or feature.get("state_district") or feature.get("county") 
     country_iso3 = iso2_to_iso3( feature.get("country_code") )
     adm1_code = feature.get("iso3166_2")
-    place_id = feature.get("place_id")
 
     return jsonify({
         "city": city,
@@ -192,7 +159,6 @@ def search():
         adm1_code = feature.get("iso3166_2")
         lat = feature.get("lat")
         lng = feature.get("lon")
-        place_id = feature.get("place_id")
         
         print(city)
         print(state)
@@ -200,7 +166,6 @@ def search():
         print(adm1_code)
         print(lat)
         print(lng)
-        print(place_id)
         print()
         
 
@@ -214,37 +179,3 @@ def search():
         })
     
     return jsonify(results)
-    
-
-def place_part_of(place_id):
-    url = f"https://api.geoapify.com/v1/boundaries/part-of?id={place_id}"
-    
-    res = requests.get(
-        url, 
-        headers={"Accept": "application/json"}, 
-        params={
-            "apiKey": _GEOAPIFY_KEY, 
-            "geometry": "point"
-        },
-        timeout=5
-    )
-    if res.status_code != 200:
-        pass
-    
-    data = res.json()
-    
-    # last place is country
-    places = data.get("features")
-    country = places[-1]
-    # last place with an ADM1 code is state
-    state = None
-    for i in range(len(places)-2, -1, -1):
-        if places[i].get("iso3166_2"):
-            state = places[i]
-            break
-    
-    # note: this returns full dict of info of country and state, not just place_id
-    results = country, state
-
-    
-    
