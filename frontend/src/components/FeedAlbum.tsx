@@ -69,7 +69,7 @@ export default function FeedAlbum({
   const createdAt = album?.created_at ? new Date(album.created_at) : null;
 
   return (
-    <article className="mx-auto w-full max-w-lg md:max-w-2xl overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm">
+    <article className="box-border w-full min-w-0 max-w-full overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm">
       {/* Header */}
       <div className="flex items-center gap-3 px-3 py-3">
         <div

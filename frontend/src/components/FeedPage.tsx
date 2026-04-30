@@ -37,15 +37,16 @@ export default function FeedPage() {
   if (isLoading) return <Loading />;
 
   return (
-    <div className="mx-auto flex max-w-lg md:max-w-2xl flex-col gap-6 px-6 py-6">
-      {friendsAlbums.length === 0 ? (
-        <p className="text-center text-sm text-neutral-500">
-          No albums from friends yet.
-        </p>
-      ) : null}
-      {sortedAlbums.map((album) => (
-        <FeedAlbum key={album.album_id} album={album} friends={friends} />
-      ))}
-    </div>
-  );
+  <div className="box-border mx-auto flex w-full max-w-lg flex-col gap-6 px-6 py-6 md:max-w-2xl">
+    {friendsAlbums.length === 0 ? (
+      <p className="text-center text-sm text-neutral-500">
+        No albums from friends yet.
+      </p>
+    ) : null}
+
+    {sortedAlbums.map((album) => (
+      <FeedAlbum key={album.album_id} album={album} friends={friends} />
+    ))}
+  </div>
+);
 }
