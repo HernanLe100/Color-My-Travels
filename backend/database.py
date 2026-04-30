@@ -295,6 +295,17 @@ def add_album(info : dict):
         with connection.cursor(row_factory=dict_row) as cursor:
             cursor.execute(
                 """
+                SELECT album_id FROM albums
+                WHERE user_id = %s AND location_id = %s
+                LIMIT 1;
+                """,
+                [info.get("user_id"), info.get("location_id")]
+            )
+            if cursor.fetchone():
+                return {"error": "Album already exists for this location."}
+
+            cursor.execute(
+                """
                 INSERT INTO albums (user_id, location_id, notes, start_date, end_date, name, pages)
                 VALUES (%s, %s, %s, %s, %s, %s, %s::jsonb)
                 RETURNING album_id;

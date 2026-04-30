@@ -6,7 +6,7 @@ import {
   type Dispatch,
   type SetStateAction,
 } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Pencil, Trash2 } from "lucide-react";
 import { useMap } from "react-leaflet";
 import type { Album, Color, Page, Pin } from "@/types";
 import { Button } from "../ui/button";
@@ -290,10 +290,8 @@ export default function AlbumDetailModal({
       case "cover":
         if (!album) return null;
         return (
-          <div className="flex max-h-[28rem] min-h-[18rem] flex-col items-center overflow-y-auto px-2 py-2 text-center text-[#5E3023]">
-            <p className="text-xs font-medium uppercase tracking-wide">
-              Travel album
-            </p>
+          <div className="flex max-h-[28rem] flex-col items-center overflow-y-auto px-2 pt-2 pb-6 text-center text-[#5E3023]">
+            
             <h3 className="mt-4 font-serif text-2xl">
               {album.name || "Untitled"}
             </h3>
@@ -303,7 +301,7 @@ export default function AlbumDetailModal({
             </p>
             {album.notes?.trim() ? (
               <div className="mt-6 w-full max-w-sm text-left">
-                <p className="mt-2 whitespace-pre-wrap border-l-2 border-stone-400 pl-3 text-sm leading-relaxed">
+                <p className="mt-2 whitespace-pre-wrap wrap-break-word border-l-2 border-stone-400 pl-3 text-sm leading-relaxed">
                   {album.notes}
                 </p>
               </div>
@@ -375,7 +373,7 @@ export default function AlbumDetailModal({
 
       if (!res.ok) throw new Error();
 
-      toast.success("Color updated");
+      toast.success("Color updated successfully");
     } catch (err) {
       console.error(err);
 
@@ -464,54 +462,52 @@ export default function AlbumDetailModal({
           <div className="mt-1 text-sm text-stone-600 flex items-center gap-2 justify-center">
             {/* ADM1 */}
             {pin.adm1 && (
-              <span className="flex items-center gap-1 relative group">
-                {pin.adm1}
-                {adm1Color && (
-                  <div className="relative group">
-                    <input
-                      type="color"
-                      value={adm1Color.color}
-                      onFocus={(e) => {
-                        e.currentTarget.dataset.prev = adm1Color.color;
-                      }}
-                      onChange={(e) => {
-                        const newColor = e.target.value;
-
-                        setLocalColors((prev) =>
-                          prev.map((c) =>
-                            c.region_code === adm1Color.region_code &&
-                            c.region_type === adm1Color.region_type
-                              ? { ...c, color: newColor }
-                              : c,
-                          ),
-                        );
-                      }}
-                      onBlur={(e) => {
-                        const prev =
-                          e.currentTarget.dataset.prev || adm1Color.color;
-
-                        handleColorChange(
-                          adm1Color.region_code,
-                          e.target.value,
-                          adm1Color.region_type,
-                          prev,
-                        );
-                      }}
-                      className="w-6 h-6 p-0 border-none cursor-pointer"
-                    />
-
-                    {/* overlay */}
-                    <div
-                      className="absolute inset-0 flex items-center justify-center
-               rounded-md bg-black/30 text-white text-[10px]
-               opacity-0 group-hover:opacity-100 transition
-               pointer-events-none"
-                    >
-                      Edit
+              adm1Color ? (
+                <label
+                  htmlFor="adm1-color-input"
+                  className="flex items-center gap-1 cursor-pointer"
+                >
+                  {pin.adm1}
+                  <div className="group flex items-center gap-1">
+                    <div className="relative">
+                      <input
+                        id="adm1-color-input"
+                        type="color"
+                        value={adm1Color.color}
+                        onFocus={(e) => {
+                          e.currentTarget.dataset.prev = adm1Color.color;
+                        }}
+                        onChange={(e) => {
+                          const newColor = e.target.value;
+                          setLocalColors((prev) =>
+                            prev.map((c) =>
+                              c.region_code === adm1Color.region_code &&
+                              c.region_type === adm1Color.region_type
+                                ? { ...c, color: newColor }
+                                : c,
+                            ),
+                          );
+                        }}
+                        onBlur={(e) => {
+                          const prev =
+                            e.currentTarget.dataset.prev || adm1Color.color;
+                          handleColorChange(
+                            adm1Color.region_code,
+                            e.target.value,
+                            adm1Color.region_type,
+                            prev,
+                          );
+                        }}
+                        className="w-6 h-6 p-0 border-none cursor-pointer"
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center rounded-md bg-black/30 text-white opacity-0 group-hover:opacity-100 transition pointer-events-none" />
                     </div>
+                    <Pencil className="w-3 h-3 text-stone-400" />
                   </div>
-                )}
-              </span>
+                </label>
+              ) : (
+                <span>{pin.adm1}</span>
+              )
             )}
 
             {/* separator */}
@@ -519,54 +515,52 @@ export default function AlbumDetailModal({
 
             {/* COUNTRY */}
             {pin.country && (
-              <span className="flex items-center gap-1">
-                {pin.country}
-                {countryColor && (
-                  <div className="relative group">
-                    <input
-                      type="color"
-                      value={countryColor.color}
-                      onFocus={(e) => {
-                        e.currentTarget.dataset.prev = countryColor.color;
-                      }}
-                      onChange={(e) => {
-                        const newColor = e.target.value;
-
-                        setLocalColors((prev) =>
-                          prev.map((c) =>
-                            c.region_code === countryColor.region_code &&
-                            c.region_type === countryColor.region_type
-                              ? { ...c, color: newColor }
-                              : c,
-                          ),
-                        );
-                      }}
-                      onBlur={(e) => {
-                        const prev =
-                          e.currentTarget.dataset.prev || countryColor.color;
-
-                        handleColorChange(
-                          countryColor.region_code,
-                          e.target.value,
-                          countryColor.region_type,
-                          prev,
-                        );
-                      }}
-                      className="w-6 h-6 p-0 border-none cursor-pointer"
-                    />
-
-                    {/* overlay */}
-                    <div
-                      className="absolute inset-0 flex items-center justify-center
-               rounded-md bg-black/30 text-white text-[10px]
-               opacity-0 group-hover:opacity-100 transition
-               pointer-events-none"
-                    >
-                      Edit
+              countryColor ? (
+                <label
+                  htmlFor="country-color-input"
+                  className="flex items-center gap-1 cursor-pointer"
+                >
+                  {pin.country}
+                  <div className="group flex items-center gap-1">
+                    <div className="relative">
+                      <input
+                        id="country-color-input"
+                        type="color"
+                        value={countryColor.color}
+                        onFocus={(e) => {
+                          e.currentTarget.dataset.prev = countryColor.color;
+                        }}
+                        onChange={(e) => {
+                          const newColor = e.target.value;
+                          setLocalColors((prev) =>
+                            prev.map((c) =>
+                              c.region_code === countryColor.region_code &&
+                              c.region_type === countryColor.region_type
+                                ? { ...c, color: newColor }
+                                : c,
+                            ),
+                          );
+                        }}
+                        onBlur={(e) => {
+                          const prev =
+                            e.currentTarget.dataset.prev || countryColor.color;
+                          handleColorChange(
+                            countryColor.region_code,
+                            e.target.value,
+                            countryColor.region_type,
+                            prev,
+                          );
+                        }}
+                        className="w-6 h-6 p-0 border-none cursor-pointer"
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center rounded-md bg-black/30 text-white opacity-0 group-hover:opacity-100 transition pointer-events-none" />
                     </div>
+                    <Pencil className="w-3 h-3 text-stone-400" />
                   </div>
-                )}
-              </span>
+                </label>
+              ) : (
+                <span>{pin.country}</span>
+              )
             )}
           </div>
         </header>
@@ -587,12 +581,12 @@ export default function AlbumDetailModal({
           />
         ) : (
           <>
-            <div className="relative mt-4 min-h-[20rem] rounded-r-md border border-stone-300 bg-[#F3E9DC] shadow-inner">
+            <div className="relative mt-4 rounded-r-md border border-stone-300 bg-[#F3E9DC] shadow-inner">
               <div
                 className="absolute bottom-2 left-0 top-2 w-2 rounded-sm bg-[#895737]"
                 aria-hidden
               />
-              <div className="min-h-[20rem] pl-5 pr-4 py-4">
+              <div className="pl-5 pr-4 py-4">
                 {renderPageBody()}
               </div>
             </div>
@@ -638,40 +632,25 @@ export default function AlbumDetailModal({
             isEditing ? "hidden" : ""
           }`}
         >
-          <div className="flex gap-2">
-            {isEditing ? (
-              <>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsEditing(false)}
-                >
-                  Cancel
-                </Button>
-                <Button type="button" onClick={handleSaveEdit}>
-                  Save
-                </Button>
-              </>
-            ) : album && !isConfirmingDelete ? (
+          <div className="flex gap-2 ml-auto">
+            {album && !isConfirmingDelete && (
               <Button
                 type="button"
                 variant="outline"
                 onClick={openEdit}
                 className="cursor-pointer"
               >
-                Edit
+                Edit <Pencil className="w-4 h-4" />
               </Button>
-            ) : null}
-          </div>
-          <div className="flex gap-2">
-            {album && !isEditing && !isConfirmingDelete && (
+            )}
+            {album && !isConfirmingDelete && (
               <Button
                 type="button"
                 variant="destructive"
                 onClick={() => setIsConfirmingDelete(true)}
                 className="cursor-pointer"
               >
-                Delete
+                Delete <Trash2 className="w-4 h-4" />
               </Button>
             )}
             {isConfirmingDelete && (
