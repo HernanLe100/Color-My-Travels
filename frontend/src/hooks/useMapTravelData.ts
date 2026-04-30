@@ -165,7 +165,7 @@ export function useMapTravelData(
 
   const polygonLevel: PolygonLevel = zoom >= 5 ? "ADM1" : "ADM0";
   const showPins = isTogglePins || zoom >= 8;
-  const showPolygons = zoom < 8;
+  const showPolygons = true; // zoom < 8;
 
   const geoData = polygonLevel === "ADM0" ? adm0 : adm1;
 
