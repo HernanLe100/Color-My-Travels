@@ -301,7 +301,7 @@ export default function AlbumDetailModal({
             </p>
             {album.notes?.trim() ? (
               <div className="mt-6 w-full max-w-sm text-left">
-                <p className="mt-2 whitespace-pre-wrap border-l-2 border-stone-400 pl-3 text-sm leading-relaxed">
+                <p className="mt-2 whitespace-pre-wrap wrap-break-word border-l-2 border-stone-400 pl-3 text-sm leading-relaxed">
                   {album.notes}
                 </p>
               </div>

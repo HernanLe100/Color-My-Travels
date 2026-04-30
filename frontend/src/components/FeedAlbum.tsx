@@ -69,7 +69,7 @@ export default function FeedAlbum({
   const createdAt = album?.created_at ? new Date(album.created_at) : null;
 
   return (
-    <article className="mx-auto w-lg overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm">
+    <article className="mx-auto w-full max-w-lg md:max-w-2xl overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm">
       {/* Header */}
       <div className="flex items-center gap-3 px-3 py-3">
         <div
@@ -97,10 +97,13 @@ export default function FeedAlbum({
       {/* Caption block — album title, dates, notes */}
       <div className="space-y-2 px-3 pb-4 pt-2">
         <h3 className="text-base font-semibold leading-snug text-neutral-900">
-          {album.name || "Untitled album"}: {dateRange}
+          {album.name || "Untitled album"}
         </h3>
+        <p className="whitespace-pre-wrap text-sm leading-relaxed text-neutral-800 max-h-24 overflow-y-auto">
+          {dateRange}
+        </p>
         {album.notes?.trim() ? (
-          <p className="whitespace-pre-wrap text-sm leading-relaxed text-neutral-800 max-h-24 overflow-y-auto">
+          <p className="whitespace-pre-wrap wrap-break-word text-sm leading-relaxed text-neutral-800 max-h-24 overflow-y-auto">
             {album.notes}
           </p>
         ) : null}

@@ -139,7 +139,7 @@ export default function FriendsPage() {
 
   return (
     <div className="mx-auto w-full max-w-lg md:mx-0 md:max-w-none px-6 py-6 flex flex-col gap-5">
-      <div className="flex flex-col gap-2 max-w-lg">
+      <div className="flex flex-col gap-2 max-w-lg md:max-w-2xl">
         <p className="text-lg font-bold">Add Friend</p>
         <Input
           type="text"
@@ -154,7 +154,7 @@ export default function FriendsPage() {
       </div>
 
       {sentRequests.length > 0 && (
-        <div className="flex flex-col gap-2 max-w-lg">
+        <div className="flex flex-col gap-2 max-w-lg md:max-w-2xl">
           <p className="text-lg font-bold">Sent Requests</p>
           {sentRequests.map((req) => (
             <div
@@ -185,7 +185,7 @@ export default function FriendsPage() {
         </div>
       )}
 
-      <div className="flex flex-col gap-2 max-w-lg">
+      <div className="flex flex-col gap-2 max-w-lg md:max-w-2xl">
         <p className="text-lg font-bold">Friend Requests</p>
         {requests?.map((request) => (
           <div
@@ -218,7 +218,7 @@ export default function FriendsPage() {
         ))}
       </div>
 
-      <div className="flex flex-col gap-2 max-w-lg">
+      <div className="flex flex-col gap-2 max-w-lg md:max-w-2xl">
         <p className="text-lg font-bold">Friends</p>
         {friends?.map((friend) => (
           <div

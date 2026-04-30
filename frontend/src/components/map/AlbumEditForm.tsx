@@ -130,6 +130,7 @@ export default function AlbumEditForm({
               setEditForm((f) => ({ ...f, name: e.target.value }))
             }
             placeholder="Enter a name for this album"
+            maxLength={50}
           />
         </div>
 

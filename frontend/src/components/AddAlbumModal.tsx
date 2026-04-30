@@ -108,7 +108,7 @@ export default function AddAlbumModal({
 
   return (
     <div className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/30 px-4">
-      <div className="w-full max-w-lg rounded-xl bg-white p-5 shadow-2xl">
+      <div className="w-full max-w-2xl rounded-xl bg-white p-5 shadow-2xl">
         <div className="relative px-2">
           <button
             type="button"
@@ -138,6 +138,7 @@ export default function AddAlbumModal({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Enter a name for this album"
+              maxLength={50}
             />
           </div>
 
@@ -155,26 +156,27 @@ export default function AddAlbumModal({
             </p>
           )}
 
-          <div className="flex flex-col gap-2">
-            <Label className="flex gap-0">
-              Start Date<span className="text-xs text-red-600">*</span>
-            </Label>
-            <Input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Label className="flex gap-0">
-              End Date<span className="text-xs text-red-600">*</span>
-            </Label>
-            <Input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-            />
+          <div className="grid grid-cols-2 gap-2">
+            <div className="flex flex-col gap-2">
+              <Label className="flex gap-0">
+                Start Date<span className="text-xs text-red-600">*</span>
+              </Label>
+              <Input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label className="flex gap-0">
+                End Date<span className="text-xs text-red-600">*</span>
+              </Label>
+              <Input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+              />
+            </div>
           </div>
 
           <div className="flex flex-col gap-2">
