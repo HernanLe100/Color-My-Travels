@@ -120,7 +120,7 @@ export default function FriendsPage() {
   };
 
   return (
-    <div className="px-14 py-6 flex flex-col gap-5">
+    <div className="mx-auto w-full max-w-lg md:mx-0 md:max-w-none px-6 py-6 flex flex-col gap-5">
       <div className="flex flex-col gap-2 max-w-md">
         <p className="text-lg font-bold">Add Friend</p>
         <Input

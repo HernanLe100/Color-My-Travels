@@ -1,4 +1,4 @@
-import { MapContainer, TileLayer } from "react-leaflet";
+import { MapContainer, TileLayer, ZoomControl } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useRef, useState } from "react";
@@ -239,7 +239,7 @@ export default function MapPage() {
 
       <MapContainer
         center={position}
-        zoom={3}
+        zoom={2}
         minZoom={2}
         scrollWheelZoom={true}
         className="h-full w-full"
@@ -249,7 +249,9 @@ export default function MapPage() {
           [90, 180],   // northeast corner
         ]}
         maxBoundsViscosity={0.8}
+        zoomControl={false}
       >
+        <ZoomControl position="bottomleft" />
         <TileLayer
           attribution="&copy; OpenStreetMap & Carto"
           url="https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png"
