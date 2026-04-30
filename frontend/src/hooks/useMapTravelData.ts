@@ -166,6 +166,7 @@ export function useMapTravelData(
   const polygonLevel: PolygonLevel = zoom >= 5 ? "ADM1" : "ADM0";
   const showPins = isTogglePins || zoom >= 8;
   const showPolygons = true; // zoom < 8;
+  // note: we don't really need showPolygons if it's always true now, but I think it's nice to have that option if we ever change our minds again
 
   const geoData = polygonLevel === "ADM0" ? adm0 : adm1;
 
