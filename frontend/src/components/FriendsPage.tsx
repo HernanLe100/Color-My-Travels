@@ -5,6 +5,7 @@ import { useAuth } from "@/App";
 import toast from "react-hot-toast";
 import type { FriendRequest, SentRequest, User } from "@/types";
 import Loading from "./Loading";
+import { Send, Check, X } from "lucide-react";
 
 export default function FriendsPage() {
   const token = useAuth();
@@ -62,6 +63,10 @@ export default function FriendsPage() {
   if (isLoading) return <Loading />;
 
   const sendRequest = async () => {
+    if (!friendId.trim()) {
+      toast.error("User ID is required");
+      return;
+    }
     setIsSendingRequest(true);
     const res = await fetch(`${BACKEND_URL}/send_friend_request`, {
       method: "POST",
@@ -144,6 +149,7 @@ export default function FriendsPage() {
         />
         <Button className="cursor-pointer" onClick={sendRequest}>
           {isSendingRequest ? "Sending..." : "Send Request"}
+          {!isSendingRequest && <Send className="w-4 h-4" />}
         </Button>
       </div>
 
@@ -163,7 +169,7 @@ export default function FriendsPage() {
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-xs text-stone-500 bg-stone-100 px-2 py-0.5 rounded-full">
-                  Pending
+                  Pending...
                 </span>
                 <Button
                   size="sm"
@@ -198,14 +204,14 @@ export default function FriendsPage() {
                 className="bg-green-600 cursor-pointer hover:bg-green-700"
                 onClick={() => acceptRequest(request.sender_id)}
               >
-                Accept
+                Accept <Check className="w-4 h-4" />
               </Button>
               <Button
                 size="sm"
                 className="bg-red-600 cursor-pointer hover:bg-red-700"
                 onClick={() => rejectRequest(request.sender_id)}
               >
-                Reject
+                Reject <X className="w-4 h-4" />
               </Button>
             </div>
           </div>

@@ -2,6 +2,8 @@ import type { Album, User } from "@/types";
 import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
 import Loading from "./Loading";
+import { LogOut, Trash2 } from "lucide-react";
+
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -64,13 +66,13 @@ export default function UserPage() {
       <div className="flex flex-col gap-2">
         <span className="text-base font-bold">Account Actions</span>
         <Button onClick={logout} className="w-fit cursor-pointer" size="lg">
-          Logout
+          Logout <LogOut className="w-4 h-4" />
         </Button>
         {!isConfirmingDelete && (
           <Button onClick={() => setIsConfirmingDelete(true)}
             className="w-fit cursor-pointer" size="lg"
             variant="destructive">
-            Delete My Account
+            Delete My Account <Trash2 className="w-4 h-4" />
           </Button>
         )}
         {isConfirmingDelete && (

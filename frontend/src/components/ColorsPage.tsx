@@ -113,7 +113,7 @@ export default function ColorsPage() {
                     e.currentTarget.dataset.prev ?? row.color,
                   )
                 }
-                className="w-10 h-10 rounded-md border shadow cursor-pointer"
+                className="w-10 h-10 cursor-pointer mr-0.5"
               />
             </div>
           </label>
