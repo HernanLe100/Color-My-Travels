@@ -104,7 +104,7 @@ def coord_location():
     
     feature = features[0]
     
-    city = feature.get("city") # or feature.get("county") 
+    city = feature.get("city") 
     state = feature.get("state") or feature.get("state_district") or feature.get("county") 
     country_iso3 = iso2_to_iso3( feature.get("country_code") )
     adm1_code = feature.get("iso3166_2")
@@ -163,7 +163,7 @@ def search():
     
     for feature in data.get("results", []):
         
-        city = feature.get("city") # or feature.get("county") 
+        city = feature.get("city") 
         state = feature.get("state") or feature.get("state_district") or feature.get("county") 
         country_iso3 = iso2_to_iso3( feature.get("country_code") )
         adm1_code = feature.get("iso3166_2")
