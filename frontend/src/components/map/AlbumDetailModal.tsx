@@ -373,7 +373,7 @@ export default function AlbumDetailModal({
 
       if (!res.ok) throw new Error();
 
-      toast.success("Color updated");
+      toast.success("Color updated successfully");
     } catch (err) {
       console.error(err);
 
