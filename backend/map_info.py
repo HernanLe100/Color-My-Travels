@@ -104,17 +104,27 @@ def coord_location():
     
     feature = features[0]
     
-    city = feature.get("city") or feature.get("county") 
+    city = feature.get("city") # or feature.get("county") 
     state = feature.get("state") or feature.get("state_district") or feature.get("county") 
     country_iso3 = iso2_to_iso3( feature.get("country_code") )
     adm1_code = feature.get("iso3166_2")
+    lat = feature.get("lat")
+    lng = feature.get("lon")
+
+    print(city)
+    print(state)
+    print(country_iso3)
+    print(adm1_code)
+    print(lat)
+    print(lng)
+    print()
 
     return jsonify({
         "city": city,
         "state": state,
         "adm1": adm1_code,
         "country": country_iso3,
-        "lat": lat, # use the queried coords, not returned coords
+        "lat": lat,
         "lng": lng
     })
 
@@ -153,7 +163,7 @@ def search():
     
     for feature in data.get("results", []):
         
-        city = feature.get("city") or feature.get("county") 
+        city = feature.get("city") # or feature.get("county") 
         state = feature.get("state") or feature.get("state_district") or feature.get("county") 
         country_iso3 = iso2_to_iso3( feature.get("country_code") )
         adm1_code = feature.get("iso3166_2")
@@ -175,7 +185,7 @@ def search():
             "adm1": adm1_code,
             "country": country_iso3,
             "lat": lat,
-            "lng": lng
+            "lng": lng,
         })
     
     return jsonify(results)
