@@ -74,10 +74,20 @@ export default function AddAlbumModal({
   return (
     <div className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/30 px-4">
       <div className="w-full max-w-lg rounded-xl bg-white p-5 shadow-2xl">
-        <h2 className="text-lg font-semibold text-slate-900 px-2">New Album</h2>
-        <p className="mt-1 text-sm text-slate-600 px-2">
-          Create a new album entry for a location.
-        </p>
+        <div className="relative px-2">
+          <button
+            type="button"
+            className="absolute right-0 top-0 text-stone-400 hover:text-stone-700 cursor-pointer"
+            onClick={onClose}
+            aria-label="Close"
+          >
+            ✕
+          </button>
+          <h2 className="text-lg font-semibold text-slate-900">New Album</h2>
+          <p className="mt-1 text-sm text-slate-600">
+            Create a new album entry for a location.
+          </p>
+        </div>
 
         <form
           onSubmit={onSubmit}
@@ -97,6 +107,13 @@ export default function AddAlbumModal({
           </div>
 
           <CitySearch onSelect={handleSelect} isRequired={!selectedLocation} />
+          <input
+            required
+            tabIndex={-1}
+            value={selectedLocation ? "selected" : ""}
+            onChange={() => {}}
+            style={{ opacity: 0, height: 0, padding: 0, border: "none", display: "block", width: "100%" }}
+          />
           {selectedLocation && (
             <p className="text-sm text-slate-600">
               Selected: {selectedLocation.city}
@@ -213,7 +230,9 @@ export default function AddAlbumModal({
             )}
           </div>
 
-          {submitError && <p className="text-sm text-red-600">{submitError}</p>}
+          {submitError && submitError !== "Choose a city from search." && (
+            <p className="text-sm text-red-600">{submitError}</p>
+          )}
 
           <div className="mt-2 flex justify-end gap-2">
             <Button
