@@ -4,7 +4,6 @@ import requests
 import pycountry
 import os
 
-_MAPBOX_TOKEN = os.getenv("MAPBOX_TOKEN")
 _GEOAPIFY_KEY = os.getenv("GEOAPIFY_KEY")
 
 # --------------------------------------------------
