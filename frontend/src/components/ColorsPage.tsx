@@ -26,7 +26,21 @@ export default function ColorsPage() {
       });
   }, [token]);
 
-  const handleColorChange = (
+  const handleColorPreview = (
+    region_code: string,
+    color: string,
+    region_type: string,
+  ) => {
+    setColors((prev) =>
+      prev.map((row) =>
+        row.region_code === region_code && row.region_type === region_type
+          ? { ...row, color }
+          : row,
+      ),
+    );
+  };
+
+  const handleColorSave = (
     region_code: string,
     color: string,
     region_type: string,
@@ -39,20 +53,8 @@ export default function ColorsPage() {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({
-        region_code,
-        color,
-        region_type,
-      }),
+      body: JSON.stringify({ region_code, color, region_type }),
     });
-
-    setColors((prev) =>
-      prev.map((row) =>
-        row.region_code === region_code && row.region_type === region_type
-          ? { ...row, color }
-          : row,
-      ),
-    );
 
     toast.success("Color updated successfully");
   };
@@ -72,32 +74,28 @@ export default function ColorsPage() {
           >
             <span className="text-sm font-medium">{row.region_code}</span>
 
-            <div className="flex items-center gap-3 group">
-              <div className="relative">
-                <input
-                  id={`color-${i}`}
-                  type="color"
-                  value={row.color}
-                  onBlur={(e) =>
-                    handleColorChange(
-                      row.region_code,
-                      e.target.value,
-                      row.region_type,
-                    )
-                  }
-                  className="w-10 h-10 rounded-md border shadow cursor-pointer"
-                />
-
-                {/* Hover overlay */}
-                <div
-                  className="absolute inset-0 flex items-center justify-center
-             rounded-md bg-black/10 text-white text-xs font-medium
-             opacity-0 group-hover:opacity-100 transition
-             pointer-events-none"
-                >
-                  <Pencil className="w-4 h-4" />
-                </div>
-              </div>
+            <div className="flex items-center gap-2">
+              <Pencil className="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 transition" />
+              <input
+                id={`color-${i}`}
+                type="color"
+                value={row.color}
+                onChange={(e) =>
+                  handleColorPreview(
+                    row.region_code,
+                    e.target.value,
+                    row.region_type,
+                  )
+                }
+                onBlur={(e) =>
+                  handleColorSave(
+                    row.region_code,
+                    e.target.value,
+                    row.region_type,
+                  )
+                }
+                className="w-10 h-10 rounded-md border shadow cursor-pointer"
+              />
             </div>
           </label>
         ))}
