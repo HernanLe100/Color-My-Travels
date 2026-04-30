@@ -5,6 +5,7 @@ import pycountry
 import os
 
 _MAPBOX_TOKEN = os.getenv("MAPBOX_TOKEN")
+_GEOAPIFY_KEY = os.getenv("GEOAPIFY_KEY")
 
 # --------------------------------------------------
 
@@ -50,7 +51,6 @@ def get_geo():
         print("Geo fetch error:", e)
         return jsonify({"error": str(e)}), 500
 
-
 def iso2_to_iso3(code):
     if not code:
         return None
@@ -61,7 +61,7 @@ def iso2_to_iso3(code):
     except:
         return None
     
-@map_bp.route("/coord_location", methods=["GET"])
+# gets location info from coords
 @map_bp.route("/coord_location", methods=["GET"])
 def coord_location():
     lat = request.args.get("lat")
@@ -75,57 +75,58 @@ def coord_location():
         lng = float(lng)
     except ValueError:
         return jsonify({"error": "Invalid lat/lng"}), 400
-
-    url = f"https://api.mapbox.com/geocoding/v5/mapbox.places/{lng},{lat}.json"
-
+    
+    url = f"https://api.geoapify.com/v1/geocode/reverse?lat={lat}&lon={lng}"
     res = requests.get(
         url,
+        headers={"Accept": "application/json"}, 
         params={
-            "access_token": _MAPBOX_TOKEN,
-            "types": "place,locality"
+            "apiKey": _GEOAPIFY_KEY,
+            "format": "json", 
+            "limit": 1
         },
         timeout=5
     )
-
+    
     if res.status_code != 200:
         return jsonify({
-            "error": "Mapbox reverse failed",
+            "error": "Geoapify reverse failed",
             "status": res.status_code,
             "body": res.text[:200]
         }), 500
-
+        
     data = res.json()
-
-    features = data.get("features", [])
+    
+    features = data.get("results", [])
 
     if not features:
-        return jsonify([])
-
+        return jsonify({})
+    
     feature = features[0]
-    context = feature.get("context", [])
+    
+    city = feature.get("city") 
+    state = feature.get("state") or feature.get("state_district") or feature.get("county") 
+    country_iso3 = iso2_to_iso3( feature.get("country_code") )
+    adm1_code = feature.get("iso3166_2")
+    lat = feature.get("lat")
+    lng = feature.get("lon")
 
-    city = feature.get("text")
+    print(city)
+    print(state)
+    print(country_iso3)
+    print(adm1_code)
+    print(lat)
+    print(lng)
+    print()
 
-    state = None
-    country_iso3 = None
-    adm1_code = None
-
-    for c in context:
-        if "region" in c["id"]:
-            state = c.get("text")
-            adm1_code = c.get("short_code")
-        if "country" in c["id"]:
-            iso2 = c.get("short_code", "").upper()
-            country_iso3 = iso2_to_iso3(iso2)
-
-    return jsonify([{
+    return jsonify({
         "city": city,
         "state": state,
         "adm1": adm1_code,
         "country": country_iso3,
         "lat": lat,
         "lng": lng
-    }])
+    })
 
 @map_bp.route("/search")
 def search():
@@ -133,48 +134,50 @@ def search():
 
     if not q:
         return jsonify({"error": "Missing query"}), 400
-
-    url = f"https://api.mapbox.com/geocoding/v5/mapbox.places/{q}.json"
-
+    
+    
+    url = f"https://api.geoapify.com/v1/geocode/autocomplete?text={q}"
+    
     res = requests.get(
-        url,
+        url, 
+        headers={"Accept": "application/json"}, 
         params={
-            "access_token": _MAPBOX_TOKEN,
-            "limit": 5,
-            "types": "place,locality"
+            "apiKey": _GEOAPIFY_KEY,
+            "format": "json", 
+            "type": "city",
+            "limit": 5
         },
         timeout=5
     )
-
+    
     if res.status_code != 200:
         return jsonify({
-            "error": "Mapbox failed",
+            "error": "Geoapify failed",
             "status": res.status_code,
             "body": res.text[:200]
         }), 500
-
+        
     data = res.json()
 
     results = []
-
-    for feature in data.get("features", []):
-        context = feature.get("context", [])
-
-        city = feature.get("text")
-
-        state = None
-        country_iso3 = None
-        adm1_code = None
-
-        for c in context:
-            if "region" in c["id"]:
-                state = c.get("text")
-                adm1_code = c.get("short_code")  # like "US-PA"
-            if "country" in c["id"]:
-                iso2 = c.get("short_code", "").upper()
-                country_iso3 = iso2_to_iso3(iso2)
-
-        lng, lat = feature["center"]
+    
+    for feature in data.get("results", []):
+        
+        city = feature.get("city") 
+        state = feature.get("state") or feature.get("state_district") or feature.get("county") 
+        country_iso3 = iso2_to_iso3( feature.get("country_code") )
+        adm1_code = feature.get("iso3166_2")
+        lat = feature.get("lat")
+        lng = feature.get("lon")
+        
+        print(city)
+        print(state)
+        print(country_iso3)
+        print(adm1_code)
+        print(lat)
+        print(lng)
+        print()
+        
 
         results.append({
             "city": city,
@@ -182,7 +185,7 @@ def search():
             "adm1": adm1_code,
             "country": country_iso3,
             "lat": lat,
-            "lng": lng
+            "lng": lng,
         })
-
+    
     return jsonify(results)
