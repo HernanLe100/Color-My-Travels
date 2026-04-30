@@ -89,33 +89,6 @@ export default function ColorsPage() {
           >
             <span className="text-sm font-medium">{row.region_code}</span>
 
-<<<<<<< HEAD
-            <div className="flex items-center gap-3 group">
-              <div className="relative">
-                <input
-                  type="color"
-                  value={row.color}
-                  onChange={(e) =>
-                    handleColorChange(
-                      row.region_code,
-                      e.target.value,
-                      row.region_type,
-                    )
-                  }
-                  className="w-10 h-10 rounded-md border shadow cursor-pointer"
-                />
-
-                {/* Hover overlay */}
-                <div
-                  className="absolute inset-0 flex items-center justify-center
-             rounded-md bg-black/10 text-white text-xs font-medium
-             opacity-0 group-hover:opacity-100 transition
-             pointer-events-none"
-                >
-                  Edit
-                </div>
-              </div>
-=======
             <div className="flex items-center gap-2">
               <Pencil className="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 transition" />
               <input
@@ -142,7 +115,6 @@ export default function ColorsPage() {
                 }
                 className="w-10 h-10 cursor-pointer mr-0.5"
               />
->>>>>>> 608d9c2cb4764a86c343e89a64205d47d842257d
             </div>
           </label>
         ))}
