@@ -4,6 +4,8 @@ import { Button } from "./ui/button";
 import { useAuth } from "@/App";
 import toast from "react-hot-toast";
 import type { FriendRequest, SentRequest, User } from "@/types";
+import Loading from "./Loading";
+import { Send, Check, X } from "lucide-react";
 
 export default function FriendsPage() {
   const token = useAuth();
@@ -13,6 +15,7 @@ export default function FriendsPage() {
   const [requests, setRequests] = useState<FriendRequest[]>([]);
   const [sentRequests, setSentRequests] = useState<SentRequest[]>([]);
   const [friends, setFriends] = useState<User[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isSendingRequest, setIsSendingRequest] = useState(false);
   const [confirmingFriendId, setConfirmingFriendId] = useState<string | null>(
     null,
@@ -43,12 +46,27 @@ export default function FriendsPage() {
   };
 
   useEffect(() => {
-    fetchRequests();
-    fetchSentRequests();
-    fetchFriends();
-  }, []);
+    const load = async () => {
+      const [reqData, sentData, friendsData] = await Promise.all([
+        fetch(`${BACKEND_URL}/get_friend_requests`, { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json()),
+        fetch(`${BACKEND_URL}/get_sent_requests`, { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json()),
+        fetch(`${BACKEND_URL}/get_friends`, { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json()),
+      ]);
+      setRequests(reqData.requests);
+      setSentRequests(sentData.requests);
+      setFriends(friendsData.friends);
+      setIsLoading(false);
+    };
+    load();
+  }, [token, BACKEND_URL]);
+
+  if (isLoading) return <Loading />;
 
   const sendRequest = async () => {
+    if (!friendId.trim()) {
+      toast.error("User ID is required");
+      return;
+    }
     setIsSendingRequest(true);
     const res = await fetch(`${BACKEND_URL}/send_friend_request`, {
       method: "POST",
@@ -121,7 +139,7 @@ export default function FriendsPage() {
 
   return (
     <div className="mx-auto w-full max-w-lg md:mx-0 md:max-w-none px-6 py-6 flex flex-col gap-5">
-      <div className="flex flex-col gap-2 max-w-md">
+      <div className="flex flex-col gap-2 max-w-lg md:max-w-2xl">
         <p className="text-lg font-bold">Add Friend</p>
         <Input
           type="text"
@@ -131,11 +149,12 @@ export default function FriendsPage() {
         />
         <Button className="cursor-pointer" onClick={sendRequest}>
           {isSendingRequest ? "Sending..." : "Send Request"}
+          {!isSendingRequest && <Send className="w-4 h-4" />}
         </Button>
       </div>
 
       {sentRequests.length > 0 && (
-        <div className="flex flex-col gap-2 max-w-md">
+        <div className="flex flex-col gap-2 max-w-lg md:max-w-2xl">
           <p className="text-lg font-bold">Sent Requests</p>
           {sentRequests.map((req) => (
             <div
@@ -150,7 +169,7 @@ export default function FriendsPage() {
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-xs text-stone-500 bg-stone-100 px-2 py-0.5 rounded-full">
-                  Pending
+                  Pending...
                 </span>
                 <Button
                   size="sm"
@@ -166,7 +185,7 @@ export default function FriendsPage() {
         </div>
       )}
 
-      <div className="flex flex-col gap-2 max-w-md">
+      <div className="flex flex-col gap-2 max-w-lg md:max-w-2xl">
         <p className="text-lg font-bold">Friend Requests</p>
         {requests?.map((request) => (
           <div
@@ -185,21 +204,21 @@ export default function FriendsPage() {
                 className="bg-green-600 cursor-pointer hover:bg-green-700"
                 onClick={() => acceptRequest(request.sender_id)}
               >
-                Accept
+                Accept <Check className="w-4 h-4" />
               </Button>
               <Button
                 size="sm"
                 className="bg-red-600 cursor-pointer hover:bg-red-700"
                 onClick={() => rejectRequest(request.sender_id)}
               >
-                Reject
+                Reject <X className="w-4 h-4" />
               </Button>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="flex flex-col gap-2 max-w-md">
+      <div className="flex flex-col gap-2 max-w-lg md:max-w-2xl">
         <p className="text-lg font-bold">Friends</p>
         {friends?.map((friend) => (
           <div

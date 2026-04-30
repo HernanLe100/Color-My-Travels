@@ -241,6 +241,7 @@ export default function MapPage() {
         center={position}
         zoom={2}
         minZoom={2}
+        maxZoom={12}
         scrollWheelZoom={true}
         className="h-full w-full"
         ref={mapRef}

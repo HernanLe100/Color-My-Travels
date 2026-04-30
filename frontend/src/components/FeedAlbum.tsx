@@ -69,7 +69,7 @@ export default function FeedAlbum({
   const createdAt = album?.created_at ? new Date(album.created_at) : null;
 
   return (
-    <article className="mx-auto w-lg overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm">
+    <article className="box-border w-full min-w-0 max-w-full overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm">
       {/* Header */}
       <div className="flex items-center gap-3 px-3 py-3">
         <div
@@ -97,10 +97,13 @@ export default function FeedAlbum({
       {/* Caption block — album title, dates, notes */}
       <div className="space-y-2 px-3 pb-4 pt-2">
         <h3 className="text-base font-semibold leading-snug text-neutral-900">
-          {album.name || "Untitled album"}: {dateRange}
+          {album.name || "Untitled album"}
         </h3>
+        <p className="whitespace-pre-wrap text-sm leading-relaxed text-neutral-800 max-h-24 overflow-y-auto">
+          {dateRange}
+        </p>
         {album.notes?.trim() ? (
-          <p className="whitespace-pre-wrap text-sm leading-relaxed text-neutral-800">
+          <p className="whitespace-pre-wrap wrap-break-word text-sm leading-relaxed text-neutral-800 max-h-24 overflow-y-auto">
             {album.notes}
           </p>
         ) : null}
@@ -154,10 +157,7 @@ export default function FeedAlbum({
             )}
           </div>
           {photos[slide]?.caption ? (
-            <p className="border-t border-neutral-100 px-3 py-2 text-sm text-neutral-700">
-              <span className="font-semibold text-neutral-900">
-                {displayName}
-              </span>{" "}
+            <p className="border-t border-neutral-100 wrap-break-word px-3 py-2 text-sm text-neutral-700">
               {photos[slide].caption}
             </p>
           ) : null}

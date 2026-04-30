@@ -1,4 +1,4 @@
-import { useEffect, useState, type SetStateAction } from "react";
+import { useRef, useState, type SetStateAction } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -58,29 +58,75 @@ export default function AddAlbumModal({
   isSubmitting,
 }: Props) {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [fieldErrors, setFieldErrors] = useState<{
+    name?: boolean;
+    startDate?: boolean;
+    endDate?: boolean;
+    city?: "required" | "unselected";
+    dateRange?: boolean;
+  }>({});
+  const cityQueryRef = useRef("");
 
-  useEffect(() => {
-    if (!images.length) {
-      setActiveImageIndex(0);
+  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const cityTyped = cityQueryRef.current.trim().length > 0;
+    const errors: typeof fieldErrors = {};
+
+    if (!name) errors.name = true;
+    if (!startDate) errors.startDate = true;
+    if (!endDate) errors.endDate = true;
+    if (!selectedLocation) errors.city = cityTyped ? "unselected" : "required";
+    if (startDate && endDate && endDate < startDate) errors.dateRange = true;
+
+    setFieldErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
+      e.preventDefault();
       return;
     }
-    if (activeImageIndex > images.length - 1) {
-      setActiveImageIndex(images.length - 1);
-    }
-  }, [images, activeImageIndex]);
+
+    onSubmit(e);
+  };
+
+  const effectiveImageIndex =
+    images.length === 0 ? 0 : Math.min(activeImageIndex, images.length - 1);
+
+  const firstError = fieldErrors.name
+    ? "Album name is required."
+    : fieldErrors.city === "unselected"
+      ? "Choose a city from search."
+      : fieldErrors.city === "required"
+        ? "City is required."
+        : fieldErrors.startDate
+          ? "Start date is required."
+          : fieldErrors.endDate
+            ? "End date is required."
+            : fieldErrors.dateRange
+              ? "End date should be on or after start date."
+              : null;
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/30 px-4">
-      <div className="w-full max-w-lg rounded-xl bg-white p-5 shadow-2xl">
-        <h2 className="text-lg font-semibold text-slate-900 px-2">New Album</h2>
-        <p className="mt-1 text-sm text-slate-600 px-2">
-          Create a new album entry for a location.
-        </p>
+      <div className="w-full max-w-2xl rounded-xl bg-white p-5 shadow-2xl">
+        <div className="relative px-2">
+          <button
+            type="button"
+            className="absolute right-0 top-0 text-stone-400 hover:text-stone-700 cursor-pointer"
+            onClick={onClose}
+            aria-label="Close"
+          >
+            ✕
+          </button>
+          <h2 className="text-lg font-semibold text-slate-900">New Album</h2>
+          <p className="mt-1 text-sm text-slate-600">
+            Create a new album entry for a location.
+          </p>
+        </div>
 
         <form
-          onSubmit={onSubmit}
+          onSubmit={handleFormSubmit}
+          noValidate
           className="mt-4 space-y-3 max-h-[500px] overflow-y-auto px-2"
         >
           <div className="flex flex-col gap-2">
@@ -92,11 +138,15 @@ export default function AddAlbumModal({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Enter a name for this album"
-              required
+              maxLength={50}
             />
           </div>
 
-          <CitySearch onSelect={handleSelect} isRequired={!selectedLocation} />
+          <CitySearch
+            onSelect={handleSelect}
+            isRequired={!selectedLocation}
+            onQueryChange={(q) => { cityQueryRef.current = q; }}
+          />
           {selectedLocation && (
             <p className="text-sm text-slate-600">
               Selected: {selectedLocation.city}
@@ -106,28 +156,27 @@ export default function AddAlbumModal({
             </p>
           )}
 
-          <div className="flex flex-col gap-2">
-            <Label className="flex gap-0">
-              Start Date<span className="text-xs text-red-600">*</span>
-            </Label>
-            <Input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Label className="flex gap-0">
-              End Date<span className="text-xs text-red-600">*</span>
-            </Label>
-            <Input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              required
-            />
+          <div className="grid grid-cols-2 gap-2">
+            <div className="flex flex-col gap-2">
+              <Label className="flex gap-0">
+                Start Date<span className="text-xs text-red-600">*</span>
+              </Label>
+              <Input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label className="flex gap-0">
+                End Date<span className="text-xs text-red-600">*</span>
+              </Label>
+              <Input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+              />
+            </div>
           </div>
 
           <div className="flex flex-col gap-2">
@@ -163,17 +212,17 @@ export default function AddAlbumModal({
             {images.length > 0 && (
               <div className="mt-2 rounded-lg border border-slate-200 p-3 flex flex-col gap-3">
                 <img
-                  src={URL.createObjectURL(images[activeImageIndex])}
-                  alt={`Selected upload ${activeImageIndex + 1}`}
+                  src={URL.createObjectURL(images[effectiveImageIndex])}
+                  alt={`Selected upload ${effectiveImageIndex + 1}`}
                   className="h-52 w-full rounded-md object-cover"
                 />
 
                 <Input
                   id="image-caption"
-                  value={imageCaptions[activeImageIndex] ?? ""}
+                  value={imageCaptions[effectiveImageIndex] ?? ""}
                   onChange={(e) => {
                     const nextCaptions = [...imageCaptions];
-                    nextCaptions[activeImageIndex] = e.target.value;
+                    nextCaptions[effectiveImageIndex] = e.target.value;
                     setImageCaptions(nextCaptions);
                   }}
                   placeholder="Write a caption for this image"
@@ -187,13 +236,13 @@ export default function AddAlbumModal({
                     onClick={() =>
                       setActiveImageIndex((current) => Math.max(0, current - 1))
                     }
-                    disabled={activeImageIndex === 0}
+                    disabled={effectiveImageIndex === 0}
                     className="cursor-pointer"
                   >
                     Prev
                   </Button>
                   <span className="text-sm text-slate-600">
-                    {activeImageIndex + 1} / {images.length}
+                    {effectiveImageIndex + 1} / {images.length}
                   </span>
                   <Button
                     type="button"
@@ -203,7 +252,7 @@ export default function AddAlbumModal({
                         Math.min(images.length - 1, current + 1),
                       )
                     }
-                    disabled={activeImageIndex === images.length - 1}
+                    disabled={effectiveImageIndex === images.length - 1}
                     className="cursor-pointer"
                   >
                     Next
@@ -213,7 +262,12 @@ export default function AddAlbumModal({
             )}
           </div>
 
-          {submitError && <p className="text-sm text-red-600">{submitError}</p>}
+          {firstError && (
+            <p className="text-sm text-red-600">{firstError}</p>
+          )}
+          {submitError && (
+            <p className="text-sm text-red-600">{submitError}</p>
+          )}
 
           <div className="mt-2 flex justify-end gap-2">
             <Button

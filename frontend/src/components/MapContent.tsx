@@ -3,7 +3,7 @@ import type { Pin } from "@/types";
 import { useAuth } from "@/App";
 import { useMapTravelData } from "@/hooks/useMapTravelData";
 import AlbumDetailModal from "./map/AlbumDetailModal";
-import MapContentLoading from "./map/MapContentLoading";
+import Loading from "./Loading";
 import TripMarkersLayer from "./map/TripMarkersLayer";
 import VisitedRegionsGeoJSON from "./map/VisitedRegionsGeoJSON";
 
@@ -40,7 +40,7 @@ export default function MapContent({ isTogglePins = false }: MapContentProps) {
   }, [albums, selectedPin]);
 
   if (!pinsLoaded || !loaded) {
-    return <MapContentLoading />;
+    return <Loading />;
   }
 
   return (

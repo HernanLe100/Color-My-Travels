@@ -178,7 +178,7 @@ def add_album():
     end_date = data.get("end_date", "")
     name = data.get("name", "")
 
-    album_id = db.add_album(
+    result = db.add_album(
         {
             "user_id": user_id,
             "location_id": location_id,
@@ -189,9 +189,10 @@ def add_album():
         }
     )
 
-    return jsonify({
-        "album_id": album_id
-    })
+    if isinstance(result, dict) and result.get("error"):
+        return jsonify(result), 400
+
+    return jsonify({"album_id": result})
 
 
 @info_bp.route("/edit_album", methods=["PUT"])

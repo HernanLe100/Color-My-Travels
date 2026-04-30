@@ -42,7 +42,7 @@ export default function AppSidebar() {
             >
               <Link to="/colors" onClick={closeOnMobile}>
                 <Paintbrush className="w-4 h-4 mr-2" />
-                Edit Colors
+                Colors
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

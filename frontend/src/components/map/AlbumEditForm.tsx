@@ -46,6 +46,51 @@ export default function AlbumEditForm({
   const [confirmDeleteIndex, setConfirmDeleteIndex] = useState<number | null>(
     null,
   );
+  const [titleError, setTitleError] = useState(false);
+  const [startDateError, setStartDateError] = useState(false);
+  const [endDateError, setEndDateError] = useState(false);
+  const [dateRangeError, setDateRangeError] = useState(false);
+
+  const handleSave = () => {
+    const badDateRange =
+      editForm.start_date &&
+      editForm.end_date &&
+      editForm.end_date < editForm.start_date;
+
+    if (!editForm.name.trim()) {
+      setTitleError(true);
+      setStartDateError(false);
+      setEndDateError(false);
+      setDateRangeError(false);
+      return;
+    }
+    if (!editForm.start_date) {
+      setTitleError(false);
+      setStartDateError(true);
+      setEndDateError(false);
+      setDateRangeError(false);
+      return;
+    }
+    if (!editForm.end_date) {
+      setTitleError(false);
+      setStartDateError(false);
+      setEndDateError(true);
+      setDateRangeError(false);
+      return;
+    }
+    if (badDateRange) {
+      setTitleError(false);
+      setStartDateError(false);
+      setEndDateError(false);
+      setDateRangeError(true);
+      return;
+    }
+    setTitleError(false);
+    setStartDateError(false);
+    setEndDateError(false);
+    setDateRangeError(false);
+    onSave();
+  };
 
   const totalItems = pages.length + newPageFiles.length;
   const viewingExisting = activeCarouselIndex < pages.length;
@@ -101,6 +146,7 @@ export default function AlbumEditForm({
               setEditForm((f) => ({ ...f, name: e.target.value }))
             }
             placeholder="Enter a name for this album"
+            maxLength={50}
           />
         </div>
 
@@ -304,11 +350,23 @@ export default function AlbumEditForm({
         </div>
       </div>
 
+      {titleError && (
+        <p className="text-sm text-red-600 px-2 mt-2">Album name is required.</p>
+      )}
+      {startDateError && (
+        <p className="text-sm text-red-600 px-2 mt-2">Start date is required.</p>
+      )}
+      {endDateError && (
+        <p className="text-sm text-red-600 px-2 mt-2">End date is required.</p>
+      )}
+      {dateRangeError && (
+        <p className="text-sm text-red-600 px-2 mt-2">End date should be on or after start date.</p>
+      )}
       <div className="mt-4 flex justify-end gap-2 border-t border-stone-300 pt-4">
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
-        <Button type="button" onClick={onSave}>
+        <Button type="button" onClick={handleSave}>
           Save
         </Button>
       </div>

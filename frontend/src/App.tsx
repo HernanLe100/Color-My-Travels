@@ -75,7 +75,7 @@ function App() {
         <div className="flex w-full">
           {token && <Sidebar />}
 
-          <main className="flex-1">
+          <main className="flex-1 relative">
             {token && <MobileMenuButton />}
             <Routes>
               <Route
