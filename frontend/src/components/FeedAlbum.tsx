@@ -157,10 +157,7 @@ export default function FeedAlbum({
             )}
           </div>
           {photos[slide]?.caption ? (
-            <p className="border-t border-neutral-100 px-3 py-2 text-sm text-neutral-700">
-              <span className="font-semibold text-neutral-900">
-                {displayName}
-              </span>{" "}
+            <p className="border-t border-neutral-100 wrap-break-word px-3 py-2 text-sm text-neutral-700">
               {photos[slide].caption}
             </p>
           ) : null}
