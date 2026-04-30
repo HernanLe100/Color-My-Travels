@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { Album, Page, User } from "@/types";
 import { cloudinaryImageUrl, formatAlbumDate } from "./map/albumModalUtils";
-import Loading from "./Loading";
 
 const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
 
@@ -101,7 +100,7 @@ export default function FeedAlbum({
           {album.name || "Untitled album"}: {dateRange}
         </h3>
         {album.notes?.trim() ? (
-          <p className="whitespace-pre-wrap text-sm leading-relaxed text-neutral-800">
+          <p className="whitespace-pre-wrap text-sm leading-relaxed text-neutral-800 max-h-24 overflow-y-auto">
             {album.notes}
           </p>
         ) : null}
