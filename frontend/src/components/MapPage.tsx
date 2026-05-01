@@ -14,8 +14,6 @@ import AddAlbumModal from "./AddAlbumModal";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import { apiFetch } from "@/lib/api";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-
 // Fix default icon paths
 L.Icon.Default.mergeOptions({
   iconUrl: markerIcon,
@@ -194,8 +192,8 @@ export default function MapPage() {
     );
     setIsModalOpen(true);
 
-    const res = await fetch(
-      `${BACKEND_URL}/coord_location?lat=${point.lat}&lng=${point.lng}`,
+    const res = await apiFetch(
+      `/coord_location?lat=${point.lat}&lng=${point.lng}`,
     );
     const data = await res.json();
 

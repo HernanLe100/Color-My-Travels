@@ -5,9 +5,11 @@ from flask import jsonify, request, Blueprint
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 import database as db
+from request_guards import apply_navigation_guard
 # --------------------------------------------------
 
 info_bp = Blueprint("info", __name__)
+apply_navigation_guard(info_bp)
 
 load_dotenv()
 
@@ -237,6 +239,7 @@ def delete_album():
 # --------------------------------------------------
 
 @info_bp.route("/get_location", methods=["GET"])
+@jwt_required()
 def get_location():
     location_id = request.args.get("location_id", "")
     

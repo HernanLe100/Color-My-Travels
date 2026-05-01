@@ -7,9 +7,11 @@ from google.auth.transport.requests import Request as GoogleRequest
 from flask_jwt_extended import create_access_token, set_access_cookies, unset_jwt_cookies
 
 import database as db
+from request_guards import apply_navigation_guard
 # --------------------------------------------------
 
 login_bp = Blueprint("login", __name__)
+apply_navigation_guard(login_bp)
 
 load_dotenv()
 

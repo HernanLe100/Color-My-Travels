@@ -10,8 +10,6 @@ import { point } from '@turf/helpers';
 import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
 import { apiFetch } from "@/lib/api";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-
 export function useMapTravelData(
   isAuthenticated: boolean,
   isTogglePins: boolean,
@@ -107,8 +105,8 @@ export function useMapTravelData(
         return cache.current.get(key);
       }
 
-      const res = await fetch(
-        `${BACKEND_URL}/geo?country=${country}&level=${level}`,
+      const res = await apiFetch(
+        `/geo?country=${country}&level=${level}`,
       );
       const data = (await res.json()) as Record<string, unknown> & {
         crs?: unknown;
