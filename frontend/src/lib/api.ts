@@ -1,4 +1,8 @@
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
+export const AUTH_UNAUTHORIZED_EVENT = "auth:unauthorized";
+let isRedirectingToLogin = false;
+
 let csrfTokenMemory: string | null = null;
 
 export function setCsrfToken(token: string | null) {
@@ -24,9 +28,19 @@ export async function apiFetch(path: string, init: RequestInit = {}) {
   }
   console.log(`${BACKEND_URL}${path}`);
 
-  return fetch(`${BACKEND_URL}${path}`, {
+  const response = await fetch(`${BACKEND_URL}${path}`, {
     ...init,
     headers,
     credentials: "include",
   });
+
+  if (response.status === 401) {
+    window.dispatchEvent(new CustomEvent(AUTH_UNAUTHORIZED_EVENT));
+    if (window.location.pathname !== "/login" && !isRedirectingToLogin) {
+      isRedirectingToLogin = true;
+      window.location.assign("/login");
+    }
+  }
+
+  return response;
 }
