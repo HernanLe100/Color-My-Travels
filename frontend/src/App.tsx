@@ -13,7 +13,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
 import FriendsPage from "./components/FriendsPage";
 import FeedPage from "./components/FeedPage";
-import { apiFetch, AUTH_UNAUTHORIZED_EVENT } from "./lib/api";
+import { apiFetch } from "./lib/api";
 
 type AuthContextValue = {
   isAuthenticated: boolean;
@@ -40,18 +40,6 @@ function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     refreshAuth();
-  }, []);
-
-  useEffect(() => {
-    const handleUnauthorized = () => {
-      setIsAuthenticated(false);
-      setIsLoading(false);
-    };
-
-    window.addEventListener(AUTH_UNAUTHORIZED_EVENT, handleUnauthorized);
-    return () => {
-      window.removeEventListener(AUTH_UNAUTHORIZED_EVENT, handleUnauthorized);
-    };
   }, []);
 
   const value = useMemo(
