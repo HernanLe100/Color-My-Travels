@@ -4,7 +4,7 @@ from flask import jsonify, request, Blueprint
 
 from google.oauth2 import id_token
 from google.auth.transport.requests import Request as GoogleRequest
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, set_access_cookies, unset_jwt_cookies
 
 import database as db
 # --------------------------------------------------
@@ -19,9 +19,15 @@ _GOOGLE_CLIENT_ID = os.environ["GOOGLE_CLIENT_ID"]
 
 @login_bp.route("/login_success", methods=["POST"])
 def login_success():
-    token = request.get_json()["credential"]
-    claims = id_token.verify_oauth2_token(token, GoogleRequest(), _GOOGLE_CLIENT_ID)
-    print(claims)
+    data = request.get_json() or {}
+    token = data.get("credential")
+    if not token:
+        return jsonify({"error": "credential required"}), 400
+
+    try:
+        claims = id_token.verify_oauth2_token(token, GoogleRequest(), _GOOGLE_CLIENT_ID)
+    except Exception:
+        return jsonify({"error": "Invalid Google credential"}), 401
 
     user_id = claims["sub"]
     name = claims.get("name", "")
@@ -32,8 +38,17 @@ def login_success():
     # create JWT
     access_token = create_access_token(identity=user_id)
 
-    return jsonify({
+    response = jsonify({
         "user_id": user_id,
         "name": name,
-        "token": access_token
+        "authenticated": True
     })
+    set_access_cookies(response, access_token)
+    return response
+
+
+@login_bp.route("/logout", methods=["POST"])
+def logout():
+    response = jsonify({"logout": True})
+    unset_jwt_cookies(response)
+    return response

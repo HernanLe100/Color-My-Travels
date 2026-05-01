@@ -1,16 +1,14 @@
 import { GoogleLogin } from '@react-oauth/google';
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+import { apiFetch } from "@/lib/api";
 
 function LoginPage() {
   const handleSuccess = async (credentialResponse: any) => {
-    const res = await fetch(`${BACKEND_URL}/login_success`, {
+    const res = await apiFetch("/login_success", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ credential: credentialResponse.credential }),
     });
-    const data = await res.json();
-    localStorage.setItem("token", data.token);
+    if (!res.ok) return;
     window.location.href = "/";
   };
 

@@ -10,86 +10,37 @@ import { useEffect, useState } from "react";
 import LoginPage from "./components/LoginPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
-import { jwtDecode } from "jwt-decode";
 import FriendsPage from "./components/FriendsPage";
 import FeedPage from "./components/FeedPage";
-
-type JwtPayload = {
-  exp: number;
-};
+import { apiFetch } from "./lib/api";
 
 export function useAuth() {
-  const [token, setToken] = useState<string | null>(() => {
-    const t = localStorage.getItem("token");
-    if (!t) return null;
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-    try {
-      const decoded = jwtDecode<JwtPayload>(t);
-      const now = Date.now() / 1000;
-
-      if (decoded.exp < now) {
-        localStorage.removeItem("token");
-        return null;
-      }
-
-      return t;
-    } catch {
-      localStorage.removeItem("token");
-      return null;
-    }
-  });
-
-  // check if token is expired by setting a timer after calculating the time until expiry, 
-  // if so, remove it from local storage AND set the token to null!!
-  // ProtectedRoute will check for null token and redirect to login page
   useEffect(() => {
-    let timeout: number | undefined;
-
-    const setupExpiry = (t: string | null) => {
-      if (!t) return;
-
+    let isMounted = true;
+    const checkAuth = async () => {
       try {
-        const decoded = jwtDecode<JwtPayload>(t);
-        const now = Date.now() / 1000;
-
-        const timeUntilExpiry = (decoded.exp - now) * 1000;
-
-        if (timeUntilExpiry <= 0) {
-          localStorage.removeItem("token");
-          setToken(null);
-        } else {
-          timeout = window.setTimeout(() => {
-            localStorage.removeItem("token");
-            setToken(null);
-          }, timeUntilExpiry);
-        }
+        const res = await apiFetch("/me");
+        if (!isMounted) return;
+        setIsAuthenticated(res.ok);
       } catch {
-        localStorage.removeItem("token");
-        setToken(null);
+        if (!isMounted) return;
+        setIsAuthenticated(false);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
-
-    setupExpiry(token);
-
+    checkAuth();
     return () => {
-      if (timeout) clearTimeout(timeout);
-    };
-  }, [token]);
-
-  // sync across tabs
-  useEffect(() => {
-    const sync = () => setToken(localStorage.getItem("token"));
-
-    window.addEventListener("storage", sync);
-    window.addEventListener("focus", sync);
-
-    return () => {
-      window.removeEventListener("storage", sync);
-      window.removeEventListener("focus", sync);
+      isMounted = false;
     };
   }, []);
 
-  return token;
+  return { isAuthenticated, isLoading };
 }
 
 function MobileMenuButton() {
@@ -107,16 +58,18 @@ function MobileMenuButton() {
 }
 
 function App() {
-  const token = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) return null;
 
   return (
     <BrowserRouter>
       <SidebarProvider>
         <div className="flex w-full">
-          {token && <Sidebar />}
+          {isAuthenticated && <Sidebar />}
 
           <main className="flex-1 relative">
-            {token && <MobileMenuButton />}
+            {isAuthenticated && <MobileMenuButton />}
             <Routes>
               <Route
                 path="/login"

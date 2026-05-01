@@ -8,11 +8,12 @@ import type { Album, Color, Page, Pin } from "@/types";
 
 import { point } from '@turf/helpers';
 import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
+import { apiFetch } from "@/lib/api";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 export function useMapTravelData(
-  token: string | null | undefined,
+  isAuthenticated: boolean,
   isTogglePins: boolean,
 ) {
   const zoom = useZoomLevel();
@@ -25,16 +26,12 @@ export function useMapTravelData(
   const [pinsLoaded, setPinsLoaded] = useState(false);
 
   useEffect(() => {
-    if (!token) return;
+    if (!isAuthenticated) return;
 
     async function loadMapData() {
       const [locRes, albumRes] = await Promise.all([
-        fetch(`${BACKEND_URL}/get_locations`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        fetch(`${BACKEND_URL}/get_albums`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
+        apiFetch("/get_locations"),
+        apiFetch("/get_albums"),
       ]);
 
       const locData = await locRes.json();
@@ -77,18 +74,16 @@ export function useMapTravelData(
     }
 
     loadMapData();
-  }, [token]);
+  }, [isAuthenticated]);
 
   useEffect(() => {
-    if (!token) return;
-    fetch(`${BACKEND_URL}/get_colors`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
+    if (!isAuthenticated) return;
+    apiFetch("/get_colors")
       .then((res) => res.json())
       .then((data) => {
         if (data.db_response) setColors(data.db_response);
       });
-  }, [token]);
+  }, [isAuthenticated]);
 
   const countriesVisited = useMemo(
     () => [...new Set(pins.map((p) => p.country))],
