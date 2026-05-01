@@ -50,7 +50,7 @@ function LoginPage() {
 
       {/* Right half */}
       <div className="flex w-full md:w-1/2 flex-col items-center justify-center gap-4 bg-[#FEF9F1] py-10 md:py-0">
-        <h2 className="text-2xl font-semibold text-[#895737]">Sign up / Sign in</h2>
+        <h2 className="text-2xl font-semibold bg-linear-to-r from-[#3274A3] to-[#2A81CB] bg-clip-text text-transparent">Sign up / Sign in</h2>
         <p className="text-sm text-[#5E3023]">Continue with Google</p>
         <GoogleLogin onSuccess={handleSuccess} onError={handleError} />
       </div>
