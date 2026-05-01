@@ -104,43 +104,48 @@ export function useMapTravelData(
       setLoaded(true);
       return;
     }
-
-    async function fetchLevel(country: string, level: string) {
-      const key = `${country}-${level}`;
-
-      if (cache.current.has(key)) {
-        return cache.current.get(key);
-      }
-
-      const res = await fetch(
-        `${BACKEND_URL}/geo?country=${country}&level=${level}`,
-      );
-      const data = (await res.json()) as Record<string, unknown> & {
-        crs?: unknown;
-      };
-
-      delete data.crs;
-
-      cache.current.set(key, data);
-      return data;
-    }
-
+  
     async function load() {
       setLoaded(false);
-
-      const adm0Results = await Promise.all(
-        countriesVisited.map((c) => fetchLevel(c, "ADM0")),
-      );
-
-      const adm1Results = await Promise.all(
-        countriesVisited.map((c) => fetchLevel(c, "ADM1")),
-      );
-
+  
+      const res = await fetch(`${BACKEND_URL}/geo_batch`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          countries: countriesVisited,
+          levels: ["ADM0", "ADM1"],
+        }),
+      });
+  
+      const data = await res.json();
+  
+      const adm0Results: unknown[] = [];
+      const adm1Results: unknown[] = [];
+  
+      for (const country of countriesVisited) {
+        const adm0Key = `${country}-ADM0`;
+        const adm1Key = `${country}-ADM1`;
+  
+        if (data[adm0Key]) {
+          delete data[adm0Key].crs;
+          cache.current.set(adm0Key, data[adm0Key]); // keep your cache
+          adm0Results.push(data[adm0Key]);
+        }
+  
+        if (data[adm1Key]) {
+          delete data[adm1Key].crs;
+          cache.current.set(adm1Key, data[adm1Key]); // keep your cache
+          adm1Results.push(data[adm1Key]);
+        }
+      }
+  
       setAdm0(adm0Results);
       setAdm1(adm1Results);
       setLoaded(true);
     }
-
+  
     load();
   }, [countriesVisited.join(",")]);
 

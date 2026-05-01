@@ -4,6 +4,11 @@ import requests
 import pycountry
 import os
 
+from threading import Lock
+
+geo_cache = {}
+cache_lock = Lock()
+
 _GEOAPIFY_KEY = os.getenv("GEOAPIFY_KEY")
 
 # --------------------------------------------------
@@ -25,8 +30,9 @@ def get_geo():
     key = f"{country}-{level}"
 
     # cache hit
-    if key in geo_cache:
-        return jsonify(geo_cache[key])
+    with cache_lock:
+        if key in geo_cache:
+            return jsonify(geo_cache[key])
 
     try:
         meta_url = f"https://www.geoboundaries.org/api/current/gbOpen/{country}/{level}"
@@ -48,13 +54,61 @@ def get_geo():
         geo_data = geo_res.json()
 
         # store in cache
-        geo_cache[key] = geo_data
+        with cache_lock:
+            geo_cache[key] = geo_data
 
         return jsonify(geo_data)
 
     except Exception as e:
         print("Geo fetch error:", e)
         return jsonify({"error": str(e)}), 500
+
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+@map_bp.route("/geo_batch", methods=["POST"])
+def geo_batch():
+    data = request.json
+    countries = data.get("countries", [])
+    levels = data.get("levels", ["ADM0", "ADM1"])
+
+    results = {}
+
+    def fetch_one(country, level):
+        key = f"{country}-{level}"
+
+        # check cache safely
+        with cache_lock:
+            if key in geo_cache:
+                return key, geo_cache[key]
+
+        try:
+            meta_url = f"https://www.geoboundaries.org/api/current/gbOpen/{country}/{level}"
+            meta = requests.get(meta_url, timeout=5).json()
+            geojson_url = meta.get("simplifiedGeometryGeoJSON")
+            geo_data = requests.get(geojson_url, timeout=10).json()
+
+            # store safely
+            with cache_lock:
+                geo_cache[key] = geo_data
+
+            return key, geo_data
+
+        except Exception as e:
+            print("Error:", key, e)
+            return key, None
+
+    futures = []
+    with ThreadPoolExecutor(max_workers=8) as executor:
+        for country in countries:
+            for level in levels:
+                futures.append(executor.submit(fetch_one, country, level))
+
+        for future in as_completed(futures):
+            key, value = future.result()
+            if value:
+                results[key] = value
+
+    return jsonify(results)
 
 def iso2_to_iso3(code):
     if not code:
