@@ -292,7 +292,7 @@ export default function AlbumDetailModal({
         return (
           <div className="flex max-h-[28rem] flex-col items-center overflow-y-auto px-2 pt-2 pb-6 text-center text-[#5E3023]">
             
-            <h3 className="mt-4 font-serif text-xl">
+            <h3 className="mt-4 font-serif text-2xl">
               {album.name || "Untitled"}
             </h3>
             <p className="mt-3 text-sm">
@@ -300,8 +300,8 @@ export default function AlbumDetailModal({
               {formatAlbumDate(album.end_date)}
             </p>
             {album.notes?.trim() ? (
-              <div className="mt-6 w-full max-w-sm text-left">
-                <p className="mt-2 whitespace-pre-wrap wrap-break-word border-l-2 border-stone-400 pl-3 text-sm leading-relaxed">
+              <div className="mt-6 w-full max-w-md text-left">
+                <p className="mt-2 whitespace-pre-wrap wrap-break-word text-sm leading-relaxed">
                   {album.notes}
                 </p>
               </div>
@@ -310,8 +310,8 @@ export default function AlbumDetailModal({
         );
       case "photo":
         return (
-          <div className="flex min-h-[18rem] flex-col gap-3">
-            <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded">
+          <div className="flex flex-col gap-3">
+            <div className="relative flex items-center justify-center overflow-hidden rounded">
               <img
                 src={cloudinaryImageUrl(cloudName, slot.page.id)}
                 alt={slot.page.caption || "Album photo"}
@@ -320,14 +320,14 @@ export default function AlbumDetailModal({
             </div>
 
             {slot.page.caption ? (
-              <div className="mt-6 w-full max-w-sm text-left">
-                <p className="mt-2 whitespace-pre-wrap border-l-2 border-stone-400 pl-3 text-sm leading-relaxed text-stone-800">
+              <div className="max-h-24 overflow-y-auto px-2 w-full text-left">
+                <p className="whitespace-pre-wrap text-sm leading-relaxed text-[#5E3023]">
                   {slot.page.caption}
                 </p>
               </div>
             ) : null}
 
-            <p className="text-right text-xs text-stone-400">
+            <p className="text-right text-xs text-stone-400 overflow-auto">
               {slot.index + 1}
             </p>
           </div>
@@ -443,8 +443,9 @@ export default function AlbumDetailModal({
       aria-labelledby="album-dialog-title"
       className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/30 p-4 outline-none"
     >
-      <div className="w-full max-w-2xl rounded-lg border-2 border-stone-300 bg-stone-100 p-5 shadow-lg">
-        <header className="relative border-b border-stone-300 pb-3 text-center">
+      <div className={`relative w-full max-w-2xl rounded-lg border-2 border-stone-300 p-5 shadow-lg bg-[#FEF9F1]`}>
+        <header className={`relative pb-3 text-center ${isEditing ? "px-3" : "px-5"}`}>
+          <div className={`absolute bottom-0 border-b border-stone-300 ${isEditing ? "left-4 right-4" : "left-0 right-0"}`} />
           <button
             type="button"
             className="absolute right-0 top-0 text-stone-400 hover:text-stone-700 cursor-pointer"
@@ -455,7 +456,7 @@ export default function AlbumDetailModal({
           </button>
           <h2
             id="album-dialog-title"
-            className="font-serif text-xl text-stone-900"
+            className="font-serif text-2xl text-stone-900"
           >
             {pin.city || "Somewhere"}
           </h2>
@@ -463,12 +464,9 @@ export default function AlbumDetailModal({
             {/* ADM1 */}
             {pin.adm1 && (
               adm1Color ? (
-                <label
-                  htmlFor="adm1-color-input"
-                  className="flex items-center gap-1 cursor-pointer"
-                >
-                  {pin.adm1}
-                  <div className="group flex items-center gap-1">
+                <div className="flex items-center gap-1">
+                  <span>{pin.adm1}</span>
+                  <label htmlFor="adm1-color-input" className="group flex items-center gap-1 cursor-pointer">
                     <div className="relative">
                       <input
                         id="adm1-color-input"
@@ -502,9 +500,9 @@ export default function AlbumDetailModal({
                       />
                       <div className="absolute inset-0 flex items-center justify-center rounded-md bg-black/30 text-white opacity-0 group-hover:opacity-100 transition pointer-events-none" />
                     </div>
-                    <Pencil className="w-3 h-3 text-stone-400" />
-                  </div>
-                </label>
+                    <Pencil className="w-3 h-3 text-stone-500" />
+                  </label>
+                </div>
               ) : (
                 <span>{pin.adm1}</span>
               )
@@ -516,12 +514,9 @@ export default function AlbumDetailModal({
             {/* COUNTRY */}
             {pin.country && (
               countryColor ? (
-                <label
-                  htmlFor="country-color-input"
-                  className="flex items-center gap-1 cursor-pointer"
-                >
-                  {pin.country}
-                  <div className="group flex items-center gap-1">
+                <div className="flex items-center gap-1">
+                  <span>{pin.country}</span>
+                  <label htmlFor="country-color-input" className="group flex items-center gap-1 cursor-pointer">
                     <div className="relative">
                       <input
                         id="country-color-input"
@@ -555,9 +550,9 @@ export default function AlbumDetailModal({
                       />
                       <div className="absolute inset-0 flex items-center justify-center rounded-md bg-black/30 text-white opacity-0 group-hover:opacity-100 transition pointer-events-none" />
                     </div>
-                    <Pencil className="w-3 h-3 text-stone-400" />
-                  </div>
-                </label>
+                    <Pencil className="w-3 h-3 text-stone-500" />
+                  </label>
+                </div>
               ) : (
                 <span>{pin.country}</span>
               )

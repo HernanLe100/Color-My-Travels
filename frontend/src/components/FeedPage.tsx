@@ -37,6 +37,7 @@ export default function FeedPage() {
   if (isLoading) return <Loading />;
 
   return (
+  <div className="min-h-screen w-full bg-[#FEF9F1]">
   <div className="box-border mx-auto w-full max-w-lg md:max-w-2xl flex flex-col gap-5 px-6 py-6">
     {friendsAlbums.length === 0 ? (
       <p className="text-center text-sm text-neutral-500">
@@ -47,6 +48,7 @@ export default function FeedPage() {
     {sortedAlbums.map((album) => (
       <FeedAlbum key={album.album_id} album={album} friends={friends} />
     ))}
+  </div>
   </div>
 );
 }

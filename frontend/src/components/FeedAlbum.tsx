@@ -71,7 +71,7 @@ export default function FeedAlbum({
   return (
     <article className="box-border w-full min-w-0 max-w-full overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm">
       {/* Header */}
-      <div className="flex items-center gap-3 px-3 py-3">
+      <div className="flex items-center gap-3 px-5 pt-5">
         <div
           className="flex size-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-amber-200 to-rose-200 text-sm font-semibold text-neutral-800"
           aria-hidden
@@ -79,11 +79,11 @@ export default function FeedAlbum({
           {initial}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold text-neutral-900">
+          <p className="truncate text-md font-semibold text-neutral-900">
             {displayName}
           </p>
           {loc ? (
-            <p className="truncate text-xs text-neutral-500">{loc}</p>
+            <p className="truncate text-sm text-neutral-500">{loc}</p>
           ) : null}
         </div>
         <time
@@ -95,7 +95,7 @@ export default function FeedAlbum({
       </div>
 
       {/* Caption block — album title, dates, notes */}
-      <div className="space-y-2 px-3 pb-4 pt-2">
+      <div className="space-y-2 px-5 pb-4 pt-2">
         <h3 className="text-base font-semibold leading-snug text-neutral-900">
           {album.name || "Untitled album"}
         </h3>

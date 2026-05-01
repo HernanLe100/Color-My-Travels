@@ -7,6 +7,7 @@ import type { Page } from "@/types";
 import { cloudinaryImageUrl } from "./albumModalUtils";
 import ImageUploadInput from "../ImageUploadInput";
 import toast from "react-hot-toast";
+import { ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
 
 type EditFormState = {
   name: string;
@@ -119,7 +120,7 @@ export default function AlbumEditForm({
 
   return (
     <>
-      <div className="mt-4 space-y-3 px-2 max-h-[500px] overflow-y-auto">
+      <div className="mt-4 space-y-3 px-5 max-h-[500px] overflow-y-auto">
         {/* name */}
         <div className="flex flex-col gap-2">
           <Label htmlFor="edit-album-name">Album Name</Label>
@@ -131,6 +132,7 @@ export default function AlbumEditForm({
             }
             placeholder="Enter a name for this album"
             maxLength={50}
+            className="bg-white"
           />
         </div>
 
@@ -148,6 +150,7 @@ export default function AlbumEditForm({
                   start_date: e.target.value,
                 }))
               }
+              className="bg-white"
             />
           </div>
 
@@ -163,6 +166,7 @@ export default function AlbumEditForm({
                   end_date: e.target.value,
                 }))
               }
+              className="bg-white"
             />
           </div>
         </div>
@@ -178,6 +182,7 @@ export default function AlbumEditForm({
               setEditForm((f) => ({ ...f, notes: e.target.value }))
             }
             placeholder="Write a description for this album"
+            className="bg-white"
           />
         </div>
 
@@ -186,7 +191,7 @@ export default function AlbumEditForm({
           <div className="flex flex-col gap-2">
             <Label>Pages</Label>
             {totalItems > 0 ? (
-              <div className="mt-2 rounded-lg border border-slate-200 p-3 flex flex-col gap-3">
+              <div className="mt-2 bg-white rounded-lg border border-slate-200 p-3 flex flex-col gap-3">
                 <img
                   src={
                     viewingExisting
@@ -238,7 +243,7 @@ export default function AlbumEditForm({
                     disabled={activeCarouselIndex === 0}
                     className="cursor-pointer"
                   >
-                    Prev
+                    <ChevronLeft className="size-4" /> Prev
                   </Button>
                   <span className="text-sm text-slate-600 flex items-center gap-1">
                     {activeCarouselIndex + 1} / {totalItems}
@@ -291,7 +296,7 @@ export default function AlbumEditForm({
                         }
                         className="cursor-pointer"
                       >
-                        Delete page
+                        Delete <Trash2 className="w-4 h-4" />
                       </Button>
                     )}
                     <Button
@@ -305,7 +310,7 @@ export default function AlbumEditForm({
                       disabled={activeCarouselIndex === totalItems - 1}
                       className="cursor-pointer"
                     >
-                      Next
+                      Next <ChevronRight className="size-4" />
                     </Button>
                   </div>
                 </div>
@@ -353,8 +358,8 @@ export default function AlbumEditForm({
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
-        <Button type="button" onClick={handleSave}>
-          Save
+        <Button type="button" onClick={handleSave} className="bg-[#2A81CB] hover:bg-[#1F3665]">
+          Save 
         </Button>
       </div>
     </>
