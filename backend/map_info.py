@@ -16,7 +16,7 @@ _GEOAPIFY_KEY = os.getenv("GEOAPIFY_KEY")
 # --------------------------------------------------
 
 map_bp = Blueprint("map", __name__)
-apply_navigation_guard(map_bp)
+#apply_navigation_guard(map_bp)
 
 geo_cache = {}
 
@@ -70,7 +70,7 @@ def get_geo():
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 @map_bp.route("/geo_batch", methods=["POST"])
-@jwt_required()
+#@jwt_required()
 def geo_batch():
     data = request.json
     countries = data.get("countries", [])
