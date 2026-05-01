@@ -1,5 +1,5 @@
 import { GoogleLogin } from '@react-oauth/google';
-import { apiFetch } from "@/lib/api";
+import { apiFetch, setCsrfToken } from "@/lib/api";
 
 function LoginPage() {
   const handleSuccess = async (credentialResponse: any) => {
@@ -9,6 +9,8 @@ function LoginPage() {
       body: JSON.stringify({ credential: credentialResponse.credential }),
     });
     if (!res.ok) return;
+    const data = await res.json();
+    setCsrfToken(data.csrf_token ?? null);
     window.location.href = "/";
   };
 
