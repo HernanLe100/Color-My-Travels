@@ -292,7 +292,7 @@ export default function AlbumDetailModal({
         return (
           <div className="flex max-h-[28rem] flex-col items-center overflow-y-auto px-2 pt-2 pb-6 text-center text-[#5E3023]">
             
-            <h3 className="mt-4 font-serif text-2xl">
+            <h3 className="mt-4 font-serif text-xl">
               {album.name || "Untitled"}
             </h3>
             <p className="mt-3 text-sm">
