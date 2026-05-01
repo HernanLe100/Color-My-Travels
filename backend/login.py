@@ -4,7 +4,14 @@ from flask import jsonify, request, Blueprint
 
 from google.oauth2 import id_token
 from google.auth.transport.requests import Request as GoogleRequest
-from flask_jwt_extended import create_access_token, set_access_cookies, unset_jwt_cookies
+from flask_jwt_extended import (
+    create_access_token,
+    get_csrf_token,
+    get_jwt,
+    jwt_required,
+    set_access_cookies,
+    unset_jwt_cookies,
+)
 
 import database as db
 from request_guards import apply_navigation_guard
@@ -43,10 +50,18 @@ def login_success():
     response = jsonify({
         "user_id": user_id,
         "name": name,
-        "authenticated": True
+        "authenticated": True,
+        "csrf_token": get_csrf_token(access_token),
     })
     set_access_cookies(response, access_token)
     return response
+
+
+@login_bp.route("/csrf_token", methods=["GET"])
+@jwt_required()
+def csrf_token():
+    claims = get_jwt()
+    return jsonify({"csrf_token": claims.get("csrf")})
 
 
 @login_bp.route("/logout", methods=["POST"])

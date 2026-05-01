@@ -1,4 +1,9 @@
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+let csrfTokenMemory: string | null = null;
+
+export function setCsrfToken(token: string | null) {
+  csrfTokenMemory = token;
+}
 
 function getCookie(name: string): string | null {
   const value = `; ${document.cookie}`;
@@ -12,12 +17,11 @@ export async function apiFetch(path: string, init: RequestInit = {}) {
   const headers = new Headers(init.headers || {});
 
   if (["POST", "PUT", "PATCH", "DELETE"].includes(method)) {
-    const csrfToken = getCookie("csrf_access_token");
-    if (csrfToken) {
+    const csrfToken = csrfTokenMemory ?? getCookie("csrf_access_token");
+    if (csrfToken && !headers.has("X-CSRF-TOKEN")) {
       headers.set("X-CSRF-TOKEN", csrfToken);
     }
   }
-
   console.log(`${BACKEND_URL}${path}`);
 
   return fetch(`${BACKEND_URL}${path}`, {
