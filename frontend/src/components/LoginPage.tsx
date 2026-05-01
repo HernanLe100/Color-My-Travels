@@ -9,6 +9,11 @@ function LoginPage() {
       body: JSON.stringify({ credential: credentialResponse.credential }),
     });
     if (!res.ok) return;
+
+    // Confirm cookie session is actually established before redirecting.
+    const meRes = await apiFetch("/me");
+    if (!meRes.ok) return;
+
     window.location.href = "/";
   };
 
