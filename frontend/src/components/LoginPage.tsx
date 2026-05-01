@@ -26,7 +26,7 @@ function LoginPage() {
           className="absolute bottom-2 left-0 top-2 w-2 rounded-sm bg-[#895737]"
           aria-hidden
         />
-        <h1 className="flex items-center gap-2 text-4xl font-semibold tracking-tight bg-linear-to-r from-[#3274A3] to-[#2A81CB] bg-clip-text text-transparent">
+        <h1 className="flex items-center gap-2 text-4xl font-semibold tracking-tight">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 82" className="h-[.7em] w-[.43em] shrink-0">
             <defs>
               <linearGradient id="pinGradient" x1="0" y1="0" x2="0" y2="82" gradientUnits="userSpaceOnUse">
@@ -38,7 +38,8 @@ function LoginPage() {
             <path fill="url(#pinGradient)" d="M25,50c-9.87,0-18.4-5.72-22.47-14.03h0s22.47,46.03,22.47,46.03l22.11-45.33c-4.19,7.93-12.52,13.33-22.11,13.33Z"/>
             <path fill="url(#pinGradient)" d="M25,0C11.19,0,0,11.19,0,25c0,3.94.91,7.66,2.53,10.97,4.06,8.31,12.6,14.03,22.47,14.03s17.92-5.4,22.11-13.33c.24-.46.47-.93.68-1.4.03-.06.06-.13.09-.19,1.36-3.08,2.12-6.49,2.12-10.08C50,11.19,38.81,0,25,0ZM25,34.26c-4.78,0-8.65-3.87-8.65-8.65s3.87-8.65,8.65-8.65,8.65,3.87,8.65,8.65-3.87,8.65-8.65,8.65Z"/>
           </svg>
-          ColorMyTravels
+          <span className="bg-linear-to-r from-[#3274A3] to-[#2A81CB] bg-clip-text text-transparent">Color</span>
+          <span className="text-[#895737]">My Travels</span>
         </h1>
         <img
           src="/map-preview.png"
