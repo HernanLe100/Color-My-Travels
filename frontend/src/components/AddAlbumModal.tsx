@@ -1,4 +1,4 @@
-import { useRef, useState, type SetStateAction } from "react";
+import { useEffect, useRef, useState, type SetStateAction } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -67,6 +67,14 @@ export default function AddAlbumModal({
     dateRange?: boolean;
   }>({});
   const cityQueryRef = useRef("");
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [onClose]);
 
   const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     const cityTyped = cityQueryRef.current.trim().length > 0;

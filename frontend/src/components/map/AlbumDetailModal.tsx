@@ -96,9 +96,15 @@ export default function AlbumDetailModal({
     if (!root) return;
 
     function onKeyDown(e: KeyboardEvent) {
-      if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+      if (e.key !== "ArrowLeft" && e.key !== "ArrowRight" && e.key !== "Escape") return;
       const el = overlayRef.current;
       if (!el || !el.contains(e.target as Node)) return;
+
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onClose();
+        return;
+      }
 
       const target = e.target;
       if (
