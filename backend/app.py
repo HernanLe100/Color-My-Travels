@@ -20,16 +20,18 @@ app = Flask(__name__)
 _FRONTEND_URL = os.environ.get("FRONTEND_URL") 
 
 _APP_SECRET_KEY = os.environ.get("APP_SECRET_KEY")
-app.config["SECRET_KEY"] = _APP_SECRET_KEY
+#app.config["SECRET_KEY"] = _APP_SECRET_KEY
 app.config['JWT_SECRET_KEY'] = _APP_SECRET_KEY
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.timedelta(hours=1) 
 app.config['JWT_REFRESH_TOKEN_EXPIRES'] = datetime.timedelta(days=1)
 
 app.config["JWT_TOKEN_LOCATION"] = ["cookies"]
-app.config["JWT_ACCESS_COOKIE_NAME"] = "access_token_cookie"
+app.config["JWT_ACCESS_COOKIE_NAME"] = "color_my_travels_access_token_cookie"
 app.config["JWT_COOKIE_HTTPONLY"] = True
 app.config["JWT_COOKIE_SECURE"] = True
 app.config["JWT_COOKIE_SAMESITE"] = "None"
+
+app.config['JWT_ACCESS_CSRF_COOKIE_NAME'] = "color_my_travels_csrf_access_token"
 app.config["JWT_COOKIE_CSRF_PROTECT"] = True
 app.config["JWT_CSRF_IN_COOKIES"] = True
 app.config["JWT_CSRF_METHODS"] = ["POST", "PUT", "PATCH", "DELETE"]

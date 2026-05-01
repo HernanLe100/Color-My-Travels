@@ -2,10 +2,8 @@ from flask import jsonify, request
 
 
 def reject_direct_navigation():
-    """
-    Block direct browser navigation to API routes.
-    Allow XHR/fetch requests from the frontend.
-    """
+    # Block direct browser navigation to API routes
+    # Allow XHR/fetch requests from the frontend
     fetch_mode = (request.headers.get("Sec-Fetch-Mode") or "").lower()
     fetch_dest = (request.headers.get("Sec-Fetch-Dest") or "").lower()
     accept = (request.headers.get("Accept") or "").lower()
@@ -18,7 +16,7 @@ def reject_direct_navigation():
 
     return None
 
-
+# apply to all routes of blueprint
 def apply_navigation_guard(blueprint):
     @blueprint.before_request
     def _guard_navigation():

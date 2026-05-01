@@ -121,14 +121,6 @@ def coord_location():
     lat = feature.get("lat")
     lng = feature.get("lon")
 
-    print(city)
-    print(state)
-    print(country_iso3)
-    print(adm1_code)
-    print(lat)
-    print(lng)
-    print()
-
     return jsonify({
         "city": city,
         "state": state,
@@ -180,15 +172,6 @@ def search():
         adm1_code = feature.get("iso3166_2")
         lat = feature.get("lat")
         lng = feature.get("lon")
-        
-        print(city)
-        print(state)
-        print(country_iso3)
-        print(adm1_code)
-        print(lat)
-        print(lng)
-        print()
-        
 
         results.append({
             "city": city,

@@ -53,10 +53,14 @@ def login_success():
         "authenticated": True,
         "csrf_token": get_csrf_token(access_token),
     })
+    # set cookie
     set_access_cookies(response, access_token)
     return response
 
 
+# used to pass csrf token from backend to frontend because
+# in deployment, frontend can only access cookie from frontend URL,
+# even with most lenient SameSite policy
 @login_bp.route("/csrf_token", methods=["GET"])
 @jwt_required()
 def csrf_token():
@@ -67,5 +71,5 @@ def csrf_token():
 @login_bp.route("/logout", methods=["POST"])
 def logout():
     response = jsonify({"logout": True})
-    unset_jwt_cookies(response)
+    unset_jwt_cookies(response) # remove cookie
     return response

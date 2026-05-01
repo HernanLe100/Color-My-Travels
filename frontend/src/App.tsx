@@ -29,10 +29,10 @@ function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshAuth = async () => {
     try {
-      const res = await apiFetch("/me");
+      const res = await apiFetch("/me"); // check for login status
       setIsAuthenticated(res.ok);
       if (res.ok) {
-        const csrfRes = await apiFetch("/csrf_token");
+        const csrfRes = await apiFetch("/csrf_token"); // get and store csrf token
         if (csrfRes.ok) {
           const csrfData = await csrfRes.json();
           setCsrfToken(csrfData.csrf_token ?? null);
@@ -59,7 +59,6 @@ function AuthProvider({ children }: { children: ReactNode }) {
       setIsAuthenticated(false);
       setIsLoading(false);
     };
-
     window.addEventListener(AUTH_UNAUTHORIZED_EVENT, handleUnauthorized);
     return () => {
       window.removeEventListener(AUTH_UNAUTHORIZED_EVENT, handleUnauthorized);
