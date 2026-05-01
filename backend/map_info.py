@@ -11,7 +11,7 @@ _GEOAPIFY_KEY = os.getenv("GEOAPIFY_KEY")
 # --------------------------------------------------
 
 map_bp = Blueprint("map", __name__)
-#apply_navigation_guard(map_bp)
+apply_navigation_guard(map_bp)
 
 geo_cache = {}
 
