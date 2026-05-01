@@ -18,6 +18,8 @@ export async function apiFetch(path: string, init: RequestInit = {}) {
     }
   }
 
+  console.log(`${BACKEND_URL}${path}`);
+
   return fetch(`${BACKEND_URL}${path}`, {
     ...init,
     headers,
