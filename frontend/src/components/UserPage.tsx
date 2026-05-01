@@ -66,7 +66,7 @@ export default function UserPage() {
       </div>
       <div className="flex flex-col gap-2">
         <span className="text-base font-bold text-[#5E3023]">Account Actions</span>
-        <Button onClick={logout} className="w-fit cursor-pointer" size="lg">
+        <Button onClick={logout} className="w-fit cursor-pointer bg-black hover:bg-slate-800" size="lg">
           Logout <LogOut className="w-4 h-4" />
         </Button>
         {!isConfirmingDelete && (
