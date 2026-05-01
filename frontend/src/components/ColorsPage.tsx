@@ -48,7 +48,7 @@ export default function ColorsPage() {
         },
         body: JSON.stringify({ region_code, color: newColor, region_type }),
       });
-
+      console.log(res);
       if (!res.ok) { console.log("error"); throw new Error(); } 
 
       toast.success("Color updated successfully");
