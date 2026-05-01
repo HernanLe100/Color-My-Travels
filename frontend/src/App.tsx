@@ -5,7 +5,8 @@ import { Menu } from "lucide-react";
 import MapPage from "./components/MapPage";
 import UserPage from "./components/UserPage";
 import ColorsPage from "./components/ColorsPage";
-import { useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import type { ReactNode } from "react";
 
 import LoginPage from "./components/LoginPage";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -14,33 +15,47 @@ import FriendsPage from "./components/FriendsPage";
 import FeedPage from "./components/FeedPage";
 import { apiFetch } from "./lib/api";
 
-export function useAuth() {
+type AuthContextValue = {
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  refreshAuth: () => Promise<void>;
+};
+
+const AuthContext = createContext<AuthContextValue | null>(null);
+
+function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  const refreshAuth = async () => {
+    try {
+      const res = await apiFetch("/me");
+      setIsAuthenticated(res.ok);
+    } catch {
+      setIsAuthenticated(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    let isMounted = true;
-    const checkAuth = async () => {
-      try {
-        const res = await apiFetch("/me");
-        if (!isMounted) return;
-        setIsAuthenticated(res.ok);
-      } catch {
-        if (!isMounted) return;
-        setIsAuthenticated(false);
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-    checkAuth();
-    return () => {
-      isMounted = false;
-    };
+    refreshAuth();
   }, []);
 
-  return { isAuthenticated, isLoading };
+  const value = useMemo(
+    () => ({ isAuthenticated, isLoading, refreshAuth }),
+    [isAuthenticated, isLoading],
+  );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+export function useAuth() {
+  const auth = useContext(AuthContext);
+  if (!auth) {
+    throw new Error("useAuth must be used within AuthProvider");
+  }
+  return auth;
 }
 
 function MobileMenuButton() {
@@ -58,6 +73,14 @@ function MobileMenuButton() {
 }
 
 function App() {
+  return (
+    <AuthProvider>
+      <AppLayout />
+    </AuthProvider>
+  );
+}
+
+function AppLayout() {
   const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) return null;
