@@ -10,6 +10,8 @@ _GEOAPIFY_KEY = os.getenv("GEOAPIFY_KEY")
 
 map_bp = Blueprint("map", __name__)
 
+geo_cache = {}
+
 # --------------------------------------------------
 
 @map_bp.route("/geo", methods=["GET"])
@@ -20,8 +22,13 @@ def get_geo():
     if not country or not level:
         return jsonify({"error": "Missing country or level"}), 400
 
+    key = f"{country}-{level}"
+
+    # cache hit
+    if key in geo_cache:
+        return jsonify(geo_cache[key])
+
     try:
-        # call geoBoundaries metadata API
         meta_url = f"https://www.geoboundaries.org/api/current/gbOpen/{country}/{level}"
         meta_res = requests.get(meta_url)
 
@@ -33,16 +40,15 @@ def get_geo():
         # get the actual GeoJSON link
         geojson_url = meta.get("simplifiedGeometryGeoJSON")
 
-        if not geojson_url:
-            return jsonify({"error": "No GeoJSON URL found"}), 500
-
-        # fetch the actual geometry
         geo_res = requests.get(geojson_url)
 
         if geo_res.status_code != 200:
             return jsonify({"error": "Failed to fetch GeoJSON"}), 500
 
         geo_data = geo_res.json()
+
+        # store in cache
+        geo_cache[key] = geo_data
 
         return jsonify(geo_data)
 
