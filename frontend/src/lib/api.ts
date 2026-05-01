@@ -25,7 +25,7 @@ export async function apiFetch(path: string, init: RequestInit = {}) {
   const headers = new Headers(init.headers || {});
 
   if (["POST", "PUT", "PATCH", "DELETE"].includes(method)) {
-    const csrfToken = csrfTokenMemory ?? getCookie("csrf_access_token");
+    const csrfToken = csrfTokenMemory ?? getCookie("color_my_travels_csrf_access_token");
     if (csrfToken && !headers.has("X-CSRF-TOKEN")) {
       headers.set("X-CSRF-TOKEN", csrfToken);
     }

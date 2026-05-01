@@ -20,7 +20,6 @@ app = Flask(__name__)
 _FRONTEND_URL = os.environ.get("FRONTEND_URL") 
 
 _APP_SECRET_KEY = os.environ.get("APP_SECRET_KEY")
-#app.config["SECRET_KEY"] = _APP_SECRET_KEY
 app.config['JWT_SECRET_KEY'] = _APP_SECRET_KEY
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.timedelta(hours=1) 
 app.config['JWT_REFRESH_TOKEN_EXPIRES'] = datetime.timedelta(days=1)
