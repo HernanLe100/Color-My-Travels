@@ -1,15 +1,23 @@
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-let csrfTokenMemory: string | null = null;
-
-export function setCsrfToken(token: string | null) {
-  csrfTokenMemory = token;
-}
 
 function getCookie(name: string): string | null {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length !== 2) return null;
-  return decodeURIComponent(parts.pop()!.split(";").shift()!);
+  console.log(document.cookie);
+  const cookies :string[]= document.cookie.split(";");
+
+  const cookies_dict: Record<string, string> = Object.fromEntries(
+    cookies.map(item => {
+      const [key, value] = item.split("=");
+      return [key.trim(), value];
+    })
+  );
+
+  console.log(cookies_dict);
+
+  if (name in cookies_dict){
+    console.log(cookies_dict[name]);
+  }
+
+  return cookies_dict[name];
 }
 
 export async function apiFetch(path: string, init: RequestInit = {}) {
@@ -17,11 +25,13 @@ export async function apiFetch(path: string, init: RequestInit = {}) {
   const headers = new Headers(init.headers || {});
 
   if (["POST", "PUT", "PATCH", "DELETE"].includes(method)) {
-    const csrfToken = csrfTokenMemory ?? getCookie("csrf_access_token");
-    if (csrfToken && !headers.has("X-CSRF-TOKEN")) {
+    const csrfToken = getCookie("csrf_access_token");
+    console.log(csrfToken);
+    if (csrfToken) {
       headers.set("X-CSRF-TOKEN", csrfToken);
     }
   }
+
   console.log(`${BACKEND_URL}${path}`);
 
   return fetch(`${BACKEND_URL}${path}`, {

@@ -13,7 +13,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
 import FriendsPage from "./components/FriendsPage";
 import FeedPage from "./components/FeedPage";
-import { apiFetch, setCsrfToken } from "./lib/api";
+import { apiFetch } from "./lib/api";
 
 type AuthContextValue = {
   isAuthenticated: boolean;
@@ -31,20 +31,8 @@ function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const res = await apiFetch("/me");
       setIsAuthenticated(res.ok);
-      if (res.ok) {
-        const csrfRes = await apiFetch("/csrf_token");
-        if (csrfRes.ok) {
-          const csrfData = await csrfRes.json();
-          setCsrfToken(csrfData.csrf_token ?? null);
-        } else {
-          setCsrfToken(null);
-        }
-      } else {
-        setCsrfToken(null);
-      }
     } catch {
       setIsAuthenticated(false);
-      setCsrfToken(null);
     } finally {
       setIsLoading(false);
     }
