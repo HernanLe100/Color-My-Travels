@@ -39,10 +39,50 @@ export function useAuth() {
     }
   });
 
+  // check if token is expired by setting a timer after calculating the time until expiry, 
+  // if so, remove it from local storage AND set the token to null!!
+  // ProtectedRoute will check for null token and redirect to login page
+  useEffect(() => {
+    let timeout: number | undefined;
+
+    const setupExpiry = (t: string | null) => {
+      if (!t) return;
+
+      try {
+        const decoded = jwtDecode<JwtPayload>(t);
+        const now = Date.now() / 1000;
+
+        const timeUntilExpiry = (decoded.exp - now) * 1000;
+
+        if (timeUntilExpiry <= 0) {
+          localStorage.removeItem("token");
+          setToken(null);
+        } else {
+          timeout = window.setTimeout(() => {
+            localStorage.removeItem("token");
+            setToken(null);
+          }, timeUntilExpiry);
+        }
+      } catch {
+        localStorage.removeItem("token");
+        setToken(null);
+      }
+    };
+
+    setupExpiry(token);
+
+    return () => {
+      if (timeout) clearTimeout(timeout);
+    };
+  }, [token]);
+
+  // sync across tabs
   useEffect(() => {
     const sync = () => setToken(localStorage.getItem("token"));
+
     window.addEventListener("storage", sync);
     window.addEventListener("focus", sync);
+
     return () => {
       window.removeEventListener("storage", sync);
       window.removeEventListener("focus", sync);
