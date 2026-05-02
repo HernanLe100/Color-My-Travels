@@ -84,7 +84,7 @@ export default function FeedAlbum({
             {displayName}
           </p>
           {loc ? (
-            <p className="flex items-center gap-1 truncate text-sm">
+            <p className="flex items-center gap-1 truncate text-sm text-[#895737]">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 82" className="h-[.7em] w-[.43em] shrink-0" fill="#2A81CB">
                 <path d="M47.88,35.08c-.03.06-.06.13-.09.19l.09-.19h0Z"/>
                 <path d="M25,50c-9.87,0-18.4-5.72-22.47-14.03h0s22.47,46.03,22.47,46.03l22.11-45.33c-4.19,7.93-12.52,13.33-22.11,13.33Z"/>
