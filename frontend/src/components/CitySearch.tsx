@@ -21,7 +21,10 @@ export default function CitySearch({
   const token = useAuth();
   
   useEffect(() => {
-    if (query.length < 3) return;
+    if (query.length < 3) {
+      setResults([]); // clear stale results
+      return;
+    }
 
     const timeout = setTimeout(async () => {
       const res = await fetch(`${BACKEND_URL}/search?q=${query}`,
