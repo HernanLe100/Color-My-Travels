@@ -225,6 +225,17 @@ export default function MapPage() {
   };
   // --------------------------------------------------
 
+  const resetForm = () => {
+    setImages([]);
+    setImageCaptions([]);
+    setNotes("");
+    setName("");
+    setStartDate("");
+    setEndDate("");
+    setSelectedLocation(null);
+    setSubmitError(null);
+  };
+
   return (
     <div className="h-screen w-full">
       <div className="pointer-events-auto absolute top-6 right-6 z-[1000]">
@@ -324,6 +335,7 @@ export default function MapPage() {
         <AddAlbumModal
           isOpen={isModalOpen}
           onClose={() => {
+            resetForm();
             setSubmitError(null);
             setIsModalOpen(false);
           }}

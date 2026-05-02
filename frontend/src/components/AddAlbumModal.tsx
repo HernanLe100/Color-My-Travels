@@ -318,15 +318,6 @@ export default function AddAlbumModal({
             <div className="flex justify-end gap-2">
               <Button
                 size="lg"
-                type="button"
-                variant="outline"
-                onClick={onClose}
-                className="cursor-pointer"
-              >
-                Cancel
-              </Button>
-              <Button
-                size="lg"
                 type="submit"
                 disabled={isSubmitting}
                 className="cursor-pointer bg-[#2A81CB] hover:bg-[#1F3665]"
