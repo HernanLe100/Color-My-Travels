@@ -97,7 +97,7 @@ export default function FeedAlbum({
       </div>
 
       {/* Caption block — album title, dates, notes */}
-      <div className="pr-7 pl-9 pb-2 pt-2">
+      <div className="pr-7 pl-9 pt-2 pb-3">
         <h3 className="text-base font-semibold leading-snug">
           {album.name || "Untitled album"}
         </h3>
@@ -160,7 +160,7 @@ export default function FeedAlbum({
           </div>
           
           {photos[slide]?.caption ? (
-            <p className="wrap-break-word border-t border-neutral-100 bg-[#F3E9DC] pr-5 pl-7 py-2 text-sm">
+            <p className="wrap-break-word border-t border-neutral-100 bg-[#F3E9DC] pr-5 pl-7 pt-2 pb-3 text-sm">
               {photos[slide].caption}
             </p>
           ) : null}
