@@ -48,7 +48,6 @@ export default function FeedAlbum({
 }) {
   const friend = friendForAlbum(album, friends);
   const displayName = friend.name?.trim() || "Friend";
-  const initial = displayName.charAt(0).toUpperCase() || "?";
   const photos = useMemo(() => photoPages(album.pages), [album.pages]);
   const [slide, setSlide] = useState(0);
 
