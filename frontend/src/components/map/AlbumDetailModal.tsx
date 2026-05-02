@@ -76,10 +76,8 @@ export default function AlbumDetailModal({
   useEffect(() => {
     if (albums.length === 1) {
       setActiveAlbumIndex(0);
-    } else if (albums.length > 1) {
-      setActiveAlbumIndex(null);
     }
-  }, [albums]);
+  }, [albums.length]);
 
   const slots = useMemo(() => albumPageSlots(activeAlbum), [activeAlbum]);
 
@@ -298,18 +296,18 @@ export default function AlbumDetailModal({
     switch (slot.kind) {
       case "empty":
         return (
-          <div className="flex h-full min-h-[18rem] flex-col items-center justify-center text-center">
+          <div className="flex h-full min-h-72 flex-col items-center justify-center text-center">
             <p className="text-sm">No activeAlbum for this place yet.</p>
           </div>
         );
-      case "cover":
+      case "cover": {
         if (!activeAlbum) return null;
 
         const hasNotes = Boolean(activeAlbum.notes?.trim());
 
         return (
           <div
-            className={`flex max-h-[28rem] flex-col items-center overflow-y-auto px-2 pt-2 pb-6 text-center text-[#5E3023] h-full ${
+            className={`flex max-h-112 flex-col items-center overflow-y-auto px-2 pt-2 pb-6 text-center text-[#5E3023] min-h-64 ${
               hasNotes ? "justify-start" : "justify-center"
             }`}
           >
@@ -329,6 +327,7 @@ export default function AlbumDetailModal({
             ) : null}
           </div>
         );
+      }
       case "photo":
         return (
           <div className="relative flex flex-col gap-3 h-full">
@@ -336,21 +335,18 @@ export default function AlbumDetailModal({
               <img
                 src={cloudinaryImageUrl(cloudName, slot.page.id)}
                 alt={slot.page.caption || "Album photo"}
-                className="max-h-[14rem] w-full object-contain"
+                className="max-h-96 w-full object-contain"
               />
             </div>
 
             {slot.page.caption ? (
               <div className="max-h-24 overflow-y-auto px-2 w-full text-left">
-                <p className="whitespace-pre-wrap text-sm leading-relaxed text-[#5E3023] line-clamp-1">
+                <p className="whitespace-pre-wrap text-sm leading-relaxed text-[#5E3023]">
                   {slot.page.caption}
                 </p>
               </div>
             ) : null}
 
-            <p className="absolute bottom-2 right-2 text-xs text-[#895737] pointer-events-none">
-              {slot.index + 2}
-            </p>
           </div>
         );
       default:
@@ -456,7 +452,7 @@ export default function AlbumDetailModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="activeAlbum-dialog-title"
-      className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/30 p-4 outline-none"
+      className="fixed inset-0 z-1100 flex items-center justify-center bg-black/30 p-4 outline-none"
     >
       <div
         className={`relative w-full max-w-2xl rounded-lg border-2 border-stone-300 p-5 shadow-lg bg-[#FEF9F1]`}
@@ -467,14 +463,15 @@ export default function AlbumDetailModal({
           {/* back button */}
           {activeAlbumIndex !== null && !isEditing && albums.length > 1 && (
             <button
+              type="button"
               onClick={() => {
                 setActiveAlbumIndex(null);
                 setPageIndex(0);
               }}
-              className="absolute left-0 top-0 text-stone-400 hover:text-stone-700 cursor-pointer flex items-center gap-1"
+              className="absolute left-0 top-0 flex items-center gap-0.5 text-stone-400 hover:text-stone-700 cursor-pointer"
             >
-              <ChevronLeft className="w-4 h-4" />
-              <span className="text-sm">Back</span>
+              <ChevronLeft className="size-4 mr-1" />
+              <span className="hidden sm:inline text-sm">Back</span>
             </button>
           )}
 
@@ -546,7 +543,7 @@ export default function AlbumDetailModal({
                       />
                       <div className="absolute inset-0 flex items-center justify-center rounded-md bg-black/30 text-white opacity-0 group-hover:opacity-100 transition pointer-events-none" />
                     </div>
-                    <Pencil className="w-3 h-3 text-stone-500" />
+                    <Pencil className="w-3 h-3" />
                   </label>
                 </div>
               ) : (
@@ -598,7 +595,7 @@ export default function AlbumDetailModal({
                       />
                       <div className="absolute inset-0 flex items-center justify-center rounded-md bg-black/30 text-white opacity-0 group-hover:opacity-100 transition pointer-events-none" />
                     </div>
-                    <Pencil className="w-3 h-3 text-stone-500" />
+                    <Pencil className="w-3 h-3" />
                   </label>
                 </div>
               ) : (
@@ -630,25 +627,25 @@ export default function AlbumDetailModal({
 
         {activeAlbumIndex === null ? (
           // album selection screen
-          <div className="mt-6">
-            <p className="text-sm text-[#895737] text-center mb-3">
-              Choose an album
+          <div className="mt-2">
+            <p className="text-base font-bold text-[#895737] font-serif text-center mb-1">
+              Choose an album:
             </p>
 
-            <div className="flex flex-col gap-3 overflow-y-auto px-2 pb-2 max-h-[20rem]">
+            <div className="flex flex-col font-serif gap-3 overflow-y-auto px-2 pb-2 max-h-80">
               {albums.map((a, i) => (
                 <button
                   key={a.album_id}
                   onClick={() => setActiveAlbumIndex(i)}
-                  className=" flex-shrink-0 rounded-lg border border-stone-300 bg-white px-3 py-3 shadow-sm hover:shadow-lg transition text-left cursor-pointer"
+                  className="shrink-0 rounded-lg border hover:border-[#5E3023] border-stone-300 bg-white px-3 py-3 shadow-sm hover:bg-[#F3E9DC] transition text-left cursor-pointer"
                 >
                   {/* title */}
-                  <p className="text-sm font-medium text-[#5E3023] truncate">
+                  <p className="text-sm font-semibold text-[#5E3023] truncate">
                     {a.name || `Album ${i + 1}`}
                   </p>
 
                   {/* dates */}
-                  <p className="text-xs text-stone-500 mt-1">
+                  <p className="text-xs text-[#5E3023] mt-1">
                     {formatAlbumDate(a.start_date)} —{" "}
                     {formatAlbumDate(a.end_date)}
                   </p>
@@ -693,25 +690,12 @@ export default function AlbumDetailModal({
                 className="absolute bottom-2 left-0 top-2 w-2 rounded-sm bg-[#895737]"
                 aria-hidden
               />
-              <div className="pl-5 pr-4 font-serif py-4 h-[18rem] flex flex-col">
-                <div className="flex-1 flex flex-col">{renderPageBody()}</div>
+              <div className="pl-5 pr-4 font-serif py-4 min-h-72 flex flex-col">
+                <div className="flex-1 flex flex-col min-h-0">{renderPageBody()}</div>
               </div>
             </div>
 
-            <div className="mt-3 flex justify-center gap-1">
-              {slots.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setPageIndex(i)}
-                  className={`h-2 w-2 rounded-full transition ${
-                    i === pageIndex ? "bg-[#895737]" : "bg-stone-300"
-                  }`}
-                  aria-label={`Go to page ${i + 1}`}
-                />
-              ))}
-            </div>
-
-            <div className="mt-2 flex items-center justify-between gap-3">
+            <div className="mt-3 flex items-center justify-between gap-3">
               <Button
                 type="button"
                 variant="outline"
@@ -725,6 +709,19 @@ export default function AlbumDetailModal({
                   Prev
                 </span>
               </Button>
+
+              <div className="flex justify-center gap-1">
+                {slots.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setPageIndex(i)}
+                    className={`h-2 w-2 rounded-full transition ${
+                      i === pageIndex ? "bg-[#895737]" : "bg-stone-300"
+                    }`}
+                    aria-label={`Go to page ${i + 1}`}
+                  />
+                ))}
+              </div>
 
               <Button
                 type="button"
@@ -774,7 +771,7 @@ export default function AlbumDetailModal({
             {isConfirmingDelete && (
               <div className="flex flex-wrap items-center justify-end gap-2">
                 <span className="text-sm text-stone-600">
-                  Delete this activeAlbum?
+                  Delete this album?
                 </span>
                 <Button
                   type="button"
