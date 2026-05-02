@@ -771,7 +771,7 @@ export default function AlbumDetailModal({
             {isConfirmingDelete && (
               <div className="flex flex-wrap items-center justify-end gap-2">
                 <span className="text-sm text-stone-600">
-                  Delete this activeAlbum?
+                  Delete this album?
                 </span>
                 <Button
                   type="button"
