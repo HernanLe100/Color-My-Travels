@@ -135,6 +135,8 @@ export function useMapTravelData(
       const adm0Results = await Promise.all(
         countriesVisited.map((c) => fetchLevel(c, "ADM0")),
       );
+      // makes it so that smaller countries render on top
+      adm0Results.sort((a: any, b: any) => (b.area ?? 0) - (a.area ?? 0));
 
       const adm1Results = await Promise.all(
         countriesVisited.map((c) => fetchLevel(c, "ADM1")),

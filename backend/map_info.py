@@ -49,6 +49,10 @@ def get_geo():
 
         geo_data = geo_res.json()
 
+        # include country area so frontend can sort countries by area
+        if level == "ADM0":
+            geo_data["area"] = float(meta.get("meanAreaSqKM"))
+
         # store in cache
         geo_cache[key] = geo_data
 
