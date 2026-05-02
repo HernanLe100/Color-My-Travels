@@ -93,10 +93,10 @@ export default function ColorsPage() {
               className="flex items-center font-serif justify-between p-3 rounded-lg border bg-white
                      hover:bg-[#F3E9DC] text-[#5E3023] transition cursor-pointer group hover:border-[#895737]"
             >
-              <span className="text-sm font-semibold">
+              <span className="font-semibold">
                 {row.display_name || row.region_code}
                 {row.display_name && (
-                  <span className="ml-2 text-xs text-gray-400">
+                  <span className="ml-2 text-xs text-gray-400 font-medium">
                     ({row.region_code})
                   </span>
                 )}
