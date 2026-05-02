@@ -258,7 +258,7 @@ export default function AlbumEditForm({
                   >
                     <ChevronLeft className="size-4" /> Prev
                   </Button>
-                  <span className="text-sm text-slate-600 font-serif flex items-center gap-1">
+                  <span className="text-sm text-slate-600 flex items-center gap-1">
                     {activeCarouselIndex + 1} / {totalItems}
                     {showNewTag && (
                       <span className="text-sm text-[#2A81CB]">(New!)</span>

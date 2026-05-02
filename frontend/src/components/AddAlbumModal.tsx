@@ -6,7 +6,7 @@ import CitySearch from "./CitySearch";
 import type { SearchLocation } from "@/types";
 import { Textarea } from "./ui/textarea";
 import ImageUploadInput from "./ImageUploadInput";
-import { ChevronLeft, ChevronRight, MapPinPlus } from "lucide-react";
+import { ChevronLeft, ChevronRight, MapPinPlus, Trash2 } from "lucide-react";
 
 type Props = {
   isOpen: boolean;
@@ -59,6 +59,7 @@ export default function AddAlbumModal({
   isSubmitting,
 }: Props) {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [confirmDeleteIndex, setConfirmDeleteIndex] = useState<number | null>(null);
   const [fieldErrors, setFieldErrors] = useState<{
     name?: boolean;
     startDate?: boolean;
@@ -117,24 +118,26 @@ export default function AddAlbumModal({
 
   return (
     <div className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/30 px-4">
-      <div className="relative w-full max-w-2xl rounded-xl bg-[#FEF9F1] p-7 shadow-2xl">
-        <div className="relative px-2">
+      <div className="relative w-full max-w-2xl rounded-xl bg-[#FEF9F1] shadow-2xl max-h-[90vh] flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between px-7 pt-7 pb-4 shrink-0">
+          <h2 className="text-2xl font-bold font-serif text-[#5E3023]">New Album</h2>
           <button
             type="button"
-            className="absolute right-0 top-0 text-stone-400 hover:text-stone-700 cursor-pointer"
+            className="text-stone-400 hover:text-stone-700 cursor-pointer"
             onClick={onClose}
             aria-label="Close"
           >
             ✕
           </button>
-          <h2 className="text-2xl font-bold font-serif text-[#5E3023]">New Album</h2>
         </div>
 
         <form
           onSubmit={handleFormSubmit}
           noValidate
-          className="mt-4 space-y-3 max-h-[500px] overflow-y-auto px-2"
+          className="flex flex-col min-h-0 flex-1"
         >
+          <div className="overflow-y-auto flex-1 px-7 space-y-3">
           <div className="flex flex-col gap-2">
             <Label htmlFor="name" className="flex gap-0 font-serif font-semibold text-[#5E3023]">
               Album Name<span className="text-xs text-red-600">*</span>
@@ -244,61 +247,94 @@ export default function AddAlbumModal({
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() =>
-                      setActiveImageIndex((current) => Math.max(0, current - 1))
-                    }
+                    onClick={() => setActiveImageIndex((c) => Math.max(0, c - 1))}
                     disabled={effectiveImageIndex === 0}
-                    className="cursor-pointer text-slate-900"
+                    className="cursor-pointe text-black"
                   >
-                    <ChevronLeft className="size-4" />Prev
+                    <ChevronLeft className="size-4" /> Prev
                   </Button>
                   <span className="text-sm text-slate-600">
                     {effectiveImageIndex + 1} / {images.length}
                   </span>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() =>
-                      setActiveImageIndex((current) =>
-                        Math.min(images.length - 1, current + 1),
-                      )
-                    }
-                    disabled={effectiveImageIndex === images.length - 1}
-                    className="cursor-pointer text-slate-900"
-                  >
-                    Next <ChevronRight className="size-4" />
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    {confirmDeleteIndex === effectiveImageIndex ? (
+                      <>
+                        <span className="text-xs text-stone-600">Delete image?</span>
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          onClick={() => {
+                            setImages((prev) => prev.filter((_, i) => i !== effectiveImageIndex));
+                            setImageCaptions((prev) => prev.filter((_, i) => i !== effectiveImageIndex));
+                            setActiveImageIndex((c) => Math.max(0, c - 1));
+                            setConfirmDeleteIndex(null);
+                          }}
+                        >
+                          Confirm
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setConfirmDeleteIndex(null)}
+                          className="cursor-pointer text-black"
+                        >
+                          Cancel
+                        </Button>
+                      </>
+                    ) : (
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        onClick={() => setConfirmDeleteIndex(effectiveImageIndex)}
+                        className="cursor-pointer"
+                      >
+                        Delete <Trash2 className="size-4" />
+                      </Button>
+                    )}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setActiveImageIndex((c) => Math.min(images.length - 1, c + 1))}
+                      disabled={effectiveImageIndex === images.length - 1}
+                      className="cursor-pointer text-black"
+                    >
+                      Next <ChevronRight className="size-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             )}
           </div>
+          </div>{/* end scrollable */}
 
-          {firstError && (
-            <p className="text-sm text-red-600">{firstError}</p>
-          )}
-          {submitError && (
-            <p className="text-sm text-red-600">{submitError}</p>
-          )}
-
-          <div className="mt-2 flex justify-end gap-2">
-            <Button
-              size="lg"
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              className="cursor-pointer"
-            >
-              Cancel
-            </Button>
-            <Button
-              size="lg"
-              type="submit"
-              disabled={isSubmitting}
-              className="cursor-pointer bg-[#2A81CB] hover:bg-[#1F3665]"
-            >
-              {isSubmitting ? "Saving…" : "Create Album"}
-              {!isSubmitting && <MapPinPlus size={14} />}
-            </Button>
+          {/* Footer */}
+          <div className="shrink-0 px-7 py-4 flex flex-col gap-2">
+            {firstError && (
+              <p className="text-sm text-red-600">{firstError}</p>
+            )}
+            {submitError && (
+              <p className="text-sm text-red-600">{submitError}</p>
+            )}
+            <div className="flex justify-end gap-2">
+              <Button
+                size="lg"
+                type="button"
+                variant="outline"
+                onClick={onClose}
+                className="cursor-pointer"
+              >
+                Cancel
+              </Button>
+              <Button
+                size="lg"
+                type="submit"
+                disabled={isSubmitting}
+                className="cursor-pointer bg-[#2A81CB] hover:bg-[#1F3665]"
+              >
+                {isSubmitting ? "Saving…" : "Create Album"}
+                {!isSubmitting && <MapPinPlus size={14} />}
+              </Button>
+            </div>
           </div>
         </form>
       </div>
