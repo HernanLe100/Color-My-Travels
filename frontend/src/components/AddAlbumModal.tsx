@@ -6,7 +6,7 @@ import CitySearch from "./CitySearch";
 import type { SearchLocation } from "@/types";
 import { Textarea } from "./ui/textarea";
 import ImageUploadInput from "./ImageUploadInput";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, MapPinPlus } from "lucide-react";
 
 type Props = {
   isOpen: boolean;
@@ -297,6 +297,7 @@ export default function AddAlbumModal({
               className="cursor-pointer bg-[#2A81CB] hover:bg-[#1F3665]"
             >
               {isSubmitting ? "Saving…" : "Create Album"}
+              {!isSubmitting && <MapPinPlus size={14} />}
             </Button>
           </div>
         </form>

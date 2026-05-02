@@ -151,7 +151,7 @@ export default function FriendsPage() {
         />
         <Button className="bg-[#2A81CB] cursor-pointer hover:bg-[#1F3665]" onClick={sendRequest}>
           {isSendingRequest ? "Sending..." : "Send Request"}
-          {!isSendingRequest && <Send className="w-4 h-4" />}
+          {!isSendingRequest && <Send className="w-3 h-3" />}
         </Button>
       </div>
 

@@ -7,7 +7,7 @@ import type { Page } from "@/types";
 import { cloudinaryImageUrl } from "./albumModalUtils";
 import ImageUploadInput from "../ImageUploadInput";
 import toast from "react-hot-toast";
-import { ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Trash2, Save } from "lucide-react";
 
 type EditFormState = {
   name: string;
@@ -360,7 +360,7 @@ export default function AlbumEditForm({
           Cancel
         </Button>
         <Button type="button" onClick={handleSave} className="bg-[#2A81CB] hover:bg-[#1F3665]">
-          Save 
+          Save <Save/>
         </Button>
       </div>
     </>
