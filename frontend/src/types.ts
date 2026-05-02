@@ -5,16 +5,19 @@ export type Pin = {
     country: string;
     adm1: string;
     city: string;
+    adm1_name: string | null;
+    country_name: string | null;
 };
 
 /** Result shape from map search (Nominatim) used when creating albums */
 export type SearchLocation = {
     adm1: string | null;
+    adm1_name: string | null;
     city: string;
     country: string;
+    country_name: string | null;
     lat: number;
     lng: number;
-    state: string | null;
 };
   
 export type User = {
@@ -51,6 +54,7 @@ export type Color = {
     user_id: string;
     region_code: string;
     region_type: string;
+    display_name: string | null;
 };
 
 export type FriendRequest = {

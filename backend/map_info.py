@@ -115,19 +115,21 @@ def coord_location():
     feature = features[0]
     
     city = feature.get("city") 
-    state = feature.get("state") or feature.get("state_district") or feature.get("county") 
+    adm1_name = feature.get("state") or feature.get("state_district") or feature.get("county") 
     country_iso3 = iso2_to_iso3( feature.get("country_code") )
     adm1_code = feature.get("iso3166_2")
     lat = feature.get("lat")
     lng = feature.get("lon")
+    country_name = feature.get("country")
 
     return jsonify({
         "city": city,
-        "state": state,
         "adm1": adm1_code,
         "country": country_iso3,
         "lat": lat,
-        "lng": lng
+        "lng": lng,
+        "country_name": country_name,
+        "adm1_name": adm1_name,
     })
 
 @map_bp.route("/search")
@@ -167,19 +169,21 @@ def search():
     for feature in data.get("results", []):
         
         city = feature.get("city") 
-        state = feature.get("state") or feature.get("state_district") or feature.get("county") 
+        adm1_name = feature.get("state") or feature.get("state_district") or feature.get("county") 
         country_iso3 = iso2_to_iso3( feature.get("country_code") )
         adm1_code = feature.get("iso3166_2")
         lat = feature.get("lat")
         lng = feature.get("lon")
+        country_name = feature.get("country")
 
         results.append({
             "city": city,
-            "state": state,
             "adm1": adm1_code,
             "country": country_iso3,
             "lat": lat,
             "lng": lng,
+            "country_name": country_name,
+            "adm1_name": adm1_name,
         })
     
     return jsonify(results)

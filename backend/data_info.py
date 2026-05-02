@@ -272,6 +272,8 @@ def ensure_location():
             "adm1": data.get("adm1"),
             "lat": data.get("lat"),
             "lng": data.get("lng"),
+            "country_name": data.get("country_name"),
+            "adm1_name": data.get("adm1_name"),
         }
     )
     return jsonify({"location_id": location_id})

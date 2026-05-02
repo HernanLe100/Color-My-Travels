@@ -72,6 +72,8 @@ export default function MapPage() {
           country: selectedLocation.country,
           lat: selectedLocation.lat,
           lng: selectedLocation.lng,
+          country_name: selectedLocation.country_name,
+          adm1_name: selectedLocation.adm1_name,
         }),
       });
 
@@ -197,13 +199,16 @@ export default function MapPage() {
     );
     const data = await res.json();
 
+    console.log(data);
+
     handleSelect({
       adm1: data.adm1,
       city: data.city,
       country: data.country,
       lat: data.lat,
       lng: data.lng,
-      state: data.state
+      country_name: data.country_name,
+      adm1_name: data.adm1_name,
     });
 
     hasStartedDrag.current = false;

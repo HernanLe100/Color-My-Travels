@@ -508,7 +508,7 @@ export default function AlbumDetailModal({
             {pin.adm1 &&
               (adm1Color ? (
                 <div className="flex items-center gap-1">
-                  <span>{pin.adm1}</span>
+                  <span>{pin.adm1_name ? pin.adm1_name : pin.adm1}</span>
                   <label
                     htmlFor="adm1-color-input"
                     className="group flex items-center gap-1 cursor-pointer"

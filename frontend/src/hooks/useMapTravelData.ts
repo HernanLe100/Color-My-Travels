@@ -49,6 +49,8 @@ export function useMapTravelData(
           country: String(p.country ?? ""),
           adm1: String(p.adm1 ?? ""),
           city: String(p.city ?? ""),
+          adm1_name: String(p.adm1_name ?? ""),
+          country_name: String(p.country_name ?? ""),
         });
       }
       setPins(uniquePins);

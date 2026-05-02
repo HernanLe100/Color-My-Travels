@@ -58,7 +58,7 @@ export default function CitySearch({
                 setQuery("");
               }}
             >
-              {r.city}, {r.state}, {r.country}
+              {r.city}, {r.adm1_name}, {r.country}
             </div>
           ))}
         </div>

@@ -157,8 +157,8 @@ export default function AddAlbumModal({
           {selectedLocation && (
             <p className="text-sm text-[#2A81CB] font-serif">
               Selected: {selectedLocation.city}
-              {selectedLocation.state
-                ? `, ${selectedLocation.state}`
+              {selectedLocation.adm1_name
+                ? `, ${selectedLocation.adm1_name}`
                 : ""}, {selectedLocation.country}
             </p>
           )}

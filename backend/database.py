@@ -536,6 +536,8 @@ def ensure_location(info: dict):
     adm1 = info.get("adm1")
     lat = info.get("lat")
     lng = info.get("lng")
+    country_name = info.get("country_name")
+    adm1_name = info.get("adm1_name")
 
     with psycopg.connect(_DATABASE_URL, connect_timeout=5) as connection:
         with connection.cursor(row_factory=dict_row) as cursor:
@@ -554,11 +556,11 @@ def ensure_location(info: dict):
 
             cursor.execute(
                 """
-                INSERT INTO locations (lat, lng, country, adm1, city)
-                VALUES (%s, %s, %s, %s, %s)
+                INSERT INTO locations (lat, lng, country, adm1, city, country_name, adm1_name)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
                 RETURNING location_id;
                 """,
-                [lat, lng, country, adm1, city],
+                [lat, lng, country, adm1, city, country_name, adm1_name],
             )
             row = cursor.fetchone()
         connection.commit()
@@ -645,16 +647,43 @@ def get_locations(user_id):
 def get_colors(user_id):
     with psycopg.connect(_DATABASE_URL, connect_timeout=5) as connection:
         with connection.cursor(row_factory=dict_row) as cursor:
+
             cursor.execute(
                 """
-                SELECT * FROM colors
-                WHERE user_id = %s::text
-                ORDER BY region_code ASC;
+                SELECT 
+                    c.region_code,
+                    c.region_type,
+                    c.color,
+
+                    MAX(l.country_name) AS country_name,
+                    MAX(l.adm1_name) AS adm1_name
+
+                FROM colors c
+
+                LEFT JOIN locations l
+                  ON (
+                        (c.region_type = 'country' AND l.country = c.region_code)
+                     OR (c.region_type = 'adm1' AND l.adm1 = c.region_code)
+                  )
+
+                WHERE c.user_id = %s
+
+                GROUP BY c.region_code, c.region_type, c.color
+                ORDER BY c.region_code ASC;
                 """,
                 [user_id]
             )
-            result = cursor.fetchall()
-            return result
+
+            rows = cursor.fetchall()
+
+            # attach display_name
+            for row in rows:
+                if row["region_type"] == "country":
+                    row["display_name"] = row.get("country_name")
+                else:
+                    row["display_name"] = row.get("adm1_name")
+
+            return rows
         
 def update_color(info : dict):
     with psycopg.connect(_DATABASE_URL, connect_timeout=5) as connection:
