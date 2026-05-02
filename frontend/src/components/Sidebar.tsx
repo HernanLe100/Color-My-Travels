@@ -8,14 +8,31 @@ import {
   SidebarMenuButton,
   useSidebar,
 } from "@/components/ui/sidebar";
+import type { User } from "@/types";
 
-import { Map, User, Paintbrush, Users, Newspaper } from "lucide-react";
+import { Map, User as UserIcon, Paintbrush, Users, Newspaper } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 export default function AppSidebar() {
   const location = useLocation();
   const { setOpenMobile } = useSidebar();
   const closeOnMobile = () => setOpenMobile(false);
+
+  const token = localStorage.getItem("token");
+  const [user, setUser] = useState<User>();
+
+  useEffect(() => {
+    if (!token) return;
+
+    Promise.all([
+      fetch(`${BACKEND_URL}/me`, { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json()),
+    ]).then(([userData]) => {
+      setUser(userData);
+    });
+  }, [token]);
 
   return (
     <Sidebar className="h-screen w-64 border-r">
@@ -93,8 +110,8 @@ export default function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={location.pathname === "/user"} className="hover:border-l-2 text-[#895737] hover:border-[#895737] hover:rounded-l-none">
               <Link to="/user" onClick={closeOnMobile}>
-                <User className="w-4 h-4 mr-2" />
-                User
+                <UserIcon className="w-4 h-4 mr-2" />
+                {user?.name}'s Settings
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
