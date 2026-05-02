@@ -118,6 +118,22 @@ export default function AlbumEditForm({
     }, 2000); // Hide the message after 2 seconds
   }
 
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  useEffect(() => {
+    if (!viewingExisting) {
+      const file = newPageFiles[newIndex];
+      if (file instanceof File) {
+        const url = URL.createObjectURL(file);
+        setPreviewUrl(url);
+        return () => URL.revokeObjectURL(url);
+      }
+    }
+  }, [viewingExisting, newIndex, newPageFiles]);
+  
+  const imageSrc = viewingExisting
+  ? cloudinaryImageUrl(cloudName, pages[existingIndex].id)
+  : previewUrl as string | undefined;
+
   return (
     <>
       <div className="mt-4 space-y-3 px-5 max-h-[500px] overflow-y-auto">
@@ -193,11 +209,7 @@ export default function AlbumEditForm({
             {totalItems > 0 ? (
               <div className="bg-white rounded-lg border border-slate-200 p-3 flex flex-col gap-3">
                 <img
-                  src={
-                    viewingExisting
-                      ? cloudinaryImageUrl(cloudName, pages[existingIndex].id)
-                      : URL.createObjectURL(newPageFiles[newIndex])
-                  }
+                  src={imageSrc}
                   alt={`Album page ${activeCarouselIndex + 1}`}
                   className="h-52 w-full rounded-md object-cover"
                 />

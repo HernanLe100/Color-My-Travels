@@ -3,11 +3,12 @@ import type { JSX } from "react";
 import { Navigate } from "react-router-dom";
 
 export default function PublicRoute({ children }: { children: JSX.Element }) {
-  const token = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
 
   //console.log("TOKEN:", token);
+  if (isLoading) return null;
 
-  if (token) {
+  if (isAuthenticated) {
     return <Navigate to="/" replace />;
   }
 

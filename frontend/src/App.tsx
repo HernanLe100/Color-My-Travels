@@ -5,51 +5,80 @@ import { Menu } from "lucide-react";
 import MapPage from "./components/MapPage";
 import UserPage from "./components/UserPage";
 import ColorsPage from "./components/ColorsPage";
-import { useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import type { ReactNode } from "react";
 
 import LoginPage from "./components/LoginPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
-import { jwtDecode } from "jwt-decode";
 import FriendsPage from "./components/FriendsPage";
 import FeedPage from "./components/FeedPage";
+import { apiFetch, setCsrfToken, AUTH_UNAUTHORIZED_EVENT } from "./lib/api";
 
-type JwtPayload = {
-  exp: number;
+type AuthContextValue = {
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  refreshAuth: () => Promise<void>;
 };
 
-export function useAuth() {
-  const [token, setToken] = useState<string | null>(() => {
-    const t = localStorage.getItem("token");
-    if (!t) return null;
+const AuthContext = createContext<AuthContextValue | null>(null);
 
+function AuthProvider({ children }: { children: ReactNode }) {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const refreshAuth = async () => {
     try {
-      const decoded = jwtDecode<JwtPayload>(t);
-      const now = Date.now() / 1000;
-
-      if (decoded.exp < now) {
-        localStorage.removeItem("token");
-        return null;
+      const res = await apiFetch("/me"); // check for login status
+      setIsAuthenticated(res.ok);
+      if (res.ok) {
+        const csrfRes = await apiFetch("/csrf_token"); // get and store csrf token
+        if (csrfRes.ok) {
+          const csrfData = await csrfRes.json();
+          setCsrfToken(csrfData.csrf_token ?? null);
+        } else {
+          setCsrfToken(null);
+        }
+      } else {
+        setCsrfToken(null);
       }
-
-      return t;
     } catch {
-      localStorage.removeItem("token");
-      return null;
+      setIsAuthenticated(false);
+      setCsrfToken(null);
+    } finally {
+      setIsLoading(false);
     }
-  });
+  };
 
   useEffect(() => {
-    const sync = () => setToken(localStorage.getItem("token"));
-    window.addEventListener("storage", sync);
-    window.addEventListener("focus", sync);
+    refreshAuth();
+  }, []);
+
+  useEffect(() => {
+    const handleUnauthorized = () => {
+      setIsAuthenticated(false);
+      setIsLoading(false);
+    };
+    window.addEventListener(AUTH_UNAUTHORIZED_EVENT, handleUnauthorized);
     return () => {
-      window.removeEventListener("storage", sync);
-      window.removeEventListener("focus", sync);
+      window.removeEventListener(AUTH_UNAUTHORIZED_EVENT, handleUnauthorized);
     };
   }, []);
 
-  return token;
+  const value = useMemo(
+    () => ({ isAuthenticated, isLoading, refreshAuth }),
+    [isAuthenticated, isLoading],
+  );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+export function useAuth() {
+  const auth = useContext(AuthContext);
+  if (!auth) {
+    throw new Error("useAuth must be used within AuthProvider");
+  }
+  return auth;
 }
 
 function MobileMenuButton() {
@@ -67,16 +96,26 @@ function MobileMenuButton() {
 }
 
 function App() {
-  const token = useAuth();
+  return (
+    <AuthProvider>
+      <AppLayout />
+    </AuthProvider>
+  );
+}
+
+function AppLayout() {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) return null;
 
   return (
     <BrowserRouter>
       <SidebarProvider>
         <div className="flex w-full">
-          {token && <Sidebar />}
+          {isAuthenticated && <Sidebar />}
 
           <main className="flex-1 relative">
-            {token && <MobileMenuButton />}
+            {isAuthenticated && <MobileMenuButton />}
             <Routes>
               <Route
                 path="/login"

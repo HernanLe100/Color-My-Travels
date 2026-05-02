@@ -12,8 +12,7 @@ import type { SearchLocation } from "@/types";
 import { Switch } from "./ui/switch";
 import AddAlbumModal from "./AddAlbumModal";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+import { apiFetch } from "@/lib/api";
 
 // Fix default icon paths
 L.Icon.Default.mergeOptions({
@@ -36,7 +35,7 @@ export default function MapPage() {
 
   const [isTogglePins, setIsTogglePins] = useState(true);
 
-  const token = useAuth();
+  const { isAuthenticated } = useAuth();
 
   const [selectedLocation, setSelectedLocation] =
     useState<SearchLocation | null>(null);
@@ -49,7 +48,7 @@ export default function MapPage() {
     event.preventDefault();
     setSubmitError(null);
 
-    if (!token) {
+    if (!isAuthenticated) {
       setSubmitError("You must be signed in.");
       return;
     }
@@ -62,11 +61,10 @@ export default function MapPage() {
 
     try {
       // 1. Ensure location
-      const locRes = await fetch(`${BACKEND_URL}/ensure_location`, {
+      const locRes = await apiFetch("/ensure_location", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           adm1: selectedLocation.adm1,
@@ -83,11 +81,10 @@ export default function MapPage() {
       const locationId = locData.location_id;
 
       // 2. Create album
-      const albumRes = await fetch(`${BACKEND_URL}/add_album`, {
+      const albumRes = await apiFetch("/add_album", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           location_id: locationId,
@@ -111,11 +108,8 @@ export default function MapPage() {
         formData.append("album_id", albumId);
         formData.append("caption", imageCaptions[index] ?? "");
 
-        const res = await fetch(`${BACKEND_URL}/upload_image`, {
+        const res = await apiFetch("/upload_image", {
           method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
           body: formData,
         });
 
@@ -198,18 +192,18 @@ export default function MapPage() {
     );
     setIsModalOpen(true);
 
-    const res = await fetch(
-      `${BACKEND_URL}/coord_location?lat=${point.lat}&lng=${point.lng}`,
+    const res = await apiFetch(
+      `/coord_location?lat=${point.lat}&lng=${point.lng}`,
     );
     const data = await res.json();
 
     handleSelect({
-      adm1: data[0].adm1,
-      city: data[0].city,
-      country: data[0].country,
-      lat: data[0].lat,
-      lng: data[0].lng,
-      state: data[0].state,
+      adm1: data.adm1,
+      city: data.city,
+      country: data.country,
+      lat: data.lat,
+      lng: data.lng,
+      state: data.state
     });
 
     hasStartedDrag.current = false;

@@ -6,10 +6,12 @@ import type {
 } from "@/components/map/mapGeoTypes";
 import type { Album, Color, Page, Pin } from "@/types";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+import { point } from '@turf/helpers';
+import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
+import { apiFetch } from "@/lib/api";
 
 export function useMapTravelData(
-  token: string | null | undefined,
+  isAuthenticated: boolean,
   isTogglePins: boolean,
 ) {
   const zoom = useZoomLevel();
@@ -22,16 +24,12 @@ export function useMapTravelData(
   const [pinsLoaded, setPinsLoaded] = useState(false);
 
   useEffect(() => {
-    if (!token) return;
+    if (!isAuthenticated) return;
 
     async function loadMapData() {
       const [locRes, albumRes] = await Promise.all([
-        fetch(`${BACKEND_URL}/get_locations`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        fetch(`${BACKEND_URL}/get_albums`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
+        apiFetch("/get_locations"),
+        apiFetch("/get_albums"),
       ]);
 
       const locData = await locRes.json();
@@ -74,18 +72,16 @@ export function useMapTravelData(
     }
 
     loadMapData();
-  }, [token]);
+  }, [isAuthenticated]);
 
   useEffect(() => {
-    if (!token) return;
-    fetch(`${BACKEND_URL}/get_colors`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
+    if (!isAuthenticated) return;
+    apiFetch("/get_colors")
       .then((res) => res.json())
       .then((data) => {
         if (data.db_response) setColors(data.db_response);
       });
-  }, [token]);
+  }, [isAuthenticated]);
 
   const countriesVisited = useMemo(
     () => [...new Set(pins.map((p) => p.country))],
@@ -109,8 +105,8 @@ export function useMapTravelData(
         return cache.current.get(key);
       }
 
-      const res = await fetch(
-        `${BACKEND_URL}/geo?country=${country}&level=${level}`,
+      const res = await apiFetch(
+        `/geo?country=${country}&level=${level}`,
       );
       const data = (await res.json()) as Record<string, unknown> & {
         crs?: unknown;
@@ -181,13 +177,45 @@ export function useMapTravelData(
   const filteredGeo = useMemo(() => {
     if (polygonLevel !== "ADM1") return combinedGeo;
 
-    return {
+    const pinPoints = pins.map((p) => ({
+      pt: point([p.lng, p.lat]),
+      adm1: p.adm1,
+      country: p.country
+    }));
+
+    const features = combinedGeo.features.flatMap((f) => {
+      const iso = f.properties?.shapeISO;
+  
+      // first try match ISO code
+      if (typeof iso === "string" && visitedADM1.has(iso)) {
+        return [f];
+      }
+  
+      // if no ISO match, find which polygon location exists in
+      const match = pinPoints.find((p) =>
+        f.properties?.shapeGroup === p.country &&
+        booleanPointInPolygon(p.pt, f as any)
+      );
+  
+      if (!match) return [];
+  
+      return [
+        {
+          ...f,
+          properties: {
+            ...f.properties,
+            shapeISO: match.adm1, // fix ISO
+          },
+        },
+      ];
+
+    });
+
+    const data = {
       type: "FeatureCollection" as const,
-      features: combinedGeo.features.filter((f) => {
-        const iso = f.properties?.shapeISO;
-        return typeof iso === "string" && visitedADM1.has(iso);
-      }),
+      features,
     };
+    return data;
   }, [combinedGeo, visitedADM1, polygonLevel]);
 
   return {
