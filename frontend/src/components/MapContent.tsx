@@ -34,9 +34,14 @@ export default function MapContent({ isTogglePins = false }: MapContentProps) {
 
   const albumsAtLocation = useMemo(() => {
     if (!selectedPin) return [];
-    return albums.filter(
-      (a) => a.location_id === selectedPin.location_id
-    );
+  
+    return albums
+      .filter((a) => a.location_id === selectedPin.location_id)
+      .sort((a, b) => {
+        const dateA = new Date(a.start_date ?? 0).getTime();
+        const dateB = new Date(b.start_date ?? 0).getTime();
+        return dateA - dateB; // oldest to newest by start date of album
+      });
   }, [albums, selectedPin]);
 
   if (!pinsLoaded || !loaded) {
