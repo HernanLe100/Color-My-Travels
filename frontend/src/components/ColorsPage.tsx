@@ -67,20 +67,21 @@ export default function ColorsPage() {
   if (isLoading) return <Loading />;
 
   return (
+    <div className="min-h-screen w-full bg-[#FEF9F1]">
     <div className="mx-auto w-full max-w-lg md:mx-0 md:max-w-none px-6 py-6">
-      <h1 className="text-lg font-bold mb-4">Edit Colors</h1>
+      <h1 className="text-lg font-bold mb-4 font-serif text-[#5E3023]">Edit Colors</h1>
       <div className="flex flex-col gap-2">
         {colors.map((row, i) => (
           <label
             key={i}
             htmlFor={`color-${i}`}
-            className="flex items-center justify-between p-3 rounded-lg border
-                     hover:bg-slate-50 transition cursor-pointer group"
+            className="flex items-center font-serif justify-between p-3 rounded-lg border bg-white
+                     hover:bg-[#F3E9DC] text-[#5E3023] transition cursor-pointer group hover:border-[#895737]"
           >
-            <span className="text-sm font-medium">{row.region_code}</span>
+            <span className="text-sm font-semibold">{row.region_code}</span>
 
             <div className="flex items-center gap-2">
-              <Pencil className="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 transition" />
+              <Pencil className="w-4 h-4 text-[#895737] opacity-0 group-hover:opacity-100 transition" />
               <input
                 id={`color-${i}`}
                 type="color"
@@ -109,6 +110,7 @@ export default function ColorsPage() {
           </label>
         ))}
       </div>
+    </div>
     </div>
   );
 }

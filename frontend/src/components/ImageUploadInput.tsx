@@ -34,7 +34,7 @@ export default function ImageUploadInput({
       className={`flex flex-col items-center justify-center
         w-full h-32 border-2 border-dashed border-gray-300
         rounded-xl cursor-pointer
-        hover:border-gray-400 hover:bg-gray-50
+        hover:border-gray-400 hover:bg-white bg-white
         transition ${className}`}
       onClick={() => inputRef.current?.click()}
       onDragOver={(e) => e.preventDefault()}

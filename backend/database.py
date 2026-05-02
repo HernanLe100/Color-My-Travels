@@ -104,6 +104,34 @@ def send_friend_request(sender_id, receiver_id):
             if existing:
                 return {"error": f"Request already {existing['status']}"}
 
+            # Auto-accept if receiver already sent a pending request
+            cursor.execute(
+                """
+                SELECT 1 FROM friend_requests
+                WHERE sender_id = %s AND receiver_id = %s AND status = 'pending';
+                """,
+                [receiver_id, sender_id]
+            )
+            if cursor.fetchone():
+                cursor.execute(
+                    """
+                    UPDATE friend_requests
+                    SET status = 'accepted'
+                    WHERE sender_id = %s AND receiver_id = %s;
+                    """,
+                    [receiver_id, sender_id]
+                )
+                cursor.execute(
+                    """
+                    INSERT INTO friendships (user_id, friend_id)
+                    VALUES (%s, %s), (%s, %s)
+                    ON CONFLICT DO NOTHING;
+                    """,
+                    [sender_id, receiver_id, receiver_id, sender_id]
+                )
+                connection.commit()
+                return {"success": True, "auto_accepted": True}
+
             # Insert new request
             cursor.execute(
                 """

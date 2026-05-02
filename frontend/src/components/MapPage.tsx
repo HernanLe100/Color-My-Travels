@@ -213,18 +213,18 @@ export default function MapPage() {
   return (
     <div className="h-screen w-full">
       <div className="pointer-events-auto absolute top-6 right-6 z-[1000]">
-        <div className="flex max-w-xs items-center gap-4 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-lg">
+        <div className="flex max-w-xs items-center gap-2 rounded-xl bg-[#FEF9F1] border border-[#895737] px-4 py-3 shadow-lg">
           <div className="min-w-0 flex-1">
             <Label
               htmlFor="togglePins"
-              className="block cursor-pointer text-sm font-medium text-slate-900"
+              className="flex items-center gap-1 cursor-pointer text-sm font-semibold font-serif text-[#5E3023]"
             >
               Pins
             </Label>
           </div>
           <Switch
             id="togglePins"
-            className="shrink-0 cursor-pointer"
+            className="shrink-0 cursor-pointer data-checked:bg-[#2A81CB]"
             checked={isTogglePins}
             onCheckedChange={setIsTogglePins}
           />
@@ -246,7 +246,9 @@ export default function MapPage() {
         maxBoundsViscosity={0.8}
         zoomControl={false}
       >
-        <ZoomControl position="bottomleft" />
+        <ZoomControl 
+          position="bottomleft"
+        />
         <TileLayer
           attribution="&copy; OpenStreetMap & Carto"
           url="https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png"
@@ -277,15 +279,15 @@ export default function MapPage() {
               window.addEventListener("pointerup", handlePointerUp);
             }}
             className="absolute bottom-6 right-6 z-[1000] cursor-pointer
-             w-14 h-14 rounded-full 
-             text-white text-2xl
+             w-14 h-14 rounded-full
+             bg-[#2A81CB] text-white text-2xl
              flex items-center justify-center
              shadow-xl"
           >
             +
           </Button>
         </TooltipTrigger>
-        <TooltipContent className="z-[2000]">Add a new album</TooltipContent>
+        <TooltipContent className="z-[2000]">Create a new album</TooltipContent>
       </Tooltip>
 
       {dragging && (

@@ -7,6 +7,7 @@ import type { Page } from "@/types";
 import { cloudinaryImageUrl } from "./albumModalUtils";
 import ImageUploadInput from "../ImageUploadInput";
 import toast from "react-hot-toast";
+import { ChevronLeft, ChevronRight, Trash2, Save } from "lucide-react";
 
 type EditFormState = {
   name: string;
@@ -135,10 +136,10 @@ export default function AlbumEditForm({
 
   return (
     <>
-      <div className="mt-4 space-y-3 px-2 max-h-[500px] overflow-y-auto">
+      <div className="mt-4 space-y-3 px-5 max-h-[500px] overflow-y-auto">
         {/* name */}
         <div className="flex flex-col gap-2">
-          <Label htmlFor="edit-album-name">Album Name</Label>
+          <Label htmlFor="edit-album-name" className="text-[#5E3023] font-serif font-semibold">Album Name</Label>
           <Input
             id="edit-album-name"
             value={editForm.name}
@@ -147,13 +148,14 @@ export default function AlbumEditForm({
             }
             placeholder="Enter a name for this album"
             maxLength={50}
+            className="bg-white font-serif"
           />
         </div>
 
         {/* dates */}
         <div className="grid grid-cols-2 gap-2">
           <div className="flex flex-col gap-2">
-            <Label htmlFor="edit-start-date">Start Date</Label>
+            <Label htmlFor="edit-start-date" className="text-[#5E3023] font-serif font-semibold">Start Date</Label>
             <Input
               id="edit-start-date"
               type="date"
@@ -164,11 +166,12 @@ export default function AlbumEditForm({
                   start_date: e.target.value,
                 }))
               }
+              className={`bg-white font-serif ${editForm.start_date ? "text-black" : "text-stone-500"}`}
             />
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label htmlFor="edit-end-date">End Date</Label>
+            <Label htmlFor="edit-end-date" className="text-[#5E3023] font-serif font-semibold">End Date</Label>
             <Input
               id="edit-end-date"
               type="date"
@@ -179,13 +182,14 @@ export default function AlbumEditForm({
                   end_date: e.target.value,
                 }))
               }
+              className={`bg-white font-serif ${editForm.end_date ? "text-black" : "text-stone-500"}`}
             />
           </div>
         </div>
 
         {/* notes */}
         <div className="flex flex-col gap-2">
-          <Label htmlFor="edit-notes">Notes</Label>
+          <Label htmlFor="edit-notes" className="text-[#5E3023] font-serif font-semibold">Notes</Label>
           <Textarea
             id="edit-notes"
             rows={4}
@@ -194,16 +198,16 @@ export default function AlbumEditForm({
               setEditForm((f) => ({ ...f, notes: e.target.value }))
             }
             placeholder="Write a description for this album"
+            className="bg-white font-serif"
           />
         </div>
 
         {/* images */}
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-2">
-            <Label>Pages</Label>
+            <Label className="text-[#5E3023] font-serif font-semibold">Pages</Label>
             {totalItems > 0 ? (
-              <div className="mt-2 rounded-lg border border-slate-200 p-3 flex flex-col gap-3">
-                
+              <div className="bg-white rounded-lg border border-slate-200 p-3 flex flex-col gap-3">
                 <img
                   src={imageSrc}
                   alt={`Album page ${activeCarouselIndex + 1}`}
@@ -237,6 +241,7 @@ export default function AlbumEditForm({
                       ? "Write a caption for this image"
                       : "Write a caption for this new image"
                   }
+                  className="font-serif"
                 />
 
                 <div className="flex items-center justify-between gap-2">
@@ -251,19 +256,19 @@ export default function AlbumEditForm({
                     disabled={activeCarouselIndex === 0}
                     className="cursor-pointer"
                   >
-                    Prev
+                    <ChevronLeft className="size-4" /> Prev
                   </Button>
-                  <span className="text-sm text-slate-600 flex items-center gap-1">
+                  <span className="text-sm text-slate-600 font-serif flex items-center gap-1">
                     {activeCarouselIndex + 1} / {totalItems}
                     {showNewTag && (
-                      <span className="text-sm text-green-700">(New!)</span>
+                      <span className="text-sm text-[#2A81CB]">(New!)</span>
                     )}
                   </span>
                   <div className="flex items-center gap-2">
                     {confirmDeleteIndex === activeCarouselIndex ? (
                       <>
                         <span className="text-xs text-stone-600">
-                          Are you sure?
+                          Delete page?
                         </span>
                         <Button
                           type="button"
@@ -304,7 +309,7 @@ export default function AlbumEditForm({
                         }
                         className="cursor-pointer"
                       >
-                        Delete page
+                        Delete <Trash2 className="w-4 h-4" />
                       </Button>
                     )}
                     <Button
@@ -318,18 +323,18 @@ export default function AlbumEditForm({
                       disabled={activeCarouselIndex === totalItems - 1}
                       className="cursor-pointer"
                     >
-                      Next
+                      Next <ChevronRight className="size-4" />
                     </Button>
                   </div>
                 </div>
               </div>
             ) : (
-              <p className="text-sm text-slate-600">No images in this album.</p>
+              <p className="text-sm text-stone-500 font-serif">No images in this album.</p>
             )}
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label>Add new pages by uploading new images</Label>
+            <Label className="text-[#5E3023] font-serif font-semibold">Add new pages by uploading new images</Label>
             <ImageUploadInput
               onFilesAdded={(selectedFiles) => {
                 setNewPageFiles((prev) => [...prev, ...selectedFiles]);
@@ -351,23 +356,23 @@ export default function AlbumEditForm({
       </div>
 
       {titleError && (
-        <p className="text-sm text-red-600 px-2 mt-2">Album name is required.</p>
+        <p className="text-sm text-red-600 px-2 mt-2">Album name is required</p>
       )}
       {startDateError && (
-        <p className="text-sm text-red-600 px-2 mt-2">Start date is required.</p>
+        <p className="text-sm text-red-600 px-2 mt-2">Start date is required</p>
       )}
       {endDateError && (
-        <p className="text-sm text-red-600 px-2 mt-2">End date is required.</p>
+        <p className="text-sm text-red-600 px-2 mt-2">End date is required</p>
       )}
       {dateRangeError && (
-        <p className="text-sm text-red-600 px-2 mt-2">End date should be on or after start date.</p>
+        <p className="text-sm text-red-600 px-2 mt-2">End date should be on or after start date</p>
       )}
       <div className="mt-4 flex justify-end gap-2 border-t border-stone-300 pt-4">
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
-        <Button type="button" onClick={handleSave}>
-          Save
+        <Button type="button" onClick={handleSave} className="bg-[#2A81CB] hover:bg-[#1F3665]">
+          Save <Save/>
         </Button>
       </div>
     </>

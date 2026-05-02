@@ -125,28 +125,30 @@ export default function FriendsPage() {
   };
 
   return (
+    <div className="min-h-screen w-full bg-[#FEF9F1]">
     <div className="mx-auto w-full max-w-lg md:mx-0 md:max-w-none px-6 py-6 flex flex-col gap-5">
       <div className="flex flex-col gap-2 max-w-lg md:max-w-2xl">
-        <p className="text-lg font-bold">Add Friend</p>
+        <p className="text-lg font-bold text-[#5E3023] font-serif">Add Friend</p>
         <Input
           type="text"
           placeholder="Enter Friend User ID"
           value={friendId}
           onChange={(e) => setFriendId(e.target.value)}
+          className="bg-white"
         />
-        <Button className="cursor-pointer" onClick={sendRequest}>
+        <Button className="bg-[#2A81CB] cursor-pointer hover:bg-[#1F3665]" onClick={sendRequest}>
           {isSendingRequest ? "Sending..." : "Send Request"}
-          {!isSendingRequest && <Send className="w-4 h-4" />}
+          {!isSendingRequest && <Send className="w-3 h-3" />}
         </Button>
       </div>
 
       {sentRequests.length > 0 && (
         <div className="flex flex-col gap-2 max-w-lg md:max-w-2xl">
-          <p className="text-lg font-bold">Sent Requests</p>
+          <p className="text-lg font-bold text-[#5E3023] font-serif">Sent Requests</p>
           {sentRequests.map((req) => (
             <div
               key={req.receiver_id}
-              className="flex items-center justify-between"
+              className="flex items-center justify-between border bg-white border-neutral-200 rounded-lg px-4 py-2"
             >
               <div>
                 <p className="text-sm font-medium">{req.name}</p>
@@ -173,11 +175,11 @@ export default function FriendsPage() {
       )}
 
       <div className="flex flex-col gap-2 max-w-lg md:max-w-2xl">
-        <p className="text-lg font-bold">Friend Requests</p>
+        <p className="text-lg font-bold text-[#5E3023] font-serif">Friend Requests</p>
         {requests?.map((request) => (
           <div
             key={request.sender_id}
-            className="flex items-center justify-between border border-neutral-200 rounded-lg px-4 py-2"
+            className="flex items-center bg-white justify-between border border-neutral-200 rounded-lg px-4 py-2"
           >
             <div>
               <p className="text-sm font-medium">{request.name}</p>
@@ -188,14 +190,14 @@ export default function FriendsPage() {
             <div className="flex gap-2">
               <Button
                 size="sm"
-                className="bg-green-600 cursor-pointer hover:bg-green-700"
+                className="bg-[#2A81CB] cursor-pointer hover:bg-[#1F3665]"
                 onClick={() => acceptRequest(request.sender_id)}
               >
                 Accept <Check className="w-4 h-4" />
               </Button>
               <Button
                 size="sm"
-                className="bg-red-600 cursor-pointer hover:bg-red-700"
+                variant={"outline"}
                 onClick={() => rejectRequest(request.sender_id)}
               >
                 Reject <X className="w-4 h-4" />
@@ -206,11 +208,11 @@ export default function FriendsPage() {
       </div>
 
       <div className="flex flex-col gap-2 max-w-lg md:max-w-2xl">
-        <p className="text-lg font-bold">Friends</p>
+        <p className="text-lg font-bold text-[#5E3023] font-serif">Friends</p>
         {friends?.map((friend) => (
           <div
             key={friend.user_id}
-            className="flex items-center justify-between border border-neutral-200 rounded-lg px-4 py-2"
+            className="flex items-center justify-between border bg-white border-neutral-200 rounded-lg px-4 py-2"
           >
             <div>
               <p className="text-sm font-medium">{friend.name}</p>
@@ -251,6 +253,7 @@ export default function FriendsPage() {
           </div>
         ))}
       </div>
+    </div>
     </div>
   );
 }

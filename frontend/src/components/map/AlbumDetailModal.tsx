@@ -93,9 +93,15 @@ export default function AlbumDetailModal({
     if (!root) return;
 
     function onKeyDown(e: KeyboardEvent) {
-      if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+      if (e.key !== "ArrowLeft" && e.key !== "ArrowRight" && e.key !== "Escape") return;
       const el = overlayRef.current;
       if (!el || !el.contains(e.target as Node)) return;
+
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onClose();
+        return;
+      }
 
       const target = e.target;
       if (
@@ -281,16 +287,16 @@ export default function AlbumDetailModal({
         return (
           <div className="flex max-h-[28rem] flex-col items-center overflow-y-auto px-2 pt-2 pb-6 text-center text-[#5E3023]">
             
-            <h3 className="mt-4 font-serif text-2xl">
+            <h3 className="mt-4 font-serif font-medium text-xl">
               {album.name || "Untitled"}
             </h3>
-            <p className="mt-3 text-sm">
+            <p className="mt-1 text-sm">
               {formatAlbumDate(album.start_date)} —{" "}
               {formatAlbumDate(album.end_date)}
             </p>
             {album.notes?.trim() ? (
-              <div className="mt-6 w-full max-w-sm text-left">
-                <p className="mt-2 whitespace-pre-wrap wrap-break-word border-l-2 border-stone-400 pl-3 text-sm leading-relaxed">
+              <div className="mt-5 w-full max-w-md text-left">
+                <p className="mt-2 whitespace-pre-wrap wrap-break-word text-sm leading-relaxed">
                   {album.notes}
                 </p>
               </div>
@@ -299,8 +305,8 @@ export default function AlbumDetailModal({
         );
       case "photo":
         return (
-          <div className="flex min-h-[18rem] flex-col gap-3">
-            <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded">
+          <div className="flex flex-col gap-3">
+            <div className="relative flex items-center justify-center overflow-hidden rounded">
               <img
                 src={cloudinaryImageUrl(cloudName, slot.page.id)}
                 alt={slot.page.caption || "Album photo"}
@@ -309,15 +315,15 @@ export default function AlbumDetailModal({
             </div>
 
             {slot.page.caption ? (
-              <div className="mt-6 w-full max-w-sm text-left">
-                <p className="mt-2 whitespace-pre-wrap border-l-2 border-stone-400 pl-3 text-sm leading-relaxed text-stone-800">
+              <div className="max-h-24 overflow-y-auto px-2 w-full text-left">
+                <p className="whitespace-pre-wrap text-sm leading-relaxed text-[#5E3023]">
                   {slot.page.caption}
                 </p>
               </div>
             ) : null}
 
-            <p className="text-right text-xs text-stone-400">
-              {slot.index + 1}
+            <p className="text-right text-xs text-[#895737] overflow-auto">
+              {slot.index + 2}
             </p>
           </div>
         );
@@ -426,8 +432,8 @@ export default function AlbumDetailModal({
       aria-labelledby="album-dialog-title"
       className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/30 p-4 outline-none"
     >
-      <div className="w-full max-w-2xl rounded-lg border-2 border-stone-300 bg-stone-100 p-5 shadow-lg">
-        <header className="relative border-b border-stone-300 pb-3 text-center">
+      <div className={`relative w-full max-w-2xl rounded-lg border-2 border-stone-300 p-5 shadow-lg bg-[#FEF9F1]`}>
+        <header className={`relative text-center ${isEditing ? "px-3" : "px-5"}`}>
           <button
             type="button"
             className="absolute right-0 top-0 text-stone-400 hover:text-stone-700 cursor-pointer"
@@ -438,20 +444,22 @@ export default function AlbumDetailModal({
           </button>
           <h2
             id="album-dialog-title"
-            className="font-serif text-xl text-stone-900"
+            className="font-serif mt-1 text-3xl text-[#895737] flex items-center justify-center gap-2"
           >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 82" className="h-[.7em] w-[.43em] shrink-0" fill="#2A81CB">
+              <path d="M47.88,35.08c-.03.06-.06.13-.09.19l.09-.19h0Z"/>
+              <path d="M25,50c-9.87,0-18.4-5.72-22.47-14.03h0s22.47,46.03,22.47,46.03l22.11-45.33c-4.19,7.93-12.52,13.33-22.11,13.33Z"/>
+              <path d="M25,0C11.19,0,0,11.19,0,25c0,3.94.91,7.66,2.53,10.97,4.06,8.31,12.6,14.03,22.47,14.03s17.92-5.4,22.11-13.33c.24-.46.47-.93.68-1.4.03-.06.06-.13.09-.19,1.36-3.08,2.12-6.49,2.12-10.08C50,11.19,38.81,0,25,0ZM25,34.26c-4.78,0-8.65-3.87-8.65-8.65s3.87-8.65,8.65-8.65,8.65,3.87,8.65,8.65-3.87,8.65-8.65,8.65Z"/>
+            </svg>
             {pin.city || "Somewhere"}
           </h2>
-          <div className="mt-1 text-sm text-stone-600 flex items-center gap-2 justify-center">
+          <div className="mt-1 text-sm font-serif text-[#895737] flex items-center gap-2 justify-center">
             {/* ADM1 */}
             {pin.adm1 && (
               adm1Color ? (
-                <label
-                  htmlFor="adm1-color-input"
-                  className="flex items-center gap-1 cursor-pointer"
-                >
-                  {pin.adm1}
-                  <div className="group flex items-center gap-1">
+                <div className="flex items-center gap-1">
+                  <span>{pin.adm1}</span>
+                  <label htmlFor="adm1-color-input" className="group flex items-center gap-1 cursor-pointer">
                     <div className="relative">
                       <input
                         id="adm1-color-input"
@@ -485,9 +493,9 @@ export default function AlbumDetailModal({
                       />
                       <div className="absolute inset-0 flex items-center justify-center rounded-md bg-black/30 text-white opacity-0 group-hover:opacity-100 transition pointer-events-none" />
                     </div>
-                    <Pencil className="w-3 h-3 text-stone-400" />
-                  </div>
-                </label>
+                    <Pencil className="w-3 h-3 text-stone-500" />
+                  </label>
+                </div>
               ) : (
                 <span>{pin.adm1}</span>
               )
@@ -499,12 +507,9 @@ export default function AlbumDetailModal({
             {/* COUNTRY */}
             {pin.country && (
               countryColor ? (
-                <label
-                  htmlFor="country-color-input"
-                  className="flex items-center gap-1 cursor-pointer"
-                >
-                  {pin.country}
-                  <div className="group flex items-center gap-1">
+                <div className="flex items-center gap-1">
+                  <span>{pin.country}</span>
+                  <label htmlFor="country-color-input" className="group flex items-center gap-1 cursor-pointer">
                     <div className="relative">
                       <input
                         id="country-color-input"
@@ -538,9 +543,9 @@ export default function AlbumDetailModal({
                       />
                       <div className="absolute inset-0 flex items-center justify-center rounded-md bg-black/30 text-white opacity-0 group-hover:opacity-100 transition pointer-events-none" />
                     </div>
-                    <Pencil className="w-3 h-3 text-stone-400" />
-                  </div>
-                </label>
+                    <Pencil className="w-3 h-3 text-stone-500" />
+                  </label>
+                </div>
               ) : (
                 <span>{pin.country}</span>
               )
@@ -564,17 +569,17 @@ export default function AlbumDetailModal({
           />
         ) : (
           <>
-            <div className="relative mt-4 rounded-r-md border border-stone-300 bg-[#F3E9DC] shadow-inner">
+            <div className="relative mt-4 rounded-md border border-stone-300 bg-[#F3E9DC] shadow-inner">
               <div
                 className="absolute bottom-2 left-0 top-2 w-2 rounded-sm bg-[#895737]"
                 aria-hidden
               />
-              <div className="pl-5 pr-4 py-4">
+              <div className="pl-5 pr-4 font-serif py-4">
                 {renderPageBody()}
               </div>
             </div>
 
-            <div className="mt-4 flex items-center justify-between gap-3 border-t border-stone-300 pt-3">
+            <div className="mt-4 flex items-center justify-between gap-3">
               <Button
                 type="button"
                 variant="outline"
@@ -588,9 +593,7 @@ export default function AlbumDetailModal({
                   Prev
                 </span>
               </Button>
-              <p className="text-center text-xs text-stone-600">
-                Page {totalPages === 0 ? 0 : pageIndex + 1} of {totalPages}
-              </p>
+
               <Button
                 type="button"
                 variant="outline"
@@ -611,7 +614,7 @@ export default function AlbumDetailModal({
         )}
 
         <div
-          className={`mt-4 flex justify-between border-t border-stone-300 pt-4 ${
+          className={`mt-4 flex justify-between pt-0 ${
             isEditing ? "hidden" : ""
           }`}
         >

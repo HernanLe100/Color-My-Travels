@@ -1,4 +1,4 @@
-import { useRef, useState, type SetStateAction } from "react";
+import { useEffect, useRef, useState, type SetStateAction } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -6,6 +6,7 @@ import CitySearch from "./CitySearch";
 import type { SearchLocation } from "@/types";
 import { Textarea } from "./ui/textarea";
 import ImageUploadInput from "./ImageUploadInput";
+import { ChevronLeft, ChevronRight, MapPinPlus } from "lucide-react";
 
 type Props = {
   isOpen: boolean;
@@ -67,6 +68,14 @@ export default function AddAlbumModal({
   }>({});
   const cityQueryRef = useRef("");
 
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [onClose]);
+
   const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     const cityTyped = cityQueryRef.current.trim().length > 0;
     const errors: typeof fieldErrors = {};
@@ -91,24 +100,24 @@ export default function AddAlbumModal({
     images.length === 0 ? 0 : Math.min(activeImageIndex, images.length - 1);
 
   const firstError = fieldErrors.name
-    ? "Album name is required."
+    ? "Album name is required"
     : fieldErrors.city === "unselected"
-      ? "Choose a city from search."
+      ? "Choose a city from search"
       : fieldErrors.city === "required"
-        ? "City is required."
+        ? "City is required"
         : fieldErrors.startDate
-          ? "Start date is required."
+          ? "Start date is required"
           : fieldErrors.endDate
-            ? "End date is required."
+            ? "End date is required"
             : fieldErrors.dateRange
-              ? "End date should be on or after start date."
+              ? "End date should be on or after start date"
               : null;
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/30 px-4">
-      <div className="w-full max-w-2xl rounded-xl bg-white p-5 shadow-2xl">
+      <div className="relative w-full max-w-2xl rounded-xl bg-[#FEF9F1] p-7 shadow-2xl">
         <div className="relative px-2">
           <button
             type="button"
@@ -118,10 +127,7 @@ export default function AddAlbumModal({
           >
             ✕
           </button>
-          <h2 className="text-lg font-semibold text-slate-900">New Album</h2>
-          <p className="mt-1 text-sm text-slate-600">
-            Create a new album entry for a location.
-          </p>
+          <h2 className="text-2xl font-bold font-serif text-[#5E3023]">New Album</h2>
         </div>
 
         <form
@@ -130,7 +136,7 @@ export default function AddAlbumModal({
           className="mt-4 space-y-3 max-h-[500px] overflow-y-auto px-2"
         >
           <div className="flex flex-col gap-2">
-            <Label htmlFor="name" className="flex gap-0">
+            <Label htmlFor="name" className="flex gap-0 font-serif font-semibold text-[#5E3023]">
               Album Name<span className="text-xs text-red-600">*</span>
             </Label>
             <Input
@@ -139,6 +145,7 @@ export default function AddAlbumModal({
               onChange={(e) => setName(e.target.value)}
               placeholder="Enter a name for this album"
               maxLength={50}
+              className="bg-white text-black font-serif"
             />
           </div>
 
@@ -148,7 +155,7 @@ export default function AddAlbumModal({
             onQueryChange={(q) => { cityQueryRef.current = q; }}
           />
           {selectedLocation && (
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-[#2A81CB] font-serif">
               Selected: {selectedLocation.city}
               {selectedLocation.state
                 ? `, ${selectedLocation.state}`
@@ -158,38 +165,41 @@ export default function AddAlbumModal({
 
           <div className="grid grid-cols-2 gap-2">
             <div className="flex flex-col gap-2">
-              <Label className="flex gap-0">
+              <Label className="flex gap-0 text-[#5E3023] font-serif font-semibold">
                 Start Date<span className="text-xs text-red-600">*</span>
               </Label>
               <Input
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
+                className={`bg-white font-serif ${startDate ? "text-black" : "text-stone-500"}`}
               />
             </div>
             <div className="flex flex-col gap-2">
-              <Label className="flex gap-0">
+              <Label className="flex gap-0 text-[#5E3023] font-serif font-semibold">
                 End Date<span className="text-xs text-red-600">*</span>
               </Label>
               <Input
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
+                className={`bg-white font-serif ${endDate ? "text-black" : "text-stone-500"}`}
               />
             </div>
           </div>
 
-          <div className="flex flex-col gap-2">
-            <Label>Notes</Label>
+          <div className="flex flex-col gap-2 text-[#5E3023]">
+            <Label className="font-serif font-semibold">Notes</Label>
             <Textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Write a description for this album"
+              className="bg-white text-black font-serif"
             />
           </div>
 
-          <div className="flex flex-col gap-2">
-            <Label>Images</Label>
+          <div className="flex flex-col gap-2 text-[#5E3023]">
+            <Label className="font-serif font-semibold">Images</Label>
             <ImageUploadInput
               onFilesAdded={(selectedFiles) => {
                 // append images
@@ -210,7 +220,7 @@ export default function AddAlbumModal({
             />
 
             {images.length > 0 && (
-              <div className="mt-2 rounded-lg border border-slate-200 p-3 flex flex-col gap-3">
+              <div className="mt-2 bg-white rounded-lg border border-slate-200 p-3 flex flex-col gap-3">
                 <img
                   src={URL.createObjectURL(images[effectiveImageIndex])}
                   alt={`Selected upload ${effectiveImageIndex + 1}`}
@@ -226,6 +236,7 @@ export default function AddAlbumModal({
                     setImageCaptions(nextCaptions);
                   }}
                   placeholder="Write a caption for this image"
+                  className="bg-white text-black font-serif"
                 />
 
                 {/* Image navigation */}
@@ -237,9 +248,9 @@ export default function AddAlbumModal({
                       setActiveImageIndex((current) => Math.max(0, current - 1))
                     }
                     disabled={effectiveImageIndex === 0}
-                    className="cursor-pointer"
+                    className="cursor-pointer text-slate-900"
                   >
-                    Prev
+                    <ChevronLeft className="size-4" />Prev
                   </Button>
                   <span className="text-sm text-slate-600">
                     {effectiveImageIndex + 1} / {images.length}
@@ -253,9 +264,9 @@ export default function AddAlbumModal({
                       )
                     }
                     disabled={effectiveImageIndex === images.length - 1}
-                    className="cursor-pointer"
+                    className="cursor-pointer text-slate-900"
                   >
-                    Next
+                    Next <ChevronRight className="size-4" />
                   </Button>
                 </div>
               </div>
@@ -283,9 +294,10 @@ export default function AddAlbumModal({
               size="lg"
               type="submit"
               disabled={isSubmitting}
-              className="cursor-pointer hover:bg-neutral-700"
+              className="cursor-pointer bg-[#2A81CB] hover:bg-[#1F3665]"
             >
-              {isSubmitting ? "Saving…" : "Add Album"}
+              {isSubmitting ? "Saving…" : "Create Album"}
+              {!isSubmitting && <MapPinPlus size={14} />}
             </Button>
           </div>
         </form>
