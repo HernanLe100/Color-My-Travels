@@ -55,6 +55,7 @@ export type Color = {
     region_code: string;
     region_type: string;
     display_name: string | null;
+    country_name: string | null;
 };
 
 export type FriendRequest = {
