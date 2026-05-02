@@ -40,9 +40,6 @@ CORS(app, origins=[_FRONTEND_URL])
 
 # --------------------------------------------------
 
-# NOTE: use cookies if want to protect against XSS
-
-
 @jwt.unauthorized_loader
 def unauthorized(reason):
     return "<h1>ERROR 401</h1>", 401

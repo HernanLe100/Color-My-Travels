@@ -8,10 +8,11 @@ import type { Album, Color, Page, Pin } from "@/types";
 
 import { point } from '@turf/helpers';
 import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
-import { apiFetch } from "@/lib/api";
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 export function useMapTravelData(
-  isAuthenticated: boolean,
+  token: string | null | undefined,
   isTogglePins: boolean,
 ) {
   const zoom = useZoomLevel();
@@ -24,12 +25,16 @@ export function useMapTravelData(
   const [pinsLoaded, setPinsLoaded] = useState(false);
 
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!token) return;
 
     async function loadMapData() {
       const [locRes, albumRes] = await Promise.all([
-        apiFetch("/get_locations"),
-        apiFetch("/get_albums"),
+        fetch(`${BACKEND_URL}/get_locations`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        fetch(`${BACKEND_URL}/get_albums`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
       ]);
 
       const locData = await locRes.json();
@@ -72,16 +77,18 @@ export function useMapTravelData(
     }
 
     loadMapData();
-  }, [isAuthenticated]);
+  }, [token]);
 
   useEffect(() => {
-    if (!isAuthenticated) return;
-    apiFetch("/get_colors")
+    if (!token) return;
+    fetch(`${BACKEND_URL}/get_colors`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
       .then((res) => res.json())
       .then((data) => {
         if (data.db_response) setColors(data.db_response);
       });
-  }, [isAuthenticated]);
+  }, [token]);
 
   const countriesVisited = useMemo(
     () => [...new Set(pins.map((p) => p.country))],
@@ -105,8 +112,12 @@ export function useMapTravelData(
         return cache.current.get(key);
       }
 
-      const res = await apiFetch(
-        `/geo?country=${country}&level=${level}`,
+      const res = await fetch(
+        `${BACKEND_URL}/geo?country=${country}&level=${level}`,
+        {headers: {
+          "Accept": "application/json",
+          Authorization: `Bearer ${token}`
+        }}
       );
       const data = (await res.json()) as Record<string, unknown> & {
         crs?: unknown;

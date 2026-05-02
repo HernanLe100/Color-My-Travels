@@ -3,20 +3,28 @@ import { Pencil } from "lucide-react";
 import type { Color } from "@/types";
 import toast from "react-hot-toast";
 import Loading from "./Loading";
-import { apiFetch } from "@/lib/api";
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 export default function ColorsPage() {
   const [colors, setColors] = useState<Color[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
-    apiFetch("/get_colors")
+    if (!token) return;
+
+    fetch(`${BACKEND_URL}/get_colors`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
       .then((res) => res.json())
       .then((data) => {
         setColors(data.db_response);
         setIsLoading(false);
       });
-  }, []);
+  }, [token]);
 
   const handleColorPreview = (
     region_code: string,
@@ -38,13 +46,15 @@ export default function ColorsPage() {
     region_type: string,
     prevColor: string,
   ) => {
+    if (!token) return;
     if (prevColor.toLowerCase() === newColor.toLowerCase()) return;
 
     try {
-      const res = await apiFetch("/update_color", {
+      const res = await fetch(`${BACKEND_URL}/update_color`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ region_code, color: newColor, region_type }),
       });

@@ -17,7 +17,8 @@ import {
   toDateInputValue,
 } from "./albumModalUtils";
 import toast from "react-hot-toast";
-import { apiFetch } from "@/lib/api";
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 type AlbumPageSlot =
   | { kind: "empty" }
@@ -36,6 +37,7 @@ function albumPageSlots(activeAlbum: Album | null): AlbumPageSlot[] {
 type AlbumDetailModalProps = {
   pin: Pin;
   albums: Album[];
+  token: string | null | undefined;
   cloudName: string | undefined;
   onClose: () => void;
   setAlbums: Dispatch<SetStateAction<Album[]>>;
@@ -45,6 +47,7 @@ type AlbumDetailModalProps = {
 export default function AlbumDetailModal({
   pin,
   albums,
+  token,
   cloudName,
   onClose,
   setAlbums,
@@ -210,10 +213,11 @@ export default function AlbumDetailModal({
 
   async function handleDeleteAlbum() {
     if (!activeAlbum) return;
-    const res = await apiFetch(
-      `/delete_album?album_id=${activeAlbum.album_id}`,
+    const res = await fetch(
+      `${BACKEND_URL}/delete_album?album_id=${activeAlbum.album_id}`,
       {
         method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
       },
     );
     if (!res.ok) {
@@ -225,7 +229,7 @@ export default function AlbumDetailModal({
   }
 
   async function handleSaveEdit() {
-    if (!activeAlbum) return;
+    if (!activeAlbum || !token) return;
 
     const appendedPages: Page[] = [];
 
@@ -236,8 +240,11 @@ export default function AlbumDetailModal({
       formData.append("album_id", String(activeAlbum.album_id));
       formData.append("caption", newPageCaptions[index] ?? "");
 
-      const uploadRes = await apiFetch("/upload_image", {
+      const uploadRes = await fetch(`${BACKEND_URL}/upload_image`, {
         method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
         body: formData,
       });
 
@@ -257,10 +264,11 @@ export default function AlbumDetailModal({
     const finalPages = [...editPages, ...appendedPages];
 
     // 3. THEN update activeAlbum (single source of truth)
-    const res = await apiFetch("/edit_album", {
+    const res = await fetch(`${BACKEND_URL}/edit_album`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         album_id: activeAlbum.album_id,
@@ -366,6 +374,7 @@ export default function AlbumDetailModal({
     region_type: string,
     prevColor: string,
   ) => {
+    if (!token) return;
     if (prevColor.toLowerCase() === newColor.toLowerCase()) return;
 
     // from useMapTravelData!!
@@ -378,10 +387,11 @@ export default function AlbumDetailModal({
     );
 
     try {
-      const res = await apiFetch("/update_color", {
+      const res = await fetch(`${BACKEND_URL}/update_color`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           region_code,
@@ -418,7 +428,11 @@ export default function AlbumDetailModal({
   useEffect(() => {
     if (!location) return;
 
-    apiFetch("/get_colors")
+    fetch(`${BACKEND_URL}/get_colors`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    })
       .then((res) => res.json())
       .then((data) => {
         const all = data.db_response;
@@ -774,7 +788,7 @@ export default function AlbumDetailModal({
             {isConfirmingDelete && (
               <div className="flex flex-wrap items-center justify-end gap-2">
                 <span className="text-sm text-stone-600">
-                  Delete this activeAlbum?
+                  Delete this album?
                 </span>
                 <Button
                   type="button"
