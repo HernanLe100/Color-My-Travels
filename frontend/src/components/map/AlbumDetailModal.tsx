@@ -65,10 +65,21 @@ export default function AlbumDetailModal({
   const [pageIndex, setPageIndex] = useState(0);
   const overlayRef = useRef<HTMLDivElement>(null);
 
-  const [activeAlbumIndex, setActiveAlbumIndex] = useState<number | null>(null);
+  // if there is only one album, set the active album index to 0 so that the album selection screen is not shown
+  const [activeAlbumIndex, setActiveAlbumIndex] = useState<number | null>(
+    albums.length === 1 ? 0 : null,
+  );
 
   const activeAlbum =
     activeAlbumIndex !== null ? albums[activeAlbumIndex] : null;
+
+  useEffect(() => {
+    if (albums.length === 1) {
+      setActiveAlbumIndex(0);
+    } else if (albums.length > 1) {
+      setActiveAlbumIndex(null);
+    }
+  }, [albums]);
 
   const slots = useMemo(() => albumPageSlots(activeAlbum), [activeAlbum]);
 
@@ -454,7 +465,7 @@ export default function AlbumDetailModal({
           className={`relative text-center ${isEditing ? "px-3" : "px-5"}`}
         >
           {/* back button */}
-          {activeAlbumIndex !== null && !isEditing && (
+          {activeAlbumIndex !== null && !isEditing && albums.length > 1 && (
             <button
               onClick={() => {
                 setActiveAlbumIndex(null);
