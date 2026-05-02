@@ -4,12 +4,21 @@ from flask import jsonify, request, Blueprint
 
 from google.oauth2 import id_token
 from google.auth.transport.requests import Request as GoogleRequest
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import (
+    create_access_token,
+    get_csrf_token,
+    get_jwt,
+    jwt_required,
+    set_access_cookies,
+    unset_jwt_cookies,
+)
 
 import database as db
+from request_guards import apply_navigation_guard
 # --------------------------------------------------
 
 login_bp = Blueprint("login", __name__)
+apply_navigation_guard(login_bp)
 
 load_dotenv()
 
@@ -19,9 +28,15 @@ _GOOGLE_CLIENT_ID = os.environ["GOOGLE_CLIENT_ID"]
 
 @login_bp.route("/login_success", methods=["POST"])
 def login_success():
-    token = request.get_json()["credential"]
-    claims = id_token.verify_oauth2_token(token, GoogleRequest(), _GOOGLE_CLIENT_ID)
-    print(claims)
+    data = request.get_json() or {}
+    token = data.get("credential")
+    if not token:
+        return jsonify({"error": "credential required"}), 400
+
+    try:
+        claims = id_token.verify_oauth2_token(token, GoogleRequest(), _GOOGLE_CLIENT_ID)
+    except Exception:
+        return jsonify({"error": "Invalid Google credential"}), 401
 
     user_id = claims["sub"]
     name = claims.get("name", "")
@@ -32,8 +47,29 @@ def login_success():
     # create JWT
     access_token = create_access_token(identity=user_id)
 
-    return jsonify({
+    response = jsonify({
         "user_id": user_id,
         "name": name,
-        "token": access_token
+        "authenticated": True,
+        "csrf_token": get_csrf_token(access_token),
     })
+    # set cookie
+    set_access_cookies(response, access_token)
+    return response
+
+
+# used to pass csrf token from backend to frontend because
+# in deployment, frontend can only access cookie from frontend URL,
+# even with most lenient SameSite policy
+@login_bp.route("/csrf_token", methods=["GET"])
+@jwt_required()
+def csrf_token():
+    claims = get_jwt()
+    return jsonify({"csrf_token": claims.get("csrf")})
+
+
+@login_bp.route("/logout", methods=["POST"])
+def logout():
+    response = jsonify({"logout": True})
+    unset_jwt_cookies(response) # remove cookie
+    return response

@@ -2,8 +2,7 @@ import { useState, useEffect } from "react";
 import type { SearchLocation } from "@/types";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+import { apiFetch } from "@/lib/api";
 
 export default function CitySearch({
   onSelect,
@@ -21,7 +20,7 @@ export default function CitySearch({
     if (query.length < 3) return;
 
     const timeout = setTimeout(async () => {
-      const res = await fetch(`${BACKEND_URL}/search?q=${query}`);
+      const res = await apiFetch(`/search?q=${query}`);
       const data = await res.json();
       setResults(data);
     }, 300);

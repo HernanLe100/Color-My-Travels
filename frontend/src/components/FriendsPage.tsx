@@ -6,10 +6,10 @@ import toast from "react-hot-toast";
 import type { FriendRequest, SentRequest, User } from "@/types";
 import Loading from "./Loading";
 import { Send, Check, X } from "lucide-react";
+import { apiFetch } from "@/lib/api";
 
 export default function FriendsPage() {
-  const token = useAuth();
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+  const { isAuthenticated } = useAuth();
 
   const [friendId, setFriendId] = useState("");
   const [requests, setRequests] = useState<FriendRequest[]>([]);
@@ -22,35 +22,30 @@ export default function FriendsPage() {
   );
 
   const fetchRequests = async () => {
-    const res = await fetch(`${BACKEND_URL}/get_friend_requests`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const res = await apiFetch("/get_friend_requests");
     const data = await res.json();
     setRequests(data.requests);
   };
 
   const fetchSentRequests = async () => {
-    const res = await fetch(`${BACKEND_URL}/get_sent_requests`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const res = await apiFetch("/get_sent_requests");
     const data = await res.json();
     setSentRequests(data.requests);
   };
 
   const fetchFriends = async () => {
-    const res = await fetch(`${BACKEND_URL}/get_friends`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const res = await apiFetch("/get_friends");
     const data = await res.json();
     setFriends(data.friends);
   };
 
   useEffect(() => {
+    if (!isAuthenticated) return;
     const load = async () => {
       const [reqData, sentData, friendsData] = await Promise.all([
-        fetch(`${BACKEND_URL}/get_friend_requests`, { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json()),
-        fetch(`${BACKEND_URL}/get_sent_requests`, { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json()),
-        fetch(`${BACKEND_URL}/get_friends`, { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json()),
+        apiFetch("/get_friend_requests").then((r) => r.json()),
+        apiFetch("/get_sent_requests").then((r) => r.json()),
+        apiFetch("/get_friends").then((r) => r.json()),
       ]);
       setRequests(reqData.requests);
       setSentRequests(sentData.requests);
@@ -58,7 +53,7 @@ export default function FriendsPage() {
       setIsLoading(false);
     };
     load();
-  }, [token, BACKEND_URL]);
+  }, [isAuthenticated]);
 
   if (isLoading) return <Loading />;
 
@@ -68,11 +63,10 @@ export default function FriendsPage() {
       return;
     }
     setIsSendingRequest(true);
-    const res = await fetch(`${BACKEND_URL}/send_friend_request`, {
+    const res = await apiFetch("/send_friend_request", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ receiver_id: friendId }),
     });
@@ -90,23 +84,18 @@ export default function FriendsPage() {
   };
 
   const cancelRequest = async (receiver_id: string) => {
-    await fetch(
-      `${BACKEND_URL}/cancel_friend_request?receiver_id=${receiver_id}`,
-      {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      },
-    );
+    await apiFetch(`/cancel_friend_request?receiver_id=${receiver_id}`, {
+      method: "DELETE",
+    });
     fetchSentRequests();
     toast.success("Friend request cancelled");
   };
 
   const acceptRequest = async (sender_id: string) => {
-    await fetch(`${BACKEND_URL}/accept_friend_request`, {
+    await apiFetch("/accept_friend_request", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ sender_id }),
     });
@@ -116,11 +105,10 @@ export default function FriendsPage() {
   };
 
   const rejectRequest = async (sender_id: string) => {
-    await fetch(`${BACKEND_URL}/reject_friend_request`, {
+    await apiFetch("/reject_friend_request", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ sender_id }),
     });
@@ -129,9 +117,8 @@ export default function FriendsPage() {
   };
 
   const deleteFriend = async (friend_id: string) => {
-    await fetch(`${BACKEND_URL}/delete_friend?friend_id=${friend_id}`, {
+    await apiFetch(`/delete_friend?friend_id=${friend_id}`, {
       method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
     });
     fetchFriends();
     toast.success("Friend removed");

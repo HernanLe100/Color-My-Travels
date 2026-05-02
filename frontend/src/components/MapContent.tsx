@@ -12,7 +12,7 @@ type MapContentProps = {
 };
 
 export default function MapContent({ isTogglePins = false }: MapContentProps) {
-  const token = useAuth();
+  const { isAuthenticated } = useAuth();
   const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
 
   const {
@@ -28,7 +28,7 @@ export default function MapContent({ isTogglePins = false }: MapContentProps) {
     countryColorMap,
     adm1ColorMap,
     setColors,
-  } = useMapTravelData(token, isTogglePins);
+  } = useMapTravelData(isAuthenticated, isTogglePins);
 
   const [selectedPin, setSelectedPin] = useState<Pin | null>(null);
 
@@ -63,7 +63,6 @@ export default function MapContent({ isTogglePins = false }: MapContentProps) {
         <AlbumDetailModal
           pin={selectedPin}
           album={albumAtLocation}
-          token={token}
           cloudName={cloudName}
           onClose={() => setSelectedPin(null)}
           setAlbums={setAlbums}

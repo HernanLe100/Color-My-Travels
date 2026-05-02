@@ -17,8 +17,7 @@ import {
   toDateInputValue,
 } from "./albumModalUtils";
 import toast from "react-hot-toast";
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+import { apiFetch } from "@/lib/api";
 
 type AlbumPageSlot =
   | { kind: "empty" }
@@ -37,7 +36,6 @@ function albumPageSlots(album: Album | null): AlbumPageSlot[] {
 type AlbumDetailModalProps = {
   pin: Pin;
   album: Album | null;
-  token: string | null | undefined;
   cloudName: string | undefined;
   onClose: () => void;
   setAlbums: Dispatch<SetStateAction<Album[]>>;
@@ -47,7 +45,6 @@ type AlbumDetailModalProps = {
 export default function AlbumDetailModal({
   pin,
   album,
-  token,
   cloudName,
   onClose,
   setAlbums,
@@ -190,13 +187,9 @@ export default function AlbumDetailModal({
 
   async function handleDeleteAlbum() {
     if (!album) return;
-    const res = await fetch(
-      `${BACKEND_URL}/delete_album?album_id=${album.album_id}`,
-      {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      },
-    );
+    const res = await apiFetch(`/delete_album?album_id=${album.album_id}`, {
+      method: "DELETE",
+    });
     if (!res.ok) {
       alert(`Failed to delete album: ${await res.text()}`);
       setIsConfirmingDelete(false);
@@ -206,7 +199,7 @@ export default function AlbumDetailModal({
   }
 
   async function handleSaveEdit() {
-    if (!album || !token) return;
+    if (!album) return;
 
     const appendedPages: Page[] = [];
 
@@ -217,11 +210,8 @@ export default function AlbumDetailModal({
       formData.append("album_id", String(album.album_id));
       formData.append("caption", newPageCaptions[index] ?? "");
 
-      const uploadRes = await fetch(`${BACKEND_URL}/upload_image`, {
+      const uploadRes = await apiFetch("/upload_image", {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
         body: formData,
       });
 
@@ -241,11 +231,10 @@ export default function AlbumDetailModal({
     const finalPages = [...editPages, ...appendedPages];
 
     // 3. THEN update album (single source of truth)
-    const res = await fetch(`${BACKEND_URL}/edit_album`, {
+    const res = await apiFetch("/edit_album", {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         album_id: album.album_id,
@@ -345,7 +334,6 @@ export default function AlbumDetailModal({
     region_type: string,
     prevColor: string,
   ) => {
-    if (!token) return;
     if (prevColor.toLowerCase() === newColor.toLowerCase()) return;
 
     // from useMapTravelData!!
@@ -358,11 +346,10 @@ export default function AlbumDetailModal({
     );
 
     try {
-      const res = await fetch(`${BACKEND_URL}/update_color`, {
+      const res = await apiFetch("/update_color", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           region_code,
@@ -399,11 +386,7 @@ export default function AlbumDetailModal({
   useEffect(() => {
     if (!location) return;
 
-    fetch(`${BACKEND_URL}/get_colors`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    })
+    apiFetch("/get_colors")
       .then((res) => res.json())
       .then((data) => {
         const all = data.db_response;
