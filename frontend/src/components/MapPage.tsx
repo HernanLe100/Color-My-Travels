@@ -219,11 +219,11 @@ export default function MapPage() {
   return (
     <div className="h-screen w-full">
       <div className="pointer-events-auto absolute top-6 right-6 z-[1000]">
-        <div className="flex max-w-xs items-center gap-2 rounded-xl bg-[#FEF9F1] px-4 py-3 shadow-lg">
+        <div className="flex max-w-xs items-center gap-2 rounded-xl bg-[#FEF9F1] border border-[#895737] px-4 py-3 shadow-lg">
           <div className="min-w-0 flex-1">
             <Label
               htmlFor="togglePins"
-              className="block cursor-pointer text-sm font-semibold text-[#895737]"
+              className="flex items-center gap-1 cursor-pointer text-sm font-semibold font-serif text-[#5E3023]"
             >
               Pins
             </Label>

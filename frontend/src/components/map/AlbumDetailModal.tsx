@@ -581,7 +581,7 @@ export default function AlbumDetailModal({
           />
         ) : (
           <>
-            <div className="relative mt-4 rounded-r-md border border-stone-300 bg-[#F3E9DC] shadow-inner">
+            <div className="relative mt-4 rounded-md border border-stone-300 bg-[#F3E9DC] shadow-inner">
               <div
                 className="absolute bottom-2 left-0 top-2 w-2 rounded-sm bg-[#895737]"
                 aria-hidden
@@ -605,9 +605,7 @@ export default function AlbumDetailModal({
                   Prev
                 </span>
               </Button>
-              <p className="text-center text-xs text-stone-600">
-                Page {totalPages === 0 ? 0 : pageIndex + 1} of {totalPages}
-              </p>
+
               <Button
                 type="button"
                 variant="outline"

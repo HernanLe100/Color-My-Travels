@@ -100,17 +100,17 @@ export default function AddAlbumModal({
     images.length === 0 ? 0 : Math.min(activeImageIndex, images.length - 1);
 
   const firstError = fieldErrors.name
-    ? "Album name is required."
+    ? "Album name is required"
     : fieldErrors.city === "unselected"
-      ? "Choose a city from search."
+      ? "Choose a city from search"
       : fieldErrors.city === "required"
-        ? "City is required."
+        ? "City is required"
         : fieldErrors.startDate
-          ? "Start date is required."
+          ? "Start date is required"
           : fieldErrors.endDate
-            ? "End date is required."
+            ? "End date is required"
             : fieldErrors.dateRange
-              ? "End date should be on or after start date."
+              ? "End date should be on or after start date"
               : null;
 
   if (!isOpen) return null;
@@ -136,7 +136,7 @@ export default function AddAlbumModal({
           className="mt-4 space-y-3 max-h-[500px] overflow-y-auto px-2"
         >
           <div className="flex flex-col gap-2">
-            <Label htmlFor="name" className="flex gap-0 text-[#5E3023]">
+            <Label htmlFor="name" className="flex gap-0 font-serif font-semibold text-[#5E3023]">
               Album Name<span className="text-xs text-red-600">*</span>
             </Label>
             <Input
@@ -165,31 +165,31 @@ export default function AddAlbumModal({
 
           <div className="grid grid-cols-2 gap-2">
             <div className="flex flex-col gap-2">
-              <Label className="flex gap-0 text-[#5E3023]">
+              <Label className="flex gap-0 text-[#5E3023] font-serif font-semibold">
                 Start Date<span className="text-xs text-red-600">*</span>
               </Label>
               <Input
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className={'bg-white font-serif ${startDate ? "text-black" : "text-stone-500"}'}
+                className={`bg-white font-serif ${startDate ? "text-black" : "text-stone-500"}`}
               />
             </div>
             <div className="flex flex-col gap-2">
-              <Label className="flex gap-0 text-[#5E3023]">
+              <Label className="flex gap-0 text-[#5E3023] font-serif font-semibold">
                 End Date<span className="text-xs text-red-600">*</span>
               </Label>
               <Input
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className={'bg-white font-serif ${startDate ? "text-black" : "text-stone-500"}'}
+                className={`bg-white font-serif ${endDate ? "text-black" : "text-stone-500"}`}
               />
             </div>
           </div>
 
           <div className="flex flex-col gap-2 text-[#5E3023]">
-            <Label>Notes</Label>
+            <Label className="font-serif font-semibold">Notes</Label>
             <Textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
@@ -199,7 +199,7 @@ export default function AddAlbumModal({
           </div>
 
           <div className="flex flex-col gap-2 text-[#5E3023]">
-            <Label>Images</Label>
+            <Label className="font-serif font-semibold">Images</Label>
             <ImageUploadInput
               onFilesAdded={(selectedFiles) => {
                 // append images

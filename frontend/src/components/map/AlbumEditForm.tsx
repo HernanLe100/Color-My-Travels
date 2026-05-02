@@ -123,7 +123,7 @@ export default function AlbumEditForm({
       <div className="mt-4 space-y-3 px-5 max-h-[500px] overflow-y-auto">
         {/* name */}
         <div className="flex flex-col gap-2">
-          <Label htmlFor="edit-album-name" className="text-[#5E3023]">Album Name</Label>
+          <Label htmlFor="edit-album-name" className="text-[#5E3023] font-serif font-semibold">Album Name</Label>
           <Input
             id="edit-album-name"
             value={editForm.name}
@@ -139,7 +139,7 @@ export default function AlbumEditForm({
         {/* dates */}
         <div className="grid grid-cols-2 gap-2">
           <div className="flex flex-col gap-2">
-            <Label htmlFor="edit-start-date" className="text-[#5E3023]">Start Date</Label>
+            <Label htmlFor="edit-start-date" className="text-[#5E3023] font-serif font-semibold">Start Date</Label>
             <Input
               id="edit-start-date"
               type="date"
@@ -150,12 +150,12 @@ export default function AlbumEditForm({
                   start_date: e.target.value,
                 }))
               }
-              className="bg-white font-serif"
+              className={`bg-white font-serif ${editForm.start_date ? "text-black" : "text-stone-500"}`}
             />
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label htmlFor="edit-end-date" className="text-[#5E3023]">End Date</Label>
+            <Label htmlFor="edit-end-date" className="text-[#5E3023] font-serif font-semibold">End Date</Label>
             <Input
               id="edit-end-date"
               type="date"
@@ -166,14 +166,14 @@ export default function AlbumEditForm({
                   end_date: e.target.value,
                 }))
               }
-              className="bg-white font-serif"
+              className={`bg-white font-serif ${editForm.end_date ? "text-black" : "text-stone-500"}`}
             />
           </div>
         </div>
 
         {/* notes */}
         <div className="flex flex-col gap-2">
-          <Label htmlFor="edit-notes" className="text-[#5E3023]">Notes</Label>
+          <Label htmlFor="edit-notes" className="text-[#5E3023] font-serif font-semibold">Notes</Label>
           <Textarea
             id="edit-notes"
             rows={4}
@@ -189,7 +189,7 @@ export default function AlbumEditForm({
         {/* images */}
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-2">
-            <Label className="text-[#5E3023]">Pages</Label>
+            <Label className="text-[#5E3023] font-serif font-semibold">Pages</Label>
             {totalItems > 0 ? (
               <div className="bg-white rounded-lg border border-slate-200 p-3 flex flex-col gap-3">
                 <img
@@ -246,7 +246,7 @@ export default function AlbumEditForm({
                   >
                     <ChevronLeft className="size-4" /> Prev
                   </Button>
-                  <span className="text-sm text-slate-600 flex items-center gap-1">
+                  <span className="text-sm text-slate-600 font-serif flex items-center gap-1">
                     {activeCarouselIndex + 1} / {totalItems}
                     {showNewTag && (
                       <span className="text-sm text-[#2A81CB]">(New!)</span>
@@ -317,12 +317,12 @@ export default function AlbumEditForm({
                 </div>
               </div>
             ) : (
-              <p className="text-sm text-black font-serif">No images in this album.</p>
+              <p className="text-sm text-stone-500 font-serif">No images in this album.</p>
             )}
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label className="text-[#5E3023]">Add new pages by uploading new images</Label>
+            <Label className="text-[#5E3023] font-serif font-semibold">Add new pages by uploading new images</Label>
             <ImageUploadInput
               onFilesAdded={(selectedFiles) => {
                 setNewPageFiles((prev) => [...prev, ...selectedFiles]);
@@ -344,16 +344,16 @@ export default function AlbumEditForm({
       </div>
 
       {titleError && (
-        <p className="text-sm text-red-600 px-2 mt-2">Album name is required.</p>
+        <p className="text-sm text-red-600 px-2 mt-2">Album name is required</p>
       )}
       {startDateError && (
-        <p className="text-sm text-red-600 px-2 mt-2">Start date is required.</p>
+        <p className="text-sm text-red-600 px-2 mt-2">Start date is required</p>
       )}
       {endDateError && (
-        <p className="text-sm text-red-600 px-2 mt-2">End date is required.</p>
+        <p className="text-sm text-red-600 px-2 mt-2">End date is required</p>
       )}
       {dateRangeError && (
-        <p className="text-sm text-red-600 px-2 mt-2">End date should be on or after start date.</p>
+        <p className="text-sm text-red-600 px-2 mt-2">End date should be on or after start date</p>
       )}
       <div className="mt-4 flex justify-end gap-2 border-t border-stone-300 pt-4">
         <Button type="button" variant="outline" onClick={onCancel}>

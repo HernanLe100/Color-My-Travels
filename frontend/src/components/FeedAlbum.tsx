@@ -69,25 +69,26 @@ export default function FeedAlbum({
   const createdAt = album?.created_at ? new Date(album.created_at) : null;
 
   return (
-    <article className="box-border w-full min-w-0 max-w-full overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm">
+    <article className="relative box-border font-serif bg-[#F3E9DC] text-[#5E3023] w-full min-w-0 max-w-full overflow-hidden rounded-xl border border-neutral-200 shadow-sm">
       {/* Header */}
-      <div className="flex items-center gap-3 px-5 pt-5 pb-1">
+      <div className="relative flex items-center gap-3 pr-5 pl-7 pt-5 pb-1">
+        <div className="absolute inset-y-0 left-0 w-2 bg-[#895737]" aria-hidden />
         <div
-          className="flex size-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-amber-200 to-rose-200 text-sm font-semibold text-neutral-800"
+          className="flex size-10 font-sans text-black shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-amber-200 to-rose-200 text-sm font-semibold"
           aria-hidden
         >
           {initial}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-md font-semibold text-neutral-900">
+          <p className="truncate text-md font-semibold font-sans text-black">
             {displayName}
           </p>
           {loc ? (
-            <p className="truncate text-sm text-neutral-500">{loc}</p>
+            <p className="truncate text-sm">{loc}</p>
           ) : null}
         </div>
         <time
-          className="shrink-0 text-xs text-neutral-400"
+          className="shrink-0 text-xs font-sans text-neutral-500"
           dateTime={album?.created_at ?? ""}
         >
           {createdAt ? timeAgo(createdAt) : ""}
@@ -95,15 +96,16 @@ export default function FeedAlbum({
       </div>
 
       {/* Caption block — album title, dates, notes */}
-      <div className=" px-5 pb-2 pt-2">
-        <h3 className="text-base font-semibold leading-snug text-neutral-900">
+      <div className="relative pr-5 pl-7 pb-2 pt-2">
+        <div className="absolute inset-y-0 left-0 w-2 bg-[#895737]" aria-hidden />
+        <h3 className="text-base font-semibold leading-snug">
           {album.name || "Untitled album"}
         </h3>
-        <p className="whitespace-pre-wrap text-sm pb-2 leading-relaxed text-neutral-800 max-h-24 overflow-y-auto">
+        <p className="whitespace-pre-wrap text-sm pb-2 leading-relaxed max-h-24 overflow-y-auto">
           {dateRange}
         </p>
         {album.notes?.trim() ? (
-          <p className="whitespace-pre-wrap wrap-break-word text-sm leading-relaxed text-neutral-800 max-h-24 overflow-y-auto">
+          <p className="whitespace-pre-wrap wrap-break-word text-sm leading-relaxed max-h-24 overflow-y-auto">
             {album.notes}
           </p>
         ) : null}
@@ -156,10 +158,14 @@ export default function FeedAlbum({
               </>
             )}
           </div>
+          
           {photos[slide]?.caption ? (
-            <p className="border-t border-neutral-100 wrap-break-word px-3 py-2 text-sm text-neutral-700">
-              {photos[slide].caption}
-            </p>
+            <div className="relative border-t border-neutral-100 bg-[#F3E9DC]">
+              <div className="absolute inset-y-0 left-0 w-2 bg-[#895737]" aria-hidden />
+              <p className="wrap-break-word pr-5 pl-7 py-2 text-sm">
+                {photos[slide].caption}
+              </p>
+            </div>
           ) : null}
         </div>
       ) : null}
