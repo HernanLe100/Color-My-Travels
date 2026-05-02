@@ -65,9 +65,10 @@ export default function AlbumDetailModal({
   const [pageIndex, setPageIndex] = useState(0);
   const overlayRef = useRef<HTMLDivElement>(null);
 
-  const [activeAlbumIndex, setActiveAlbumIndex] = useState(0);
+  const [activeAlbumIndex, setActiveAlbumIndex] = useState<number | null>(null);
 
-  const activeAlbum = albums[activeAlbumIndex] ?? null;
+  const activeAlbum =
+    activeAlbumIndex !== null ? albums[activeAlbumIndex] : null;
 
   const slots = useMemo(() => albumPageSlots(activeAlbum), [activeAlbum]);
 
@@ -452,6 +453,21 @@ export default function AlbumDetailModal({
         <header
           className={`relative text-center ${isEditing ? "px-3" : "px-5"}`}
         >
+          {/* back button */}
+          {activeAlbumIndex !== null && !isEditing && (
+            <button
+              onClick={() => {
+                setActiveAlbumIndex(null);
+                setPageIndex(0);
+              }}
+              className="absolute left-0 top-0 text-stone-400 hover:text-stone-700 cursor-pointer flex items-center gap-1"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              <span className="text-sm">Back</span>
+            </button>
+          )}
+
+          {/* close button */}
           <button
             type="button"
             className="absolute right-0 top-0 text-stone-400 hover:text-stone-700 cursor-pointer"
@@ -580,7 +596,7 @@ export default function AlbumDetailModal({
           </div>
         </header>
 
-        {albums.length > 1 && (
+        {/* {albums.length > 1 && (
           <div className="flex gap-2 mt-3 flex-wrap justify-center">
             {albums.map((a, i) => (
               <button
@@ -599,9 +615,53 @@ export default function AlbumDetailModal({
               </button>
             ))}
           </div>
-        )}
+        )} */}
 
-        {isEditing && activeAlbum ? (
+        {activeAlbumIndex === null ? (
+          // album selection screen
+          <div className="mt-6">
+            <p className="text-sm text-[#895737] text-center mb-3">
+              Choose an album
+            </p>
+
+            <div className="flex flex-col gap-3 overflow-y-auto px-2 pb-2 max-h-[20rem]">
+              {albums.map((a, i) => (
+                <button
+                  key={a.album_id}
+                  onClick={() => setActiveAlbumIndex(i)}
+                  className=" flex-shrink-0 rounded-lg border border-stone-300 bg-white px-3 py-3 shadow-sm hover:shadow-lg transition text-left cursor-pointer"
+                >
+                  {/* title */}
+                  <p className="text-sm font-medium text-[#5E3023] truncate">
+                    {a.name || `Album ${i + 1}`}
+                  </p>
+
+                  {/* dates */}
+                  <p className="text-xs text-stone-500 mt-1">
+                    {formatAlbumDate(a.start_date)} —{" "}
+                    {formatAlbumDate(a.end_date)}
+                  </p>
+
+                  {/* notes preview */}
+                  {a.notes?.trim() ? (
+                    <p className="text-xs text-stone-400 mt-2 line-clamp-3">
+                      {a.notes}
+                    </p>
+                  ) : (
+                    <p className="text-xs text-stone-300 mt-2 italic">
+                      No notes
+                    </p>
+                  )}
+
+                  {/* page count */}
+                  <p className="text-[10px] text-stone-400 mt-2">
+                    {a.pages?.length ?? 0} pages
+                  </p>
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : isEditing && activeAlbum ? (
           <AlbumEditForm
             editForm={editForm}
             setEditForm={setEditForm}
