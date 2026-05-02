@@ -180,6 +180,7 @@ export function useMapTravelData(
     const pinPoints = pins.map((p) => ({
       pt: point([p.lng, p.lat]),
       adm1: p.adm1,
+      country: p.country
     }));
 
     const features = combinedGeo.features.flatMap((f) => {
@@ -191,8 +192,9 @@ export function useMapTravelData(
       }
   
       // if no ISO match, find which polygon location exists in
-      const match = pinPoints.find(({ pt }) =>
-        booleanPointInPolygon(pt, f as any)
+      const match = pinPoints.find((p) =>
+        f.properties?.shapeGroup === p.country &&
+        booleanPointInPolygon(p.pt, f as any)
       );
   
       if (!match) return [];
