@@ -3,10 +3,11 @@ import type { Album, User } from "@/types";
 import { useEffect, useState } from "react";
 import FeedAlbum from "./FeedAlbum";
 import Loading from "./Loading";
-import { apiFetch } from "@/lib/api";
 
 export default function FeedPage() {
-  const { isAuthenticated } = useAuth();
+  const token = useAuth();
+
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
   const [friendsAlbums, setFriendsAlbums] = useState<Album[]>([]);
   const [friends, setFriends] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -20,18 +21,18 @@ export default function FeedPage() {
   });
 
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!token) return;
     const load = async () => {
       const [albumsData, friendsData] = await Promise.all([
-        apiFetch("/get_friends_albums").then((r) => r.json()),
-        apiFetch("/get_friends").then((r) => r.json()),
+        fetch(`${BACKEND_URL}/get_friends_albums`, { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json()),
+        fetch(`${BACKEND_URL}/get_friends`, { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json()),
       ]);
       setFriendsAlbums(Array.isArray(albumsData.albums) ? albumsData.albums : []);
       setFriends(friendsData.friends);
       setIsLoading(false);
     };
     load();
-  }, [isAuthenticated]);
+  }, [token, BACKEND_URL]);
 
   if (isLoading) return <Loading />;
 

@@ -3,8 +3,9 @@ import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
 import Loading from "./Loading";
 import { LogOut, Trash2 } from "lucide-react";
-import { apiFetch } from "@/lib/api";
 
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 export default function UserPage() {
   const [user, setUser] = useState<User>();
@@ -12,31 +13,38 @@ export default function UserPage() {
   const [friendCount, setFriendCount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
 
+  const token = localStorage.getItem("token");
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
 
   useEffect(() => {
+    if (!token) return;
+
     Promise.all([
-      apiFetch("/me").then((r) => r.json()),
-      apiFetch("/get_albums").then((r) => r.json()),
-      apiFetch("/get_friends").then((r) => r.json()),
+      fetch(`${BACKEND_URL}/me`, { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json()),
+      fetch(`${BACKEND_URL}/get_albums`, { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json()),
+      fetch(`${BACKEND_URL}/get_friends`, { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json()),
     ]).then(([userData, albumsData, friendsData]) => {
       setUser(userData);
       setAlbums(albumsData.db_response);
       setFriendCount(friendsData.friends?.length ?? 0);
       setIsLoading(false);
     });
-  }, []);
+  }, [token]);
 
-  async function logout() {
-    await apiFetch("/logout", { method: "POST" });
+  function logout() {
+    localStorage.removeItem("token");
     window.location.href = "/login";
   }
 
   async function handleDeleteUser() {
     if (!user) return;
-    const res = await apiFetch("/delete_user", {
-      method: "DELETE",
-    });
+    const res = await fetch(
+      `${BACKEND_URL}/delete_user`,
+      {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
     if (!res.ok) {
       alert(`Failed to delete user: ${await res.text()}`);
       setIsConfirmingDelete(false);

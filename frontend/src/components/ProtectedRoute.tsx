@@ -7,12 +7,11 @@ export default function ProtectedRoute({
 }: {
   children: JSX.Element;
 }) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const token = useAuth();
 
   //console.log("TOKEN:", token);
-  if (isLoading) return null;
 
-  if (!isAuthenticated) {
+  if (!token) {
     return <Navigate to="/login" replace />;
   }
 

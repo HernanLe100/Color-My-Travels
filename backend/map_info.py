@@ -4,14 +4,12 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 import requests
 import pycountry
 import os
-from request_guards import apply_navigation_guard
 
 _GEOAPIFY_KEY = os.getenv("GEOAPIFY_KEY")
 
 # --------------------------------------------------
 
 map_bp = Blueprint("map", __name__)
-apply_navigation_guard(map_bp)
 
 geo_cache = {}
 
@@ -50,6 +48,10 @@ def get_geo():
             return jsonify({"error": "Failed to fetch GeoJSON"}), 500
 
         geo_data = geo_res.json()
+
+        # include country area so frontend can sort countries by area
+        if level == "ADM0":
+            geo_data["area"] = float(meta.get("meanAreaSqKM"))
 
         # store in cache
         geo_cache[key] = geo_data
