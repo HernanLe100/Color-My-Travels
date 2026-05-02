@@ -321,16 +321,18 @@ def upload_image(file, user_id, album_id, caption=""):
 def add_album(info : dict):
     with psycopg.connect(_DATABASE_URL, connect_timeout=5) as connection:
         with connection.cursor(row_factory=dict_row) as cursor:
-            cursor.execute(
-                """
-                SELECT album_id FROM albums
-                WHERE user_id = %s AND location_id = %s
-                LIMIT 1;
-                """,
-                [info.get("user_id"), info.get("location_id")]
-            )
-            if cursor.fetchone():
-                return {"error": "Album already exists for this location."}
+            # No need to check if album already exists for this location 
+            #if multiple albums can be created for the same location
+            # cursor.execute(
+            #     """
+            #     SELECT album_id FROM albums
+            #     WHERE user_id = %s AND location_id = %s
+            #     LIMIT 1;
+            #     """,
+            #     [info.get("user_id"), info.get("location_id")]
+            # )
+            # if cursor.fetchone():
+            #     return {"error": "Album already exists for this location."}
 
             cursor.execute(
                 """
