@@ -331,8 +331,8 @@ export default function AlbumDetailModal({
         );
       case "photo":
         return (
-          <div className="relative flex flex-col gap-3">
-            <div className="relative flex items-center justify-center overflow-hidden rounded">
+          <div className="relative flex flex-col gap-3 h-full">
+            <div className="flex items-center justify-center overflow-hidden rounded">
               <img
                 src={cloudinaryImageUrl(cloudName, slot.page.id)}
                 alt={slot.page.caption || "Album photo"}
