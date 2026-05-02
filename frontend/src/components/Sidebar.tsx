@@ -18,7 +18,7 @@ export default function AppSidebar() {
   const closeOnMobile = () => setOpenMobile(false);
 
   return (
-    <Sidebar className="h-screen w-64 border-r font-serif [--sidebar:#F3E9DC] [--sidebar-accent:#FEF9F1] [--sidebar-accent-foreground:#5E3023]">
+    <Sidebar className="h-screen w-64 border-r">
       {/* Top title */}
       <SidebarHeader>
         <h1 className="flex items-center gap-1.5 whitespace-nowrap text-xl font-black font-serif px-4 pt-4">
