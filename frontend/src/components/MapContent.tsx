@@ -32,11 +32,16 @@ export default function MapContent({ isTogglePins = false }: MapContentProps) {
 
   const [selectedPin, setSelectedPin] = useState<Pin | null>(null);
 
-  const albumAtLocation = useMemo(() => {
-    if (!selectedPin) return null;
-    return (
-      albums.find((a) => a.location_id === selectedPin.location_id) ?? null
-    );
+  const albumsAtLocation = useMemo(() => {
+    if (!selectedPin) return [];
+
+    return albums
+      .filter((a) => a.location_id === selectedPin.location_id)
+      .sort((a, b) => {
+        const dateA = new Date(a.start_date ?? 0).getTime();
+        const dateB = new Date(b.start_date ?? 0).getTime();
+        return dateB - dateA; // newest to oldest by start date of album
+      });
   }, [albums, selectedPin]);
 
   if (!pinsLoaded || !loaded) {
@@ -62,7 +67,7 @@ export default function MapContent({ isTogglePins = false }: MapContentProps) {
       {selectedPin && (
         <AlbumDetailModal
           pin={selectedPin}
-          album={albumAtLocation}
+          albums={albumsAtLocation}
           cloudName={cloudName}
           onClose={() => setSelectedPin(null)}
           setAlbums={setAlbums}
