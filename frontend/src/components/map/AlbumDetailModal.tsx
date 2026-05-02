@@ -292,8 +292,15 @@ export default function AlbumDetailModal({
         );
       case "cover":
         if (!activeAlbum) return null;
+
+        const hasNotes = Boolean(activeAlbum.notes?.trim());
+
         return (
-          <div className="flex max-h-[28rem] flex-col items-center overflow-y-auto px-2 pt-2 pb-6 text-center text-[#5E3023]">
+          <div
+            className={`flex max-h-[28rem] flex-col items-center overflow-y-auto px-2 pt-2 pb-6 text-center text-[#5E3023] h-full ${
+              hasNotes ? "justify-start" : "justify-center"
+            }`}
+          >
             <h3 className="mt-4 font-serif font-medium text-xl">
               {activeAlbum.name || "Untitled"}
             </h3>
@@ -615,12 +622,25 @@ export default function AlbumDetailModal({
                 className="absolute bottom-2 left-0 top-2 w-2 rounded-sm bg-[#895737]"
                 aria-hidden
               />
-              <div className="pl-5 pr-4 font-serif py-4">
-                {renderPageBody()}
+              <div className="pl-5 pr-4 font-serif py-4 h-[18rem] flex flex-col">
+                <div className="flex-1 flex flex-col">{renderPageBody()}</div>
               </div>
             </div>
 
-            <div className="mt-4 flex items-center justify-between gap-3">
+            <div className="mt-3 flex justify-center gap-1">
+              {slots.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setPageIndex(i)}
+                  className={`h-2 w-2 rounded-full transition ${
+                    i === pageIndex ? "bg-[#895737]" : "bg-stone-300"
+                  }`}
+                  aria-label={`Go to page ${i + 1}`}
+                />
+              ))}
+            </div>
+
+            <div className="mt-2 flex items-center justify-between gap-3">
               <Button
                 type="button"
                 variant="outline"
