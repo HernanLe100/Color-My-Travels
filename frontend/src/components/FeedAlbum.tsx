@@ -70,9 +70,9 @@ export default function FeedAlbum({
 
   return (
     <article className="relative box-border font-serif bg-[#F3E9DC] text-[#5E3023] w-full min-w-0 max-w-full overflow-hidden rounded-xl border border-neutral-200 shadow-sm">
+      <div className="absolute top-2 bottom-2 left-0 w-2 rounded-sm bg-[#895737] z-10" aria-hidden />
       {/* Header */}
-      <div className="relative flex items-center gap-3 pr-5 pl-7 pt-5 pb-1">
-        <div className="absolute inset-y-0 left-0 w-2 bg-[#895737]" aria-hidden />
+      <div className="flex items-center gap-3 pr-5 pl-7 pt-5 pb-1">
         <div
           className="flex size-10 font-sans text-black shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-amber-200 to-rose-200 text-sm font-semibold"
           aria-hidden
@@ -96,8 +96,7 @@ export default function FeedAlbum({
       </div>
 
       {/* Caption block — album title, dates, notes */}
-      <div className="relative pr-5 pl-7 pb-2 pt-2">
-        <div className="absolute inset-y-0 left-0 w-2 bg-[#895737]" aria-hidden />
+      <div className="pr-5 pl-7 pb-2 pt-2">
         <h3 className="text-base font-semibold leading-snug">
           {album.name || "Untitled album"}
         </h3>
@@ -160,12 +159,9 @@ export default function FeedAlbum({
           </div>
           
           {photos[slide]?.caption ? (
-            <div className="relative border-t border-neutral-100 bg-[#F3E9DC]">
-              <div className="absolute inset-y-0 left-0 w-2 bg-[#895737]" aria-hidden />
-              <p className="wrap-break-word pr-5 pl-7 py-2 text-sm">
-                {photos[slide].caption}
-              </p>
-            </div>
+            <p className="wrap-break-word border-t border-neutral-100 bg-[#F3E9DC] pr-5 pl-7 py-2 text-sm">
+              {photos[slide].caption}
+            </p>
           ) : null}
         </div>
       ) : null}
