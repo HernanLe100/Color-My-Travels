@@ -492,7 +492,7 @@ export default function AlbumDetailModal({
           {/* close button */}
           <button
             type="button"
-            className="absolute right-0 top-0 text-stone-400 hover:text-stone-700 cursor-pointer"
+            className="absolute right-0 top-0 text-stone-400 hover:text-stone-700 cursor-pointer text-base"
             onClick={handleClose}
             aria-label="Close"
           >
