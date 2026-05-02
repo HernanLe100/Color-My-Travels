@@ -331,7 +331,7 @@ export default function AlbumDetailModal({
         );
       case "photo":
         return (
-          <div className="flex flex-col gap-3">
+          <div className="relative flex flex-col gap-3">
             <div className="relative flex items-center justify-center overflow-hidden rounded">
               <img
                 src={cloudinaryImageUrl(cloudName, slot.page.id)}
@@ -342,13 +342,13 @@ export default function AlbumDetailModal({
 
             {slot.page.caption ? (
               <div className="max-h-24 overflow-y-auto px-2 w-full text-left">
-                <p className="whitespace-pre-wrap text-sm leading-relaxed text-[#5E3023]">
+                <p className="whitespace-pre-wrap text-sm leading-relaxed text-[#5E3023] line-clamp-1">
                   {slot.page.caption}
                 </p>
               </div>
             ) : null}
 
-            <p className="text-right text-xs text-[#895737] overflow-auto">
+            <p className="absolute bottom-2 right-2 text-xs text-[#895737] pointer-events-none">
               {slot.index + 2}
             </p>
           </div>
