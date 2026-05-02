@@ -219,11 +219,11 @@ export default function MapPage() {
   return (
     <div className="h-screen w-full">
       <div className="pointer-events-auto absolute top-6 right-6 z-[1000]">
-        <div className="flex max-w-xs items-center gap-4 rounded-xl border border-[#895737] bg-[#FEF9F1] px-4 py-3 shadow-lg">
+        <div className="flex max-w-xs items-center gap-2 rounded-xl bg-[#FEF9F1] px-4 py-3 shadow-lg">
           <div className="min-w-0 flex-1">
             <Label
               htmlFor="togglePins"
-              className="block cursor-pointer text-sm font-medium text-[#5E3023]"
+              className="block cursor-pointer text-sm font-semibold text-[#895737]"
             >
               Pins
             </Label>
@@ -293,7 +293,7 @@ export default function MapPage() {
             +
           </Button>
         </TooltipTrigger>
-        <TooltipContent className="z-[2000]">Add a new album</TooltipContent>
+        <TooltipContent className="z-[2000]">Create a new album</TooltipContent>
       </Tooltip>
 
       {dragging && (

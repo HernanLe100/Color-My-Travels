@@ -32,9 +32,9 @@ function timeAgo(date: Date) {
   const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
 
   if (seconds < 60) return "just now";
-  if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
-  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h`;
-  if (seconds < 604800) return `${Math.floor(seconds / 86400)}d`;
+  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+  if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
 
   return date.toLocaleDateString();
 }
@@ -71,7 +71,7 @@ export default function FeedAlbum({
   return (
     <article className="box-border w-full min-w-0 max-w-full overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm">
       {/* Header */}
-      <div className="flex items-center gap-3 px-5 pt-5">
+      <div className="flex items-center gap-3 px-5 pt-5 pb-1">
         <div
           className="flex size-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-amber-200 to-rose-200 text-sm font-semibold text-neutral-800"
           aria-hidden
@@ -95,11 +95,11 @@ export default function FeedAlbum({
       </div>
 
       {/* Caption block — album title, dates, notes */}
-      <div className="space-y-2 px-5 pb-4 pt-2">
+      <div className=" px-5 pb-2 pt-2">
         <h3 className="text-base font-semibold leading-snug text-neutral-900">
           {album.name || "Untitled album"}
         </h3>
-        <p className="whitespace-pre-wrap text-sm leading-relaxed text-neutral-800 max-h-24 overflow-y-auto">
+        <p className="whitespace-pre-wrap text-sm pb-2 leading-relaxed text-neutral-800 max-h-24 overflow-y-auto">
           {dateRange}
         </p>
         {album.notes?.trim() ? (

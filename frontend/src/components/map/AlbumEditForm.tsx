@@ -123,7 +123,7 @@ export default function AlbumEditForm({
       <div className="mt-4 space-y-3 px-5 max-h-[500px] overflow-y-auto">
         {/* name */}
         <div className="flex flex-col gap-2">
-          <Label htmlFor="edit-album-name">Album Name</Label>
+          <Label htmlFor="edit-album-name" className="text-[#5E3023]">Album Name</Label>
           <Input
             id="edit-album-name"
             value={editForm.name}
@@ -132,14 +132,14 @@ export default function AlbumEditForm({
             }
             placeholder="Enter a name for this album"
             maxLength={50}
-            className="bg-white"
+            className="bg-white font-serif"
           />
         </div>
 
         {/* dates */}
         <div className="grid grid-cols-2 gap-2">
           <div className="flex flex-col gap-2">
-            <Label htmlFor="edit-start-date">Start Date</Label>
+            <Label htmlFor="edit-start-date" className="text-[#5E3023]">Start Date</Label>
             <Input
               id="edit-start-date"
               type="date"
@@ -150,12 +150,12 @@ export default function AlbumEditForm({
                   start_date: e.target.value,
                 }))
               }
-              className="bg-white"
+              className="bg-white font-serif"
             />
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label htmlFor="edit-end-date">End Date</Label>
+            <Label htmlFor="edit-end-date" className="text-[#5E3023]">End Date</Label>
             <Input
               id="edit-end-date"
               type="date"
@@ -166,14 +166,14 @@ export default function AlbumEditForm({
                   end_date: e.target.value,
                 }))
               }
-              className="bg-white"
+              className="bg-white font-serif"
             />
           </div>
         </div>
 
         {/* notes */}
         <div className="flex flex-col gap-2">
-          <Label htmlFor="edit-notes">Notes</Label>
+          <Label htmlFor="edit-notes" className="text-[#5E3023]">Notes</Label>
           <Textarea
             id="edit-notes"
             rows={4}
@@ -182,16 +182,16 @@ export default function AlbumEditForm({
               setEditForm((f) => ({ ...f, notes: e.target.value }))
             }
             placeholder="Write a description for this album"
-            className="bg-white"
+            className="bg-white font-serif"
           />
         </div>
 
         {/* images */}
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-2">
-            <Label>Pages</Label>
+            <Label className="text-[#5E3023]">Pages</Label>
             {totalItems > 0 ? (
-              <div className="mt-2 bg-white rounded-lg border border-slate-200 p-3 flex flex-col gap-3">
+              <div className="bg-white rounded-lg border border-slate-200 p-3 flex flex-col gap-3">
                 <img
                   src={
                     viewingExisting
@@ -229,6 +229,7 @@ export default function AlbumEditForm({
                       ? "Write a caption for this image"
                       : "Write a caption for this new image"
                   }
+                  className="font-serif"
                 />
 
                 <div className="flex items-center justify-between gap-2">
@@ -248,14 +249,14 @@ export default function AlbumEditForm({
                   <span className="text-sm text-slate-600 flex items-center gap-1">
                     {activeCarouselIndex + 1} / {totalItems}
                     {showNewTag && (
-                      <span className="text-sm text-green-700">(New!)</span>
+                      <span className="text-sm text-[#2A81CB]">(New!)</span>
                     )}
                   </span>
                   <div className="flex items-center gap-2">
                     {confirmDeleteIndex === activeCarouselIndex ? (
                       <>
                         <span className="text-xs text-stone-600">
-                          Are you sure?
+                          Delete page?
                         </span>
                         <Button
                           type="button"
@@ -316,12 +317,12 @@ export default function AlbumEditForm({
                 </div>
               </div>
             ) : (
-              <p className="text-sm text-slate-600">No images in this album.</p>
+              <p className="text-sm text-black font-serif">No images in this album.</p>
             )}
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label>Add new pages by uploading new images</Label>
+            <Label className="text-[#5E3023]">Add new pages by uploading new images</Label>
             <ImageUploadInput
               onFilesAdded={(selectedFiles) => {
                 setNewPageFiles((prev) => [...prev, ...selectedFiles]);

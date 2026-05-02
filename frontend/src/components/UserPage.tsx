@@ -58,14 +58,14 @@ export default function UserPage() {
   return (
     <div className="min-h-screen w-full bg-[#FEF9F1]">
     <div className="mx-auto w-full max-w-lg md:mx-0 md:max-w-none px-6 py-6 flex flex-col gap-4">
-      <h1 className="text-lg font-bold text-[#5E3023]">{user?.name}'s User Page</h1>
-      <div className="flex flex-col gap-1">
+      <h1 className="text-lg font-bold text-[#5E3023] font-serif">{user?.name}'s User Page</h1>
+      <div className="flex flex-col gap-1 font-serif">
         <span className="text-base font-bold text-[#5E3023]">Stats</span>
         <span className="text-[#895737]">Albums: {albums.length}</span>
         <span className="text-[#895737]">Friends: {friendCount}</span>
       </div>
       <div className="flex flex-col gap-2">
-        <span className="text-base font-bold text-[#5E3023]">Account Actions</span>
+        <span className="text-base font-bold text-[#5E3023] font-serif">Account Actions</span>
         <Button onClick={logout} className="w-fit cursor-pointer bg-black hover:bg-slate-800" size="lg">
           Logout <LogOut className="w-4 h-4" />
         </Button>

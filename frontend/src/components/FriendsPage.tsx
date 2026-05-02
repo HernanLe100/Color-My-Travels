@@ -141,7 +141,7 @@ export default function FriendsPage() {
     <div className="min-h-screen w-full bg-[#FEF9F1]">
     <div className="mx-auto w-full max-w-lg md:mx-0 md:max-w-none px-6 py-6 flex flex-col gap-5">
       <div className="flex flex-col gap-2 max-w-lg md:max-w-2xl">
-        <p className="text-lg font-bold text-[#5E3023]">Add Friend</p>
+        <p className="text-lg font-bold text-[#5E3023] font-serif">Add Friend</p>
         <Input
           type="text"
           placeholder="Enter Friend User ID"
@@ -157,7 +157,7 @@ export default function FriendsPage() {
 
       {sentRequests.length > 0 && (
         <div className="flex flex-col gap-2 max-w-lg md:max-w-2xl">
-          <p className="text-lg font-bold text-[#5E3023]">Sent Requests</p>
+          <p className="text-lg font-bold text-[#5E3023] font-serif">Sent Requests</p>
           {sentRequests.map((req) => (
             <div
               key={req.receiver_id}
@@ -188,7 +188,7 @@ export default function FriendsPage() {
       )}
 
       <div className="flex flex-col gap-2 max-w-lg md:max-w-2xl">
-        <p className="text-lg font-bold text-[#5E3023]">Friend Requests</p>
+        <p className="text-lg font-bold text-[#5E3023] font-serif">Friend Requests</p>
         {requests?.map((request) => (
           <div
             key={request.sender_id}
@@ -221,7 +221,7 @@ export default function FriendsPage() {
       </div>
 
       <div className="flex flex-col gap-2 max-w-lg md:max-w-2xl">
-        <p className="text-lg font-bold text-[#5E3023]">Friends</p>
+        <p className="text-lg font-bold text-[#5E3023] font-serif">Friends</p>
         {friends?.map((friend) => (
           <div
             key={friend.user_id}

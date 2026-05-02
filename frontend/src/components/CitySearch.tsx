@@ -32,11 +32,11 @@ export default function CitySearch({
   return (
     <div>
       <div className="flex flex-col gap-2">
-        <Label htmlFor="city-search" className="flex gap-0 text-black">
+        <Label htmlFor="city-search" className="flex gap-0 text-[#5E3023]">
           City<span className="text-xs text-red-600">*</span>
         </Label>
         <Input
-          className="bg-white"
+          className="bg-white font-serif"
           required={isRequired}
           placeholder="Search for a city..."
           value={query}

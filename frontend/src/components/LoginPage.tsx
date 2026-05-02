@@ -26,7 +26,7 @@ function LoginPage() {
           className="absolute bottom-2 left-0 top-2 w-2 rounded-sm bg-[#895737]"
           aria-hidden
         />
-        <h1 className="flex items-center gap-2 text-4xl font-semibold tracking-tight">
+        <h1 className="flex items-center gap-2 text-5xl font-serif font-black tracking-tight">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 82" className="h-[.7em] w-[.43em] shrink-0">
             <defs>
               <linearGradient id="pinGradient" x1="0" y1="0" x2="0" y2="82" gradientUnits="userSpaceOnUse">

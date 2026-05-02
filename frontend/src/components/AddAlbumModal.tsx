@@ -127,10 +127,7 @@ export default function AddAlbumModal({
           >
             ✕
           </button>
-          <h2 className="text-xl font-semibold text-[#5E3023]">New Album</h2>
-          <p className="mt-1 text-sm text-slate-600">
-            Create a new album entry for a location.
-          </p>
+          <h2 className="text-2xl font-bold font-serif text-[#5E3023]">New Album</h2>
         </div>
 
         <form
@@ -139,7 +136,7 @@ export default function AddAlbumModal({
           className="mt-4 space-y-3 max-h-[500px] overflow-y-auto px-2"
         >
           <div className="flex flex-col gap-2">
-            <Label htmlFor="name" className="flex gap-0 text-black">
+            <Label htmlFor="name" className="flex gap-0 text-[#5E3023]">
               Album Name<span className="text-xs text-red-600">*</span>
             </Label>
             <Input
@@ -148,7 +145,7 @@ export default function AddAlbumModal({
               onChange={(e) => setName(e.target.value)}
               placeholder="Enter a name for this album"
               maxLength={50}
-              className="bg-white text-black"
+              className="bg-white text-black font-serif"
             />
           </div>
 
@@ -158,7 +155,7 @@ export default function AddAlbumModal({
             onQueryChange={(q) => { cityQueryRef.current = q; }}
           />
           {selectedLocation && (
-            <p className="text-sm text-slate-700">
+            <p className="text-sm text-[#2A81CB] font-serif">
               Selected: {selectedLocation.city}
               {selectedLocation.state
                 ? `, ${selectedLocation.state}`
@@ -168,40 +165,40 @@ export default function AddAlbumModal({
 
           <div className="grid grid-cols-2 gap-2">
             <div className="flex flex-col gap-2">
-              <Label className="flex gap-0 text-black">
+              <Label className="flex gap-0 text-[#5E3023]">
                 Start Date<span className="text-xs text-red-600">*</span>
               </Label>
               <Input
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className= {startDate ? "text-black bg-white" : "text-stone-500 bg-white"}
+                className={'bg-white font-serif ${startDate ? "text-black" : "text-stone-500"}'}
               />
             </div>
             <div className="flex flex-col gap-2">
-              <Label className="flex gap-0 text-black">
+              <Label className="flex gap-0 text-[#5E3023]">
                 End Date<span className="text-xs text-red-600">*</span>
               </Label>
               <Input
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className={startDate ? "text-black bg-white" : "text-stone-500 bg-white"}
+                className={'bg-white font-serif ${startDate ? "text-black" : "text-stone-500"}'}
               />
             </div>
           </div>
 
-          <div className="flex flex-col gap-2 text-black">
+          <div className="flex flex-col gap-2 text-[#5E3023]">
             <Label>Notes</Label>
             <Textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Write a description for this album"
-              className="bg-white text-black"
+              className="bg-white text-black font-serif"
             />
           </div>
 
-          <div className="flex flex-col gap-2 text-black">
+          <div className="flex flex-col gap-2 text-[#5E3023]">
             <Label>Images</Label>
             <ImageUploadInput
               onFilesAdded={(selectedFiles) => {
@@ -239,7 +236,7 @@ export default function AddAlbumModal({
                     setImageCaptions(nextCaptions);
                   }}
                   placeholder="Write a caption for this image"
-                  className="bg-white text-black"
+                  className="bg-white text-black font-serif"
                 />
 
                 {/* Image navigation */}
@@ -299,7 +296,7 @@ export default function AddAlbumModal({
               disabled={isSubmitting}
               className="cursor-pointer bg-[#2A81CB] hover:bg-[#1F3665]"
             >
-              {isSubmitting ? "Saving…" : "Add Album"}
+              {isSubmitting ? "Saving…" : "Create Album"}
             </Button>
           </div>
         </form>

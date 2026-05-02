@@ -21,7 +21,7 @@ export default function AppSidebar() {
     <Sidebar className="h-screen w-64 border-r [--sidebar:#F3E9DC] [--sidebar-accent:#FEF9F1] [--sidebar-accent-foreground:#5E3023]">
       {/* Top title */}
       <SidebarHeader>
-        <h1 className="flex items-center gap-1.5 whitespace-nowrap text-xl font-bold px-4 pt-4">
+        <h1 className="flex items-center gap-1.5 whitespace-nowrap text-xl font-black font-serif px-4 pt-4">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 82" className="h-[.7em] w-[.43em] shrink-0">
             <defs>
               <linearGradient id="pinGradient" x1="0" y1="0" x2="0" y2="82" gradientUnits="userSpaceOnUse">
@@ -41,7 +41,7 @@ export default function AppSidebar() {
       <SidebarContent className="px-4 pt-1">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={location.pathname === "/"} className="hover:border-l-2 text-[#5E3023] hover:border-[#895737] hover:rounded-l-none">
+            <SidebarMenuButton asChild isActive={location.pathname === "/"} className="hover:border-l-2 text-[#895737] hover:border-[#895737] hover:rounded-l-none">
               <Link to="/" onClick={closeOnMobile}>
                 <Map className="w-4 h-4 mr-2" />
                 Map
@@ -52,7 +52,7 @@ export default function AppSidebar() {
             <SidebarMenuButton
               asChild
               isActive={location.pathname === "/colors"}
-              className="hover:border-l-2 text-[#5E3023] hover:border-[#895737] hover:rounded-l-none"
+              className="hover:border-l-2 text-[#895737] hover:border-[#895737] hover:rounded-l-none"
             >
               <Link to="/colors" onClick={closeOnMobile}>
                 <Paintbrush className="w-4 h-4 mr-2" />
@@ -64,7 +64,7 @@ export default function AppSidebar() {
             <SidebarMenuButton
               asChild
               isActive={location.pathname === "/feed"}
-              className="hover:border-l-2 text-[#5E3023] hover:border-[#895737] hover:rounded-l-none"
+              className="hover:border-l-2 text-[#895737] hover:border-[#895737] hover:rounded-l-none"
             >
               <Link to="/feed" onClick={closeOnMobile}>
                 <Newspaper className="w-4 h-4 mr-2" />
@@ -76,7 +76,7 @@ export default function AppSidebar() {
             <SidebarMenuButton
               asChild
               isActive={location.pathname === "/friends"}
-              className="hover:border-l-2 text-[#5E3023] hover:border-[#895737] hover:rounded-l-none"
+              className="hover:border-l-2 text-[#895737] hover:border-[#895737] hover:rounded-l-none"
             >
               <Link to="/friends" onClick={closeOnMobile}>
                 <Users className="w-4 h-4 mr-2" />
@@ -91,7 +91,7 @@ export default function AppSidebar() {
       <SidebarFooter >
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={location.pathname === "/user"} className="hover:border-l-2 text-[#5E3023] hover:border-[#895737] hover:rounded-l-none">
+            <SidebarMenuButton asChild isActive={location.pathname === "/user"} className="hover:border-l-2 text-[#895737] hover:border-[#895737] hover:rounded-l-none">
               <Link to="/user" onClick={closeOnMobile}>
                 <User className="w-4 h-4 mr-2" />
                 User

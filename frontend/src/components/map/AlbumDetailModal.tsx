@@ -298,15 +298,15 @@ export default function AlbumDetailModal({
         return (
           <div className="flex max-h-[28rem] flex-col items-center overflow-y-auto px-2 pt-2 pb-6 text-center text-[#5E3023]">
             
-            <h3 className="mt-4 font-serif text-2xl">
+            <h3 className="mt-4 font-serif font-medium text-xl">
               {album.name || "Untitled"}
             </h3>
-            <p className="mt-3 text-sm">
+            <p className="mt-1 text-sm">
               {formatAlbumDate(album.start_date)} —{" "}
               {formatAlbumDate(album.end_date)}
             </p>
             {album.notes?.trim() ? (
-              <div className="mt-6 w-full max-w-md text-left">
+              <div className="mt-5 w-full max-w-md text-left">
                 <p className="mt-2 whitespace-pre-wrap wrap-break-word text-sm leading-relaxed">
                   {album.notes}
                 </p>
@@ -333,8 +333,8 @@ export default function AlbumDetailModal({
               </div>
             ) : null}
 
-            <p className="text-right text-xs text-stone-400 overflow-auto">
-              {slot.index + 1}
+            <p className="text-right text-xs text-[#895737] overflow-auto">
+              {slot.index + 2}
             </p>
           </div>
         );
@@ -450,8 +450,7 @@ export default function AlbumDetailModal({
       className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/30 p-4 outline-none"
     >
       <div className={`relative w-full max-w-2xl rounded-lg border-2 border-stone-300 p-5 shadow-lg bg-[#FEF9F1]`}>
-        <header className={`relative pb-3 text-center ${isEditing ? "px-3" : "px-5"}`}>
-          <div className={`absolute bottom-0 border-b border-stone-300 ${isEditing ? "left-4 right-4" : "left-0 right-0"}`} />
+        <header className={`relative text-center ${isEditing ? "px-3" : "px-5"}`}>
           <button
             type="button"
             className="absolute right-0 top-0 text-stone-400 hover:text-stone-700 cursor-pointer"
@@ -462,11 +461,11 @@ export default function AlbumDetailModal({
           </button>
           <h2
             id="album-dialog-title"
-            className="font-serif text-2xl text-stone-900"
+            className="font-serif font-medium mt-1 text-3xl text-[#5E3023]"
           >
             {pin.city || "Somewhere"}
           </h2>
-          <div className="mt-1 text-sm text-stone-600 flex items-center gap-2 justify-center">
+          <div className="mt-1 text-sm font-serif text-[#895737] flex items-center gap-2 justify-center">
             {/* ADM1 */}
             {pin.adm1 && (
               adm1Color ? (
@@ -587,12 +586,12 @@ export default function AlbumDetailModal({
                 className="absolute bottom-2 left-0 top-2 w-2 rounded-sm bg-[#895737]"
                 aria-hidden
               />
-              <div className="pl-5 pr-4 py-4">
+              <div className="pl-5 pr-4 font-serif py-4">
                 {renderPageBody()}
               </div>
             </div>
 
-            <div className="mt-4 flex items-center justify-between gap-3 border-t border-stone-300 pt-3">
+            <div className="mt-4 flex items-center justify-between gap-3">
               <Button
                 type="button"
                 variant="outline"
@@ -629,7 +628,7 @@ export default function AlbumDetailModal({
         )}
 
         <div
-          className={`mt-4 flex justify-between border-t border-stone-300 pt-4 ${
+          className={`mt-4 flex justify-between pt-0 ${
             isEditing ? "hidden" : ""
           }`}
         >
