@@ -24,10 +24,10 @@ type AlbumPageSlot =
   | { kind: "cover" }
   | { kind: "photo"; page: Page; index: number };
 
-function albumPageSlots(album: Album | null): AlbumPageSlot[] {
-  if (!album) return [{ kind: "empty" }];
+function albumPageSlots(activeAlbum: Album | null): AlbumPageSlot[] {
+  if (!activeAlbum) return [{ kind: "empty" }];
   const slots: AlbumPageSlot[] = [{ kind: "cover" }];
-  album.pages.forEach((p, index) => {
+  activeAlbum.pages.forEach((p, index) => {
     if (p?.id) slots.push({ kind: "photo", page: p, index });
   });
   return slots;
@@ -35,7 +35,7 @@ function albumPageSlots(album: Album | null): AlbumPageSlot[] {
 
 type AlbumDetailModalProps = {
   pin: Pin;
-  album: Album | null;
+  albums: Album[];
   cloudName: string | undefined;
   onClose: () => void;
   setAlbums: Dispatch<SetStateAction<Album[]>>;
@@ -44,7 +44,7 @@ type AlbumDetailModalProps = {
 
 export default function AlbumDetailModal({
   pin,
-  album,
+  albums,
   cloudName,
   onClose,
   setAlbums,
@@ -65,13 +65,17 @@ export default function AlbumDetailModal({
   const [pageIndex, setPageIndex] = useState(0);
   const overlayRef = useRef<HTMLDivElement>(null);
 
-  const slots = useMemo(() => albumPageSlots(album), [album]);
+  const [activeAlbumIndex, setActiveAlbumIndex] = useState(0);
+
+  const activeAlbum = albums[activeAlbumIndex] ?? null;
+
+  const slots = useMemo(() => albumPageSlots(activeAlbum), [activeAlbum]);
 
   useEffect(() => {
     setIsEditing(false);
     setIsConfirmingDelete(false);
     setPageIndex(0);
-  }, [pin.location_id, album?.album_id]);
+  }, [pin.location_id, activeAlbum?.album_id]);
 
   // to make sure the modal is focused when it is opened to prevent the map from moving
   useEffect(() => {
@@ -93,7 +97,8 @@ export default function AlbumDetailModal({
     if (!root) return;
 
     function onKeyDown(e: KeyboardEvent) {
-      if (e.key !== "ArrowLeft" && e.key !== "ArrowRight" && e.key !== "Escape") return;
+      if (e.key !== "ArrowLeft" && e.key !== "ArrowRight" && e.key !== "Escape")
+        return;
       const el = overlayRef.current;
       if (!el || !el.contains(e.target as Node)) return;
 
@@ -172,14 +177,14 @@ export default function AlbumDetailModal({
   }, [map]);
 
   function openEdit() {
-    if (!album) return;
+    if (!activeAlbum) return;
     setEditForm({
-      name: album.name ?? "",
-      notes: album.notes ?? "",
-      start_date: toDateInputValue(album.start_date),
-      end_date: toDateInputValue(album.end_date),
+      name: activeAlbum.name ?? "",
+      notes: activeAlbum.notes ?? "",
+      start_date: toDateInputValue(activeAlbum.start_date),
+      end_date: toDateInputValue(activeAlbum.end_date),
     });
-    setEditPages(album.pages?.filter((p) => Boolean(p?.id)) ?? []);
+    setEditPages(activeAlbum.pages?.filter((p) => Boolean(p?.id)) ?? []);
     setNewPageFiles([]);
     setNewPageCaptions([]);
     setIsEditing(true);
@@ -192,12 +197,15 @@ export default function AlbumDetailModal({
   }
 
   async function handleDeleteAlbum() {
-    if (!album) return;
-    const res = await apiFetch(`/delete_album?album_id=${album.album_id}`, {
-      method: "DELETE",
-    });
+    if (!activeAlbum) return;
+    const res = await apiFetch(
+      `/delete_album?album_id=${activeAlbum.album_id}`,
+      {
+        method: "DELETE",
+      },
+    );
     if (!res.ok) {
-      alert(`Failed to delete album: ${await res.text()}`);
+      alert(`Failed to delete activeAlbum: ${await res.text()}`);
       setIsConfirmingDelete(false);
       return;
     }
@@ -205,7 +213,7 @@ export default function AlbumDetailModal({
   }
 
   async function handleSaveEdit() {
-    if (!album) return;
+    if (!activeAlbum) return;
 
     const appendedPages: Page[] = [];
 
@@ -213,7 +221,7 @@ export default function AlbumDetailModal({
     for (let index = 0; index < newPageFiles.length; index += 1) {
       const formData = new FormData();
       formData.append("file", newPageFiles[index]);
-      formData.append("album_id", String(album.album_id));
+      formData.append("album_id", String(activeAlbum.album_id));
       formData.append("caption", newPageCaptions[index] ?? "");
 
       const uploadRes = await apiFetch("/upload_image", {
@@ -236,28 +244,28 @@ export default function AlbumDetailModal({
     // 2. Merge ALL pages
     const finalPages = [...editPages, ...appendedPages];
 
-    // 3. THEN update album (single source of truth)
+    // 3. THEN update activeAlbum (single source of truth)
     const res = await apiFetch("/edit_album", {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        album_id: album.album_id,
+        album_id: activeAlbum.album_id,
         ...editForm,
         pages: finalPages,
       }),
     });
 
     if (!res.ok) {
-      console.error("Failed to save album:", await res.text());
+      console.error("Failed to save activeAlbum:", await res.text());
       return;
     }
 
     // 4. Update UI
     setAlbums((prev) =>
       prev.map((a) =>
-        a.album_id === album.album_id
+        a.album_id === activeAlbum.album_id
           ? { ...a, ...editForm, pages: finalPages }
           : a,
       ),
@@ -279,25 +287,24 @@ export default function AlbumDetailModal({
       case "empty":
         return (
           <div className="flex h-full min-h-[18rem] flex-col items-center justify-center text-center">
-            <p className="text-sm">No album for this place yet.</p>
+            <p className="text-sm">No activeAlbum for this place yet.</p>
           </div>
         );
       case "cover":
-        if (!album) return null;
+        if (!activeAlbum) return null;
         return (
           <div className="flex max-h-[28rem] flex-col items-center overflow-y-auto px-2 pt-2 pb-6 text-center text-[#5E3023]">
-            
             <h3 className="mt-4 font-serif font-medium text-xl">
-              {album.name || "Untitled"}
+              {activeAlbum.name || "Untitled"}
             </h3>
             <p className="mt-1 text-sm">
-              {formatAlbumDate(album.start_date)} —{" "}
-              {formatAlbumDate(album.end_date)}
+              {formatAlbumDate(activeAlbum.start_date)} —{" "}
+              {formatAlbumDate(activeAlbum.end_date)}
             </p>
-            {album.notes?.trim() ? (
+            {activeAlbum.notes?.trim() ? (
               <div className="mt-5 w-full max-w-md text-left">
                 <p className="mt-2 whitespace-pre-wrap wrap-break-word text-sm leading-relaxed">
-                  {album.notes}
+                  {activeAlbum.notes}
                 </p>
               </div>
             ) : null}
@@ -429,11 +436,15 @@ export default function AlbumDetailModal({
       tabIndex={-1}
       role="dialog"
       aria-modal="true"
-      aria-labelledby="album-dialog-title"
+      aria-labelledby="activeAlbum-dialog-title"
       className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/30 p-4 outline-none"
     >
-      <div className={`relative w-full max-w-2xl rounded-lg border-2 border-stone-300 p-5 shadow-lg bg-[#FEF9F1]`}>
-        <header className={`relative text-center ${isEditing ? "px-3" : "px-5"}`}>
+      <div
+        className={`relative w-full max-w-2xl rounded-lg border-2 border-stone-300 p-5 shadow-lg bg-[#FEF9F1]`}
+      >
+        <header
+          className={`relative text-center ${isEditing ? "px-3" : "px-5"}`}
+        >
           <button
             type="button"
             className="absolute right-0 top-0 text-stone-400 hover:text-stone-700 cursor-pointer"
@@ -443,23 +454,31 @@ export default function AlbumDetailModal({
             ✕
           </button>
           <h2
-            id="album-dialog-title"
+            id="activeAlbum-dialog-title"
             className="font-serif mt-1 text-3xl text-[#895737] flex items-center justify-center gap-2"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 82" className="h-[.7em] w-[.43em] shrink-0" fill="#2A81CB">
-              <path d="M47.88,35.08c-.03.06-.06.13-.09.19l.09-.19h0Z"/>
-              <path d="M25,50c-9.87,0-18.4-5.72-22.47-14.03h0s22.47,46.03,22.47,46.03l22.11-45.33c-4.19,7.93-12.52,13.33-22.11,13.33Z"/>
-              <path d="M25,0C11.19,0,0,11.19,0,25c0,3.94.91,7.66,2.53,10.97,4.06,8.31,12.6,14.03,22.47,14.03s17.92-5.4,22.11-13.33c.24-.46.47-.93.68-1.4.03-.06.06-.13.09-.19,1.36-3.08,2.12-6.49,2.12-10.08C50,11.19,38.81,0,25,0ZM25,34.26c-4.78,0-8.65-3.87-8.65-8.65s3.87-8.65,8.65-8.65,8.65,3.87,8.65,8.65-3.87,8.65-8.65,8.65Z"/>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 50 82"
+              className="h-[.7em] w-[.43em] shrink-0"
+              fill="#2A81CB"
+            >
+              <path d="M47.88,35.08c-.03.06-.06.13-.09.19l.09-.19h0Z" />
+              <path d="M25,50c-9.87,0-18.4-5.72-22.47-14.03h0s22.47,46.03,22.47,46.03l22.11-45.33c-4.19,7.93-12.52,13.33-22.11,13.33Z" />
+              <path d="M25,0C11.19,0,0,11.19,0,25c0,3.94.91,7.66,2.53,10.97,4.06,8.31,12.6,14.03,22.47,14.03s17.92-5.4,22.11-13.33c.24-.46.47-.93.68-1.4.03-.06.06-.13.09-.19,1.36-3.08,2.12-6.49,2.12-10.08C50,11.19,38.81,0,25,0ZM25,34.26c-4.78,0-8.65-3.87-8.65-8.65s3.87-8.65,8.65-8.65,8.65,3.87,8.65,8.65-3.87,8.65-8.65,8.65Z" />
             </svg>
             {pin.city || "Somewhere"}
           </h2>
           <div className="mt-1 text-sm font-serif text-[#895737] flex items-center gap-2 justify-center">
             {/* ADM1 */}
-            {pin.adm1 && (
-              adm1Color ? (
+            {pin.adm1 &&
+              (adm1Color ? (
                 <div className="flex items-center gap-1">
                   <span>{pin.adm1}</span>
-                  <label htmlFor="adm1-color-input" className="group flex items-center gap-1 cursor-pointer">
+                  <label
+                    htmlFor="adm1-color-input"
+                    className="group flex items-center gap-1 cursor-pointer"
+                  >
                     <div className="relative">
                       <input
                         id="adm1-color-input"
@@ -498,18 +517,20 @@ export default function AlbumDetailModal({
                 </div>
               ) : (
                 <span>{pin.adm1}</span>
-              )
-            )}
+              ))}
 
             {/* separator */}
             {pin.adm1 && pin.country && <span>·</span>}
 
             {/* COUNTRY */}
-            {pin.country && (
-              countryColor ? (
+            {pin.country &&
+              (countryColor ? (
                 <div className="flex items-center gap-1">
                   <span>{pin.country}</span>
-                  <label htmlFor="country-color-input" className="group flex items-center gap-1 cursor-pointer">
+                  <label
+                    htmlFor="country-color-input"
+                    className="group flex items-center gap-1 cursor-pointer"
+                  >
                     <div className="relative">
                       <input
                         id="country-color-input"
@@ -548,12 +569,32 @@ export default function AlbumDetailModal({
                 </div>
               ) : (
                 <span>{pin.country}</span>
-              )
-            )}
+              ))}
           </div>
         </header>
 
-        {isEditing && album ? (
+        {albums.length > 1 && (
+          <div className="flex gap-2 mt-3 flex-wrap justify-center">
+            {albums.map((a, i) => (
+              <button
+                key={a.album_id}
+                onClick={() => {
+                  setActiveAlbumIndex(i);
+                  setPageIndex(0); // reset pages when switching albums
+                }}
+                className={`px-3 py-1 rounded border text-sm ${
+                  i === activeAlbumIndex
+                    ? "bg-[#895737] text-white"
+                    : "bg-white text-[#895737]"
+                }`}
+              >
+                {a.name || `Album ${i + 1}`}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {isEditing && activeAlbum ? (
           <AlbumEditForm
             editForm={editForm}
             setEditForm={setEditForm}
@@ -619,7 +660,7 @@ export default function AlbumDetailModal({
           }`}
         >
           <div className="flex gap-2 ml-auto">
-            {album && !isConfirmingDelete && (
+            {activeAlbum && !isConfirmingDelete && (
               <Button
                 type="button"
                 variant="outline"
@@ -629,7 +670,7 @@ export default function AlbumDetailModal({
                 Edit <Pencil className="w-4 h-4" />
               </Button>
             )}
-            {album && !isConfirmingDelete && (
+            {activeAlbum && !isConfirmingDelete && (
               <Button
                 type="button"
                 variant="destructive"
@@ -642,7 +683,7 @@ export default function AlbumDetailModal({
             {isConfirmingDelete && (
               <div className="flex flex-wrap items-center justify-end gap-2">
                 <span className="text-sm text-stone-600">
-                  Delete this album?
+                  Delete this activeAlbum?
                 </span>
                 <Button
                   type="button"

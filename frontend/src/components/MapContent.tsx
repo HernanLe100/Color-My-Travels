@@ -32,10 +32,10 @@ export default function MapContent({ isTogglePins = false }: MapContentProps) {
 
   const [selectedPin, setSelectedPin] = useState<Pin | null>(null);
 
-  const albumAtLocation = useMemo(() => {
-    if (!selectedPin) return null;
-    return (
-      albums.find((a) => a.location_id === selectedPin.location_id) ?? null
+  const albumsAtLocation = useMemo(() => {
+    if (!selectedPin) return [];
+    return albums.filter(
+      (a) => a.location_id === selectedPin.location_id
     );
   }, [albums, selectedPin]);
 
@@ -62,7 +62,7 @@ export default function MapContent({ isTogglePins = false }: MapContentProps) {
       {selectedPin && (
         <AlbumDetailModal
           pin={selectedPin}
-          album={albumAtLocation}
+          albums={albumsAtLocation}
           cloudName={cloudName}
           onClose={() => setSelectedPin(null)}
           setAlbums={setAlbums}
