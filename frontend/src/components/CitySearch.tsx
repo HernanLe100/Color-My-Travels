@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import type { SearchLocation } from "@/types";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { useAuth } from "@/App";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -17,8 +16,6 @@ export default function CitySearch({
 }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchLocation[]>([]);
-
-  const token = useAuth();
   
   useEffect(() => {
     if (query.length < 3) {
