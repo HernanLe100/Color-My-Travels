@@ -117,6 +117,24 @@
     --sidebar-ring: oklch(0.556 0 0);
 }
 
+.map-pin-tooltip {
+  background-color: #000 !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 6px !important;
+  font-size: 0.75rem !important;
+  padding: 4px 8px !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3) !important;
+  animation: map-pin-tooltip-in 150ms ease-out;
+}
+@keyframes map-pin-tooltip-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.map-pin-tooltip::before {
+  display: none !important;
+}
+
 [data-sidebar="sidebar"] {
   --sidebar: #F3E9DC;
   --sidebar-accent: #FEF9F1;

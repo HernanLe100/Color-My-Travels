@@ -22,6 +22,7 @@ export default function VisitedRegionsGeoJSON({
     <GeoJSON
       key={polygonLevel}
       data={data}
+      interactive={false}
       style={(feature) => {
         const iso = feature?.properties?.shapeISO as string | undefined;
         const fillColor =

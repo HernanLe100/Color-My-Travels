@@ -12,6 +12,7 @@ import type { SearchLocation } from "@/types";
 import { Switch } from "./ui/switch";
 import AddAlbumModal from "./AddAlbumModal";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+import { CircleHelp, MapPinPlus } from "lucide-react";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -35,6 +36,7 @@ export default function MapPage() {
   const [imageCaptions, setImageCaptions] = useState<string[]>([]);
 
   const [isTogglePins, setIsTogglePins] = useState(true);
+  const [helpOpen, setHelpOpen] = useState(false);
 
   const token = useAuth();
 
@@ -227,22 +229,65 @@ export default function MapPage() {
 
   return (
     <div className="h-screen w-full">
-      <div className="pointer-events-auto absolute top-6 right-6 z-[1000]">
-        <div className="flex max-w-xs items-center gap-2 rounded-xl bg-[#FEF9F1] border border-[#895737] px-4 py-3 shadow-lg">
-          <div className="min-w-0 flex-1">
-            <Label
-              htmlFor="togglePins"
-              className="flex items-center gap-1 cursor-pointer text-sm font-semibold font-serif text-[#5E3023]"
-            >
-              Pins
-            </Label>
-          </div>
+      {/* Pins pill */}
+      <div className="pointer-events-auto absolute top-6 right-6 z-1000">
+        <div className="flex items-center gap-2 rounded-xl bg-[#FEF9F1] border border-[#895737] px-4 py-3 shadow-lg">
+          <Label
+            htmlFor="togglePins"
+            className="cursor-pointer text-sm font-semibold font-serif text-[#5E3023]"
+          >
+            Pins
+          </Label>
           <Switch
             id="togglePins"
             className="shrink-0 cursor-pointer data-checked:bg-[#2A81CB]"
             checked={isTogglePins}
             onCheckedChange={setIsTogglePins}
           />
+        </div>
+      </div>
+
+      {/* Help button — centered vertically on the Pins pill (py-3 + ~20px content = ~44px tall, center = 22px from top of pill) */}
+      <div className="pointer-events-auto absolute top-7.5 right-36 z-1000 h-10 flex items-center">
+        <div className="relative">
+          <button
+            type="button"
+            className="text-neutral-600 hover:text-[#2A81CB] cursor-pointer"
+            onMouseEnter={() => setHelpOpen(true)}
+            onMouseLeave={() => setHelpOpen(false)}
+            onClick={() => setHelpOpen((o) => !o)}
+            aria-label="Help"
+          >
+            <CircleHelp className="size-6" />
+          </button>
+          {helpOpen && (
+            <div className="absolute right-0 top-full mt-2 w-42 rounded-xl bg-[#FEF9F1] border border-[#895737] px-4 py-3 shadow-lg text-sm font-serif text-[#5E3023] flex flex-col gap-2 animate-in fade-in-0 zoom-in-95">
+              <div>
+                <p className="font-semibold">Create Album:</p>
+                <div className="flex items-center gap-1">
+                  <p>Click or drag the  <span className="inline-flex size-5 items-center justify-center rounded-full bg-[#2A81CB]"><MapPinPlus className="size-3 text-white" /></span>  onto the map.</p>
+                </div>
+              </div>
+              <div>
+                <p className="font-semibold">View Album:</p>
+                <div className="flex items-center gap-1">
+                  <p>Click</p>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 82" className="h-5 w-3 shrink-0">
+                    <defs>
+                      <linearGradient id="pinGradient" x1="0" y1="0" x2="0" y2="82" gradientUnits="userSpaceOnUse">
+                        <stop offset="0%" stopColor="#2A81CB" />
+                        <stop offset="100%" stopColor="#3274A3" />
+                      </linearGradient>
+                    </defs>
+                    <path fill="url(#pinGradient)" d="M47.88,35.08c-.03.06-.06.13-.09.19l.09-.19h0Z"/>
+                    <path fill="url(#pinGradient)" d="M25,50c-9.87,0-18.4-5.72-22.47-14.03h0s22.47,46.03,22.47,46.03l22.11-45.33c-4.19,7.93-12.52,13.33-22.11,13.33Z"/>
+                    <path fill="url(#pinGradient)" d="M25,0C11.19,0,0,11.19,0,25c0,3.94.91,7.66,2.53,10.97,4.06,8.31,12.6,14.03,22.47,14.03s17.92-5.4,22.11-13.33c.24-.46.47-.93.68-1.4.03-.06.06-.13.09-.19,1.36-3.08,2.12-6.49,2.12-10.08C50,11.19,38.81,0,25,0ZM25,34.26c-4.78,0-8.65-3.87-8.65-8.65s3.87-8.65,8.65-8.65,8.65,3.87,8.65,8.65-3.87,8.65-8.65,8.65Z"/>
+                  </svg>
+                  <p>on the map.</p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -293,16 +338,16 @@ export default function MapPage() {
               window.addEventListener("pointermove", handlePointerMove);
               window.addEventListener("pointerup", handlePointerUp);
             }}
-            className="absolute bottom-6 right-6 z-[1000] cursor-pointer
-             w-14 h-14 rounded-full
-             bg-[#2A81CB] text-white text-2xl
+            className="absolute bottom-6 right-6 z-1000 cursor-pointer
+             w-16 h-16 rounded-full
+             bg-[#2A81CB] text-white
              flex items-center justify-center
              shadow-xl"
           >
-            +
+            <MapPinPlus className="size-6"/>
           </Button>
         </TooltipTrigger>
-        <TooltipContent className="z-[2000]">Create a new album</TooltipContent>
+        <TooltipContent className="z-2000">Create Album</TooltipContent>
       </Tooltip>
 
       {dragging && (
