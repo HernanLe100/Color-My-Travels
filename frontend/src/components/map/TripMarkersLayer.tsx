@@ -1,4 +1,4 @@
-import { Marker } from "react-leaflet";
+import { Marker, Tooltip } from "react-leaflet";
 import type { Pin } from "@/types";
 import type { Icon } from "leaflet";
 import { tripPinIcon } from "./leafletTripPinIcon";
@@ -28,7 +28,11 @@ export default function TripMarkersLayer({
           eventHandlers={{
             click: () => onPinSelect(p),
           }}
-        />
+        >
+          <Tooltip direction="top" offset={[0, -30]} className="map-pin-tooltip">
+            View Album: <span className="font-semibold">{p.city}</span>
+          </Tooltip>
+        </Marker>
       ))}
     </>
   );
