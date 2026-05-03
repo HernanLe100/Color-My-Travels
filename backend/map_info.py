@@ -206,4 +206,12 @@ def search():
             "adm1_name": adm1_name,
         })
     
-    return jsonify(results)
+    seen = set()
+    unique_results = []
+    for r in results:
+        key = (r["city"], r["adm1"], r["country"])
+        if key not in seen:
+            seen.add(key)
+            unique_results.append(r)
+
+    return jsonify(unique_results)
