@@ -111,7 +111,7 @@ export default function AppSidebar() {
             <SidebarMenuButton asChild isActive={location.pathname === "/user"} className="hover:border-l-2 text-[#895737] hover:border-[#895737] hover:rounded-l-none">
               <Link to="/user" onClick={closeOnMobile}>
                 <UserIcon className="w-4 h-4 mr-2" />
-                {user?.name}'s Settings
+                <span><span className="font-bold">{user?.name}</span> - Settings</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
