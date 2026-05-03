@@ -30,7 +30,7 @@ export default function TripMarkersLayer({
           }}
         >
           <Tooltip direction="top" offset={[0, -30]} className="map-pin-tooltip">
-            View Album
+            View Album: <span className="font-semibold">{p.city}</span>
           </Tooltip>
         </Marker>
       ))}
