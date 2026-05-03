@@ -6,6 +6,70 @@ import Loading from "./Loading";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
+function ColorRow({
+  row,
+  index,
+  handleColorPreview,
+  handleColorSave,
+}: {
+  row: Color;
+  index: number;
+  handleColorPreview: (
+    region_code: string,
+    color: string,
+    region_type: string,
+  ) => void;
+  handleColorSave: (
+    region_code: string,
+    newColor: string,
+    region_type: string,
+    prevColor: string,
+  ) => void;
+}) {
+  return (
+    <label
+      htmlFor={`color-${index}`}
+      className="flex items-center font-serif justify-between p-3 rounded-lg border bg-white
+      hover:bg-[#F3E9DC] text-[#5E3023] transition cursor-pointer group hover:border-[#895737]"
+    >
+      <span className="font-semibold">
+        {row.display_name || row.region_code}
+        {row.display_name && (
+          <span className="ml-2 text-xs text-gray-400 font-medium">
+            {row.region_type === "adm1"
+              ? `(${row.region_code}, ${row.country_name})`
+              : `(${row.region_code})`}
+          </span>
+        )}
+      </span>
+
+      <div className="flex items-center gap-2">
+        <Pencil className="w-4 h-4 text-[#895737] opacity-0 group-hover:opacity-100 transition" />
+        <input
+          id={`color-${index}`}
+          type="color"
+          value={row.color}
+          onFocus={(e) => {
+            e.currentTarget.dataset.prev = row.color;
+          }}
+          onChange={(e) =>
+            handleColorPreview(row.region_code, e.target.value, row.region_type)
+          }
+          onBlur={(e) =>
+            handleColorSave(
+              row.region_code,
+              e.target.value,
+              row.region_type,
+              e.currentTarget.dataset.prev ?? row.color,
+            )
+          }
+          className="w-10 h-10 cursor-pointer mr-0.5"
+        />
+      </div>
+    </label>
+  );
+}
+
 export default function ColorsPage() {
   const [colors, setColors] = useState<Color[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -79,58 +143,51 @@ export default function ColorsPage() {
 
   console.log(colors);
 
+  const countries = colors.filter((c) => c.region_type === "country");
+  const regions = colors.filter((c) => c.region_type === "adm1");
+
   return (
     <div className="min-h-screen w-full bg-[#FEF9F1]">
       <div className="mx-auto w-full max-w-lg md:mx-0 md:max-w-none px-6 py-6">
         <h1 className="text-lg font-bold mb-4 font-serif text-[#5E3023]">
           Edit Colors
         </h1>
-        <div className="flex flex-col gap-2">
-          {colors.map((row, i) => (
-            <label
-              key={i}
-              htmlFor={`color-${i}`}
-              className="flex items-center font-serif justify-between p-3 rounded-lg border bg-white
-                     hover:bg-[#F3E9DC] text-[#5E3023] transition cursor-pointer group hover:border-[#895737]"
-            >
-              <span className="font-semibold">
-                {row.display_name || row.region_code}
-                {row.display_name && (
-                  <span className="ml-2 text-xs text-gray-400 font-medium">
-                    ({row.region_code})
-                  </span>
-                )}
-              </span>
-
-              <div className="flex items-center gap-2">
-                <Pencil className="w-4 h-4 text-[#895737] opacity-0 group-hover:opacity-100 transition" />
-                <input
-                  id={`color-${i}`}
-                  type="color"
-                  value={row.color}
-                  onFocus={(e) => {
-                    e.currentTarget.dataset.prev = row.color;
-                  }}
-                  onChange={(e) =>
-                    handleColorPreview(
-                      row.region_code,
-                      e.target.value,
-                      row.region_type,
-                    )
-                  }
-                  onBlur={(e) =>
-                    handleColorSave(
-                      row.region_code,
-                      e.target.value,
-                      row.region_type,
-                      e.currentTarget.dataset.prev ?? row.color,
-                    )
-                  }
-                  className="w-10 h-10 cursor-pointer mr-0.5"
+        <div className="flex flex-col gap-6">
+          {/* Countries */}
+          <div>
+            <h2 className="text-md font-bold font-serif text-[#5E3023] mb-2">
+              Countries
+            </h2>
+            <div className="flex flex-col gap-2">
+              {countries.map((row, i) => (
+                <ColorRow
+                  key={i}
+                  row={row}
+                  index={i}
+                  handleColorPreview={handleColorPreview}
+                  handleColorSave={handleColorSave}
                 />
-              </div>
-            </label>
-          ))}
+              ))}
+            </div>
+          </div>
+
+          {/* Regions / States */}
+          <div>
+            <h2 className="text-md font-bold font-serif text-[#5E3023] mb-2">
+              States / Regions
+            </h2>
+            <div className="flex flex-col gap-2">
+              {regions.map((row, i) => (
+                <ColorRow
+                  key={i}
+                  row={row}
+                  index={i}
+                  handleColorPreview={handleColorPreview}
+                  handleColorSave={handleColorSave}
+                />
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>
