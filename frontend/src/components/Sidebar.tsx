@@ -109,9 +109,10 @@ export default function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={location.pathname === "/user"} className="hover:border-l-2 text-[#895737] hover:border-[#895737] hover:rounded-l-none">
-              <Link to="/user" onClick={closeOnMobile}>
-                <UserIcon className="w-4 h-4 mr-2" />
-                <span><span className="font-bold">{user?.name}</span> - Settings</span>
+              <Link to="/user" onClick={closeOnMobile} className="flex items-center min-w-0">
+                <UserIcon className="w-4 h-4 mr-2 shrink-0" />
+                <span className="truncate min-w-0 font-bold">{user?.name}</span>
+                <span className="shrink-0">—&nbsp;Settings</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
