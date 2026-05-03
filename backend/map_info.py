@@ -4,6 +4,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 import requests
 import pycountry
 import os
+from functools import wraps
 
 _GEOAPIFY_KEY = os.getenv("GEOAPIFY_KEY")
 
@@ -14,9 +15,26 @@ map_bp = Blueprint("map", __name__)
 geo_cache = {}
 
 # --------------------------------------------------
+# since these routes arent jwt required, we will protect from direct browsing manually
+def reject_direct_navigation(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        fetch_mode = (request.headers.get("Sec-Fetch-Mode") or "").lower()
+        fetch_dest = (request.headers.get("Sec-Fetch-Dest") or "").lower()
+        accept = (request.headers.get("Accept") or "").lower()
+        
+        is_navigation = fetch_mode == "navigate" or fetch_dest == "document"
+        wants_html = "text/html" in accept
+
+        if is_navigation or wants_html:
+            return jsonify({"error": "Direct browsing not allowed"}), 403
+        return None
+    return decorated_function
+    
+# --------------------------------------------------
 
 @map_bp.route("/geo", methods=["GET"])
-@jwt_required()
+@reject_direct_navigation
 def get_geo():
     country = request.args.get("country")
     level = request.args.get("level") # ADM0 or ADM1
@@ -74,7 +92,7 @@ def iso2_to_iso3(code):
     
 # gets location info from coords
 @map_bp.route("/coord_location", methods=["GET"])
-@jwt_required()
+@reject_direct_navigation
 def coord_location():
     lat = request.args.get("lat")
     lng = request.args.get("lng")
@@ -135,7 +153,7 @@ def coord_location():
     })
 
 @map_bp.route("/search")
-@jwt_required()
+@reject_direct_navigation
 def search():
     q = request.args.get("q")
 

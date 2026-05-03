@@ -117,8 +117,7 @@ export function useMapTravelData(
       const res = await fetch(
         `${BACKEND_URL}/geo?country=${country}&level=${level}`,
         {headers: {
-          "Accept": "application/json",
-          Authorization: `Bearer ${token}`
+          "Accept": "application/json"
         }}
       );
       const data = (await res.json()) as Record<string, unknown> & {

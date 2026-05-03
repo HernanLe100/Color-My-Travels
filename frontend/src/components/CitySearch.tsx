@@ -29,8 +29,7 @@ export default function CitySearch({
     const timeout = setTimeout(async () => {
       const res = await fetch(`${BACKEND_URL}/search?q=${query}`,
       {headers: {
-        "Accept": "application/json",
-        Authorization: `Bearer ${token}`
+        "Accept": "application/json"
       }}
       );
       const data = await res.json();

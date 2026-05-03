@@ -204,7 +204,6 @@ export default function MapPage() {
       `${BACKEND_URL}/coord_location?lat=${point.lat}&lng=${point.lng}`,
       {headers: {
         "Accept": "application/json",
-        Authorization: `Bearer ${token}`
       }}
     );
     const data = await res.json();
