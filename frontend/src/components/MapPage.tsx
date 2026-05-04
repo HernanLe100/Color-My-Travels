@@ -274,13 +274,13 @@ export default function MapPage() {
             <div className="absolute right-0 top-full mt-2 w-42 rounded-xl bg-[#FEF9F1] border border-[#895737] px-4 py-3 shadow-lg text-sm font-serif text-[#5E3023] flex flex-col gap-2 animate-in fade-in-0 zoom-in-95">
               <div>
                 <p className="font-semibold">Create Album:</p>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1 text-[#895737]">
                   <p>Click or drag the  <span className="inline-flex size-5 items-center justify-center rounded-full bg-[#2A81CB]"><MapPinPlus className="size-3 text-white" /></span>  onto the map.</p>
                 </div>
               </div>
               <div>
                 <p className="font-semibold">View Album:</p>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1 text-[#895737]">
                   <p>Click</p>
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 82" className="h-5 w-3 shrink-0">
                     <defs>
