@@ -205,7 +205,7 @@ export default function AlbumEditForm({
         {/* images */}
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-2">
-            <Label className="text-[#5E3023] font-serif font-semibold">Pages</Label>
+            <Label className="text-[#5E3023] font-serif font-semibold">Images</Label>
             {totalItems > 0 ? (
               <div className="bg-white rounded-lg border border-slate-200 p-3 flex flex-col gap-3">
                 <img
@@ -334,7 +334,7 @@ export default function AlbumEditForm({
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label className="text-[#5E3023] font-serif font-semibold">Add new images</Label>
+            <Label className="text-[#5E3023] font-serif font-semibold">Add images</Label>
             <ImageUploadInput
               onFilesAdded={(selectedFiles) => {
                 setNewPageFiles((prev) => [...prev, ...selectedFiles]);
