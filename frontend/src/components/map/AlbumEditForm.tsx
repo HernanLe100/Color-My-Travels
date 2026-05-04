@@ -334,7 +334,7 @@ export default function AlbumEditForm({
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label className="text-[#5E3023] font-serif font-semibold">Add images</Label>
+            <Label className="text-[#5E3023] font-serif font-semibold">Add Images</Label>
             <ImageUploadInput
               onFilesAdded={(selectedFiles) => {
                 setNewPageFiles((prev) => [...prev, ...selectedFiles]);
