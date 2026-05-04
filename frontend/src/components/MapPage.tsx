@@ -262,7 +262,7 @@ export default function MapPage() {
         <div className="relative">
           <button
             type="button"
-            className="text-neutral-600 hover:text-[#2A81CB] cursor-pointer"
+            className="text-[#895737] hover:text-[#2A81CB] cursor-pointer"
             onMouseEnter={() => setHelpOpen(true)}
             onMouseLeave={() => setHelpOpen(false)}
             onClick={() => setHelpOpen((o) => !o)}
