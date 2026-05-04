@@ -268,7 +268,7 @@ export default function AlbumEditForm({
                     {confirmDeleteIndex === activeCarouselIndex ? (
                       <>
                         <span className="text-xs text-stone-600">
-                          Delete page?
+                          Delete image?
                         </span>
                         <Button
                           type="button"
@@ -334,7 +334,7 @@ export default function AlbumEditForm({
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label className="text-[#5E3023] font-serif font-semibold">Add new pages by uploading new images</Label>
+            <Label className="text-[#5E3023] font-serif font-semibold">Add new images</Label>
             <ImageUploadInput
               onFilesAdded={(selectedFiles) => {
                 setNewPageFiles((prev) => [...prev, ...selectedFiles]);
@@ -347,7 +347,7 @@ export default function AlbumEditForm({
                   setActiveCarouselIndex(0);
                 }
 
-                toast.success("New pages added successfully");
+                toast.success("New images added successfully");
                 handleShowNewTag();
               }}
             />
