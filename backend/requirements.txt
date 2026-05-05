@@ -20,7 +20,6 @@ packaging==26.0
 psycopg==3.2.13
 psycopg-binary==3.2.13
 psycopg-pool==3.2.8
-psycopg2-binary==2.9.11
 pyasn1==0.6.3
 pyasn1_modules==0.4.2
 pycountry==24.6.1
