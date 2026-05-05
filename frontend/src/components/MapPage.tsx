@@ -320,13 +320,19 @@ export default function MapPage() {
           position="bottomleft"
         />
         <TileLayer
-          attribution="&copy; OpenStreetMap & Carto"
+          attribution="&copy; OpenStreetMap & Carto | Powered by 
+            <a href='https://www.geoapify.com/' target='_blank' rel='noopener noreferrer'>Geoapify</a>
+            and <a href='https://www.geoboundaries.org/' target='_blank' rel='noopener noreferrer'>geoBoundaries</a>
+          "
           url="https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png"
         />
 
         {/* Labels-only layer */}
         <TileLayer
-          attribution="&copy; OpenStreetMap & Carto"
+          attribution="&copy; OpenStreetMap & Carto | Powered by 
+            <a href='https://www.geoapify.com/' target='_blank' rel='noopener noreferrer'>Geoapify</a>
+            and <a href='https://www.geoboundaries.org/' target='_blank' rel='noopener noreferrer'>geoBoundaries</a>
+          "
           url="https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png"
           pane="overlayPane"
         />
