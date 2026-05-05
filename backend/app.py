@@ -25,13 +25,6 @@ app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.timedelta(hours=1)
 app.config['JWT_REFRESH_TOKEN_EXPIRES'] = datetime.timedelta(days=1)
 jwt = JWTManager(app)
 
-"""
-Some possibly useful info:
-@jwt.expired_token_loader: Runs when a token has expired.
-@jwt.invalid_token_loader: Runs if the token is malformed or forged.
-@jwt.unauthorized_loader: Runs when no token is provided at all.
-"""
-
 app.register_blueprint(login_bp) 
 app.register_blueprint(info_bp)
 app.register_blueprint(map_bp)
@@ -39,17 +32,23 @@ app.register_blueprint(map_bp)
 CORS(app, origins=[_FRONTEND_URL]) 
 
 # --------------------------------------------------
+def jwt_error(message, code):
+    return jsonify({
+        "error": message
+    }), code
 
-@jwt.unauthorized_loader
-def unauthorized(reason):
-    return "<h1>ERROR 401</h1>", 401
+@jwt.unauthorized_loader # Runs when no token is provided at all
+def unauthorized(_):
+    return jwt_error("Unauthorized", 401)
 
-    #return jsonify({
-    #    "error": "Authorization failed",
-    #    "reason": reason
-    #}), 401
+@jwt.expired_token_loader # Runs when a token has expired
+def expired_session(_, __):
+    return jwt_error("Expired session", 400)
 
-    
+@jwt.invalid_token_loader # Runs if the token is malformed or forged
+def invalid_token(_):
+    return jwt_error("Invalid token", 422)
+# --------------------------------------------------
 
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=False, port=5001, ssl_context=("cert.pem", "key.pem"))

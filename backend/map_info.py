@@ -27,7 +27,7 @@ def reject_direct_navigation(f):
         wants_html = "text/html" in accept
 
         if is_navigation or wants_html:
-            return "<h1>ERROR 403</h1>", 403 # jsonify({"error": "Direct browsing not allowed"}), 403
+            return jsonify({"error": "Direct browsing not allowed"}), 403
         return f(*args, **kwargs)
     return decorated_function
     
