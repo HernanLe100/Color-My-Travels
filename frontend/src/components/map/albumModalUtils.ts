@@ -1,7 +1,8 @@
 export function formatAlbumDate(value: string) {
   if (!value) return "—";
   const d = new Date(value);
-  return Number.isNaN(d.getTime()) ? value : d.toLocaleDateString();
+  // assume the user is inputting date "locally", ignoring timezone differences
+  return Number.isNaN(d.getTime()) ? value : d.toLocaleDateString("en-US", { timeZone: "UTC" });
 }
 
 export function toDateInputValue(value: string) {
