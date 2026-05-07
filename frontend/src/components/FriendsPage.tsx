@@ -85,7 +85,7 @@ export default function FriendsPage() {
     }
     await fetchSentRequests();
     setIsSendingRequest(false);
-    toast.success("Friend request sent");
+    toast.success("Friend request sent.");
     setFriendId("");
   };
 
@@ -98,7 +98,7 @@ export default function FriendsPage() {
       },
     );
     fetchSentRequests();
-    toast.success("Friend request cancelled");
+    toast.success("Friend request cancelled.");
   };
 
   const acceptRequest = async (sender_id: string) => {
@@ -112,7 +112,7 @@ export default function FriendsPage() {
     });
     fetchRequests();
     fetchFriends();
-    toast.success("Friend request accepted");
+    toast.success("Friend request accepted.");
   };
 
   const rejectRequest = async (sender_id: string) => {
@@ -125,7 +125,7 @@ export default function FriendsPage() {
       body: JSON.stringify({ sender_id }),
     });
     fetchRequests();
-    toast.success("Friend request rejected");
+    toast.success("Friend request rejected.");
   };
 
   const deleteFriend = async (friend_id: string) => {
@@ -134,7 +134,7 @@ export default function FriendsPage() {
       headers: { Authorization: `Bearer ${token}` },
     });
     fetchFriends();
-    toast.success("Friend removed");
+    toast.success("Friend removed.");
   };
 
   return (
