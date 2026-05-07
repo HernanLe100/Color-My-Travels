@@ -10,6 +10,10 @@ function LoginPage() {
       sessionStorage.removeItem("session_expired");
       toast.error("Session expired. Please sign in again.");
     }
+    if (sessionStorage.getItem("account_deleted")) {
+      sessionStorage.removeItem("account_deleted");
+      toast.success("Account deleted successfully.");
+    }
   }, []);
   const handleSuccess = async (credentialResponse: any) => {
     const res = await fetch(`${BACKEND_URL}/login_success`, {

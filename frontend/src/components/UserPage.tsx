@@ -50,7 +50,8 @@ export default function UserPage() {
       setIsConfirmingDelete(false);
       return;
     }
-    logout()
+    sessionStorage.setItem("account_deleted", "true");
+    logout();
   }
 
   if (isLoading) return <Loading />;
@@ -78,7 +79,7 @@ export default function UserPage() {
         )}
         {isConfirmingDelete && (
           <div className="flex items-center gap-2">
-            <span className="text-sm text-stone-600 font-semibold">Are you sure you want to delete your account?</span>
+            <span className="text-sm text-red-600 font-semibold">Are you sure you want to delete your account?</span>
             <Button type="button" variant="destructive" onClick={handleDeleteUser}>
               Confirm
             </Button>
