@@ -18,15 +18,6 @@ cloudinary.config(
 
 # --------------------------------------------------
 
-# handles escape sequences in input string <s> to prep for SQL queries,
-# returns the handled string
-def add_escape(s):
-    # first make sure to keep existing escapes,
-    # then replace % with \% and _ with \_
-    return s.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
-
-# --------------------------------------------------
-
 # adds a user of <user_id> and <name> to the users table
 # does nothing if user already exists
 def add_user(user_id, name):
@@ -62,8 +53,8 @@ def delete_user(user_id):
 
         # Run Cloudinary AFTER commit
         try:
-            cloudinary.api.delete_resources_by_prefix(f"user/{user_id}/")
-            cloudinary.api.delete_folder(f"user/{user_id}")
+            cloudinary.api.delete_resources_by_prefix(f"users/{user_id}/")
+            cloudinary.api.delete_folder(f"users/{user_id}")
         except Exception as e:
             print("Cloudinary error:", e)
 
@@ -604,14 +595,6 @@ def get_friends_albums(user_id):
             return cursor.fetchall()
 
 # --------------------------------------------------
-
-# get location details by <location_id>
-def get_location(location_id):
-    with psycopg.connect(_DATABASE_URL, connect_timeout=5) as connection:
-        with connection.cursor(row_factory=dict_row) as cursor:
-            cursor.execute(f"SELECT * FROM locations WHERE location_id = %s;", [location_id])
-            result = cursor.fetchall()
-            return result
 
 # get locations from <user_id>
 def get_locations(user_id):

@@ -54,7 +54,8 @@ def send_friend_request_route():
     sender_id = get_jwt_identity()
     data = request.get_json()
 
-    receiver_id = data.get("receiver_id")
+    # remove leading/trailing whitespace in backend: future updates could allow usernames with spaces?
+    receiver_id = data.get("receiver_id").strip()
     if not receiver_id:
         return jsonify({"error": "receiver_id required"}), 400
 
@@ -235,14 +236,6 @@ def delete_album():
     return jsonify({"success": True})
 
 # --------------------------------------------------
-
-@info_bp.route("/get_location", methods=["GET"])
-def get_location():
-    location_id = request.args.get("location_id", "")
-    
-    result = db.get_location(location_id)
-    
-    return jsonify({"db_response": result})
 
 @info_bp.route("/get_locations", methods=["GET"])
 @jwt_required()
