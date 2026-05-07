@@ -167,8 +167,8 @@ def add_album():
 
     location_id = data.get("location_id")
     notes = data.get("notes", "")
-    start_date = data.get("start_date", "")
-    end_date = data.get("end_date", "")
+    start_date = data.get("start_date") or None
+    end_date = data.get("end_date") or None
     name = data.get("name", "")
 
     result = db.add_album(

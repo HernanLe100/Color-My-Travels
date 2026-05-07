@@ -320,12 +320,14 @@ export default function AlbumDetailModal({
             }`}
           >
             <h3 className="mt-4 font-serif font-medium text-xl">
-              {activeAlbum.name || "Untitled"}
+              {activeAlbum.name?.trim() ? activeAlbum.name : <span className="text-stone-400 italic font-normal">Untitled</span>}
             </h3>
-            <p className="mt-1 text-sm">
-              {formatAlbumDate(activeAlbum.start_date)} —{" "}
-              {formatAlbumDate(activeAlbum.end_date)}
-            </p>
+            {(activeAlbum.start_date || activeAlbum.end_date) ? (
+              <p className="mt-1 text-sm">
+                {formatAlbumDate(activeAlbum.start_date)} —{" "}
+                {formatAlbumDate(activeAlbum.end_date)}
+              </p>
+            ) : null}
             {activeAlbum.notes?.trim() ? (
               <div className="mt-5 w-full max-w-md text-left">
                 <p className="mt-2 whitespace-pre-wrap wrap-break-word text-sm leading-relaxed">
@@ -655,14 +657,16 @@ export default function AlbumDetailModal({
                 >
                   {/* title */}
                   <p className="text-sm font-semibold text-[#5E3023] truncate">
-                    {a.name || `Album ${i + 1}`}
+                    {a.name?.trim() ? a.name : <span className="text-stone-400 italic font-normal">Untitled</span>}
                   </p>
 
                   {/* dates */}
-                  <p className="text-xs text-[#5E3023] mt-1">
-                    {formatAlbumDate(a.start_date)} —{" "}
-                    {formatAlbumDate(a.end_date)}
-                  </p>
+                  {(a.start_date || a.end_date) ? (
+                    <p className="text-xs text-[#5E3023] mt-1">
+                      {formatAlbumDate(a.start_date)} —{" "}
+                      {formatAlbumDate(a.end_date)}
+                    </p>
+                  ) : null}
 
                   {/* notes preview */}
                   {a.notes?.trim() ? (
