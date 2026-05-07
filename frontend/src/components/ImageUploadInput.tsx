@@ -1,4 +1,4 @@
-import { useRef, useMemo } from "react";
+import { useRef, useMemo, useState } from "react";
 
 type Props = {
   onFilesAdded: (files: File[]) => void;
@@ -16,6 +16,7 @@ export default function ImageUploadInput({
   sublabel,
 }: Props) {
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const [typeError, setTypeError] = useState(false);
 
   const multiSelectHint = useMemo(() => {
     if (!multiple) return "";
@@ -25,11 +26,15 @@ export default function ImageUploadInput({
 
   const handleFiles = (files: FileList | null) => {
     if (!files) return;
-    const fileArray = Array.from(files);
-    onFilesAdded(fileArray);
+    const all = Array.from(files);
+    const hasNonImage = all.some((f) => !f.type.startsWith("image/"));
+    setTypeError(hasNonImage);
+    const imageFiles = all.filter((f) => f.type.startsWith("image/"));
+    if (imageFiles.length) onFilesAdded(imageFiles);
   };
 
   return (
+    <>
     <div
       className={`flex flex-col items-center justify-center
         w-full h-32 border-2 border-dashed border-gray-300
@@ -64,5 +69,9 @@ export default function ImageUploadInput({
         onChange={(e) => handleFiles(e.target.files)}
       />
     </div>
+    {typeError && (
+      <p className="text-sm text-red-600 mt-1">Files must be images</p>
+    )}
+    </>
   );
 }
