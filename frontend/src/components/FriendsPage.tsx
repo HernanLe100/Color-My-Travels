@@ -51,7 +51,7 @@ export default function FriendsPage() {
         fetch(`${BACKEND_URL}/get_friend_requests`, { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json()),
         fetch(`${BACKEND_URL}/get_sent_requests`, { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json()),
         fetch(`${BACKEND_URL}/get_friends`, { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json()),
-      ]);
+              ]);
       setRequests(reqData.requests);
       setSentRequests(sentData.requests);
       setFriends(friendsData.friends);
@@ -138,7 +138,7 @@ export default function FriendsPage() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#FEF9F1]">
+    <div className="min-h-screen w-full bg-[#FEF9F1] pt-14 md:pt-0">
     <div className="mx-auto w-full max-w-lg md:mx-0 md:max-w-none px-6 py-6 flex flex-col gap-5">
       <div className="flex flex-col gap-2 max-w-lg md:max-w-2xl">
         <p className="text-lg font-bold text-[#5E3023] font-serif">Add Friend</p>

@@ -238,7 +238,7 @@ export default function MapPage() {
   };
 
   return (
-    <div className="h-screen w-full">
+    <div className="relative h-[calc(100vh-3.5rem)] md:h-screen w-full mt-14 md:mt-0">
       {/* Pins pill */}
       <div className="pointer-events-auto absolute top-6 right-6 z-1000">
         <div className="flex items-center gap-2 rounded-xl bg-[#FEF9F1] border border-[#895737] px-4 py-3 shadow-lg">
