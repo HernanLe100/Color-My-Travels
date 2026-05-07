@@ -99,11 +99,13 @@ export default function FeedAlbum({
       {/* Caption block — album title, dates, notes */}
       <div className="pr-7 pl-9 pt-2 pb-3">
         <h3 className="text-base font-semibold leading-snug">
-          {album.name || "Untitled album"}
+          {album.name?.trim()}
         </h3>
-        <p className="whitespace-pre-wrap text-sm pb-2 leading-relaxed max-h-24 overflow-y-auto">
-          {dateRange}
-        </p>
+        {(album.start_date || album.end_date) ? (
+          <p className="whitespace-pre-wrap text-sm pb-2 leading-relaxed max-h-24 overflow-y-auto">
+            {dateRange}
+          </p>
+        ) : null}
         {album.notes?.trim() ? (
           <p className="whitespace-pre-wrap wrap-break-word text-sm leading-relaxed max-h-24 overflow-y-auto">
             {album.notes}
