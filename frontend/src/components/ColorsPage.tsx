@@ -147,7 +147,7 @@ export default function ColorsPage() {
   const regions = colors.filter((c) => c.region_type === "adm1");
 
   return (
-    <div className="min-h-screen w-full bg-[#FEF9F1]">
+    <div className="min-h-screen w-full bg-[#FEF9F1] pt-14 md:pt-0">
       <div className="mx-auto w-full max-w-lg md:mx-0 md:max-w-none px-6 py-6">
         <h1 className="text-lg font-bold mb-4 font-serif text-[#5E3023]">
           Edit Colors

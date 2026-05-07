@@ -57,7 +57,7 @@ export default function UserPage() {
   if (isLoading) return <Loading />;
 
   return (
-    <div className="min-h-screen w-full bg-[#FEF9F1]">
+    <div className="min-h-screen w-full bg-[#FEF9F1] pt-14 md:pt-0">
     <div className="mx-auto w-full max-w-lg md:mx-0 md:max-w-none px-6 py-6 flex flex-col gap-4">
       <h1 className="text-lg font-bold text-[#5E3023] font-serif">Account Settings</h1>
       <div className="flex flex-col gap-1 font-serif">
@@ -66,7 +66,7 @@ export default function UserPage() {
         <span className="text-[#895737]">Friends: {friendCount}</span>
       </div>
       <div className="flex flex-col gap-2">
-        <span className="text-base font-bold text-[#5E3023] font-serif">Account Actions</span>
+        <span className="text-base font-bold text-[#5E3023] font-serif">Actions</span>
         <Button onClick={logout} className="w-fit cursor-pointer bg-black hover:bg-slate-800" size="lg">
           Logout <LogOut className="w-4 h-4" />
         </Button>

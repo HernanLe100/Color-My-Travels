@@ -37,7 +37,7 @@ export default function FeedPage() {
   if (isLoading) return <Loading />;
 
   return (
-  <div className="min-h-screen w-full bg-[#FEF9F1]">
+  <div className="min-h-screen w-full bg-[#FEF9F1] pt-14 md:pt-0">
   <div className="box-border mx-auto w-full max-w-lg md:max-w-2xl flex flex-col gap-5 px-6 py-6">
     {friendsAlbums.length === 0 ? (
       <p className="text-center text-sm text-[#5E3023] font-serif">
