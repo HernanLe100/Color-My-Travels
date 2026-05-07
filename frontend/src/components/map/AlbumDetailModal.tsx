@@ -65,6 +65,7 @@ export default function AlbumDetailModal({
   const [newPageFiles, setNewPageFiles] = useState<File[]>([]);
   const [newPageCaptions, setNewPageCaptions] = useState<string[]>([]);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [pageIndex, setPageIndex] = useState(0);
   const overlayRef = useRef<HTMLDivElement>(null);
 
@@ -229,6 +230,7 @@ export default function AlbumDetailModal({
   async function handleSaveEdit() {
     if (!activeAlbum || !token) return;
 
+    setIsSaving(true);
     const appendedPages: Page[] = [];
 
     // 1. Upload images FIRST
@@ -277,6 +279,7 @@ export default function AlbumDetailModal({
 
     if (!res.ok) {
       console.error("Failed to save activeAlbum:", await res.text());
+      setIsSaving(false);
       return;
     }
 
@@ -291,6 +294,7 @@ export default function AlbumDetailModal({
 
     setNewPageFiles([]);
     setNewPageCaptions([]);
+    setIsSaving(false);
     setIsEditing(false);
   }
 
@@ -700,6 +704,7 @@ export default function AlbumDetailModal({
             cloudName={cloudName}
             onCancel={() => setIsEditing(false)}
             onSave={handleSaveEdit}
+            isSaving={isSaving}
           />
         ) : (
           <>
