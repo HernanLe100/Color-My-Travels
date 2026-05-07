@@ -1,7 +1,9 @@
-import { useRef, useMemo } from "react";
+import { useRef, useState } from "react";
+import { ImagePlus } from "lucide-react";
 
 type Props = {
   onFilesAdded: (files: File[]) => void;
+  onError?: (msg: string | null) => void;
   multiple?: boolean;
   className?: string;
   label?: string;
@@ -10,50 +12,39 @@ type Props = {
 
 export default function ImageUploadInput({
   onFilesAdded,
+  onError,
   multiple = true,
   className = "",
-  label = "Click to upload or drag & drop",
-  sublabel,
+  label = "Click to upload or drag and drop image(s) here",
 }: Props) {
   const inputRef = useRef<HTMLInputElement | null>(null);
-
-  const multiSelectHint = useMemo(() => {
-    if (!multiple) return "";
-    const isMac = navigator.platform.toUpperCase().includes("MAC");
-    return `Hold ${isMac ? "⌘" : "Ctrl"} to select multiple`;
-  }, [multiple]);
+  const [isDragging, setIsDragging] = useState(false);
 
   const handleFiles = (files: FileList | null) => {
     if (!files) return;
-    const fileArray = Array.from(files);
-    onFilesAdded(fileArray);
+    const all = Array.from(files);
+    const hasNonImage = all.some((f) => !f.type.startsWith("image/"));
+    onError?.(hasNonImage ? "Files must be images" : null);
+    const imageFiles = all.filter((f) => f.type.startsWith("image/"));
+    if (imageFiles.length) onFilesAdded(imageFiles);
   };
 
   return (
     <div
       className={`flex flex-col items-center justify-center
-        w-full h-32 border-2 border-dashed border-gray-300
-        rounded-xl cursor-pointer
-        hover:border-gray-400 hover:bg-white bg-white
-        transition ${className}`}
+        w-full h-32 border-2 border-dashed rounded-xl cursor-pointer transition ${className}
+        ${isDragging ? "bg-[#F3E9DC]" : "border-neutral-200 bg-white hover:border-neutral-400"}`}
       onClick={() => inputRef.current?.click()}
-      onDragOver={(e) => e.preventDefault()}
+      onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+      onDragLeave={() => setIsDragging(false)}
       onDrop={(e) => {
         e.preventDefault();
+        setIsDragging(false);
         handleFiles(e.dataTransfer.files);
       }}
     >
-      <span className="text-sm text-gray-600">{label}</span>
-
-      <span className="text-xs text-gray-400 mt-1 text-center">
-        {sublabel ?? "PNG, JPG, GIF"}
-      </span>
-
-      {multiple && (
-        <span className="text-[11px] text-gray-400">
-          {multiSelectHint}
-        </span>
-      )}
+      <ImagePlus className="w-6 h-6 text-neutral-400 mb-1" />
+      <span className="text-sm font-serif text-neutral-500">{label}</span>
 
       <input
         ref={inputRef}

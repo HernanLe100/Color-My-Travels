@@ -50,6 +50,7 @@ export default function AlbumEditForm({
     null,
   );
   const [dateRangeError, setDateRangeError] = useState(false);
+  const [imageError, setImageError] = useState<string | null>(null);
 
   const handleSave = () => {
     const badDateRange =
@@ -308,6 +309,7 @@ export default function AlbumEditForm({
           <div className="flex flex-col gap-2">
             <Label className="text-[#5E3023] font-serif font-semibold">Add Images</Label>
             <ImageUploadInput
+              onError={(msg) => setImageError(msg)}
               onFilesAdded={(selectedFiles) => {
                 setNewPageFiles((prev) => [...prev, ...selectedFiles]);
                 setNewPageCaptions((prev) => [
@@ -327,8 +329,10 @@ export default function AlbumEditForm({
         </div>
       </div>
 
-      {dateRangeError && (
-        <p className="text-sm text-red-600 px-2 mt-2">End date should be on or after start date</p>
+      {(dateRangeError || imageError) && (
+        <p className="text-sm text-red-600 px-2 mt-2">
+          {dateRangeError ? "End date should be on or after start date" : imageError}
+        </p>
       )}
       <div className="mt-4 flex justify-end gap-2 border-t border-stone-300 pt-4">
         <Button type="button" variant="outline" onClick={onCancel}>
