@@ -27,10 +27,14 @@ export default function ImageUploadInput({
     const all = Array.from(files);
     const hasNonImage = all.some((f) => !f.type.startsWith("image/"));
     if (hasNonImage) { onError?.("Files must be images"); return; }
-    const tooBig = all.some((f) => f.size > MAX_SIZE);
-    if (tooBig) { onError?.("Images must be under 10 MB"); return; }
-    onError?.(null);
-    if (all.length) onFilesAdded(all);
+    const valid = all.filter((f) => f.size <= MAX_SIZE);
+    const skipped = all.length - valid.length;
+    if (skipped > 0) {
+      onError?.(`Image${skipped > 1 ? "s" : ""} exceeding 10 MB ${skipped > 1 ? "were" : "was"} not uploaded`);
+    } else {
+      onError?.(null);
+    }
+    if (valid.length) onFilesAdded(valid);
   };
 
   return (
@@ -49,6 +53,7 @@ export default function ImageUploadInput({
     >
       <ImagePlus className="w-6 h-6 text-neutral-400 mb-1" />
       <span className="text-sm font-serif text-neutral-500">{label}</span>
+      <span className="text-xs font-serif text-neutral-400 mt-0.5">Max 10 MB per image</span>
 
       <input
         ref={inputRef}
