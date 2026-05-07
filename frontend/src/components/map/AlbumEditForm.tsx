@@ -47,9 +47,6 @@ export default function AlbumEditForm({
   const [confirmDeleteIndex, setConfirmDeleteIndex] = useState<number | null>(
     null,
   );
-  const [titleError, setTitleError] = useState(false);
-  const [startDateError, setStartDateError] = useState(false);
-  const [endDateError, setEndDateError] = useState(false);
   const [dateRangeError, setDateRangeError] = useState(false);
 
   const handleSave = () => {
@@ -58,37 +55,10 @@ export default function AlbumEditForm({
       editForm.end_date &&
       editForm.end_date < editForm.start_date;
 
-    if (!editForm.name.trim()) {
-      setTitleError(true);
-      setStartDateError(false);
-      setEndDateError(false);
-      setDateRangeError(false);
-      return;
-    }
-    if (!editForm.start_date) {
-      setTitleError(false);
-      setStartDateError(true);
-      setEndDateError(false);
-      setDateRangeError(false);
-      return;
-    }
-    if (!editForm.end_date) {
-      setTitleError(false);
-      setStartDateError(false);
-      setEndDateError(true);
-      setDateRangeError(false);
-      return;
-    }
     if (badDateRange) {
-      setTitleError(false);
-      setStartDateError(false);
-      setEndDateError(false);
       setDateRangeError(true);
       return;
     }
-    setTitleError(false);
-    setStartDateError(false);
-    setEndDateError(false);
     setDateRangeError(false);
     onSave();
   };
@@ -355,15 +325,6 @@ export default function AlbumEditForm({
         </div>
       </div>
 
-      {titleError && (
-        <p className="text-sm text-red-600 px-2 mt-2">Album name is required</p>
-      )}
-      {startDateError && (
-        <p className="text-sm text-red-600 px-2 mt-2">Start date is required</p>
-      )}
-      {endDateError && (
-        <p className="text-sm text-red-600 px-2 mt-2">End date is required</p>
-      )}
       {dateRangeError && (
         <p className="text-sm text-red-600 px-2 mt-2">End date should be on or after start date</p>
       )}

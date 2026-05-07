@@ -61,9 +61,6 @@ export default function AddAlbumModal({
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [confirmDeleteIndex, setConfirmDeleteIndex] = useState<number | null>(null);
   const [fieldErrors, setFieldErrors] = useState<{
-    name?: boolean;
-    startDate?: boolean;
-    endDate?: boolean;
     city?: "required" | "unselected";
     dateRange?: boolean;
   }>({});
@@ -81,9 +78,6 @@ export default function AddAlbumModal({
     const cityTyped = cityQueryRef.current.trim().length > 0;
     const errors: typeof fieldErrors = {};
 
-    if (!name) errors.name = true;
-    if (!startDate) errors.startDate = true;
-    if (!endDate) errors.endDate = true;
     if (!selectedLocation) errors.city = cityTyped ? "unselected" : "required";
     if (startDate && endDate && endDate < startDate) errors.dateRange = true;
 
@@ -100,19 +94,13 @@ export default function AddAlbumModal({
   const effectiveImageIndex =
     images.length === 0 ? 0 : Math.min(activeImageIndex, images.length - 1);
 
-  const firstError = fieldErrors.name
-    ? "Album name is required"
-    : fieldErrors.city === "unselected"
-      ? "Choose a city from search"
-      : fieldErrors.city === "required"
-        ? "City is required"
-        : fieldErrors.startDate
-          ? "Start date is required"
-          : fieldErrors.endDate
-            ? "End date is required"
-            : fieldErrors.dateRange
-              ? "End date should be on or after start date"
-              : null;
+  const firstError = fieldErrors.city === "unselected"
+    ? "Choose a city from search"
+    : fieldErrors.city === "required"
+      ? "City is required"
+      : fieldErrors.dateRange
+        ? "End date should be on or after start date"
+        : null;
 
   if (!isOpen) return null;
 
@@ -140,7 +128,7 @@ export default function AddAlbumModal({
           <div className="overflow-y-auto flex-1 px-7 space-y-3">
           <div className="flex flex-col gap-2">
             <Label htmlFor="name" className="flex gap-0 font-serif font-semibold text-[#5E3023]">
-              Album Name<span className="text-xs text-red-600">*</span>
+              Album Name
             </Label>
             <Input
               id="name"
@@ -169,7 +157,7 @@ export default function AddAlbumModal({
           <div className="grid grid-cols-2 gap-2">
             <div className="flex flex-col gap-2">
               <Label className="flex gap-0 text-[#5E3023] font-serif font-semibold">
-                Start Date<span className="text-xs text-red-600">*</span>
+                Start Date
               </Label>
               <Input
                 type="date"
@@ -180,7 +168,7 @@ export default function AddAlbumModal({
             </div>
             <div className="flex flex-col gap-2">
               <Label className="flex gap-0 text-[#5E3023] font-serif font-semibold">
-                End Date<span className="text-xs text-red-600">*</span>
+                End Date
               </Label>
               <Input
                 type="date"
