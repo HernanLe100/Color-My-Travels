@@ -11,6 +11,7 @@ export default function FriendsPage() {
   const token = useAuth();
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
+  const [myUserId, setMyUserId] = useState<string | null>(null);
   const [friendId, setFriendId] = useState("");
   const [requests, setRequests] = useState<FriendRequest[]>([]);
   const [sentRequests, setSentRequests] = useState<SentRequest[]>([]);
@@ -47,14 +48,16 @@ export default function FriendsPage() {
 
   useEffect(() => {
     const load = async () => {
-      const [reqData, sentData, friendsData] = await Promise.all([
+      const [reqData, sentData, friendsData, meData] = await Promise.all([
         fetch(`${BACKEND_URL}/get_friend_requests`, { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json()),
         fetch(`${BACKEND_URL}/get_sent_requests`, { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json()),
         fetch(`${BACKEND_URL}/get_friends`, { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json()),
-              ]);
+        fetch(`${BACKEND_URL}/me`, { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json()),
+      ]);
       setRequests(reqData.requests);
       setSentRequests(sentData.requests);
       setFriends(friendsData.friends);
+      setMyUserId(meData.user_id ?? null);
       setIsLoading(false);
     };
     load();
@@ -153,6 +156,7 @@ export default function FriendsPage() {
           {isSendingRequest ? "Sending..." : "Send Request"}
           {!isSendingRequest && <Send className="w-3 h-3" />}
         </Button>
+        <p className="text-neutral-400 text-xs">Your User ID: {myUserId}</p>
       </div>
 
       {sentRequests.length > 0 && (
