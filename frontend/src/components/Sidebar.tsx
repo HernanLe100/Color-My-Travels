@@ -27,18 +27,25 @@ export default function AppSidebar() {
   useEffect(() => {
     if (!token) return;
 
-    Promise.all([
-      fetch(`${BACKEND_URL}/me`, { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.json()),
-    ]).then(([userData]) => {
-      setUser(userData);
-    });
+    fetch(`${BACKEND_URL}/me`, { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => {
+        if (r.status === 404) {
+          localStorage.removeItem("token");
+          window.location.href = "/login";
+          return null;
+        }
+        return r.json();
+      })
+      .then((userData) => {
+        if (userData && !userData.error) setUser(userData);
+      });
   }, [token]);
 
   return (
     <Sidebar className="h-screen w-64 border-r">
       {/* Top title */}
       <SidebarHeader>
-        <h1 className="flex items-center gap-1.5 whitespace-nowrap text-xl font-black font-serif px-4 pt-4">
+        <h1 className="flex items-center gap-1.5 whitespace-nowrap text-xl font-black font-serif px-4 pt-2">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 82" className="h-[.7em] w-[.43em] shrink-0">
             <defs>
               <linearGradient id="pinGradient" x1="0" y1="0" x2="0" y2="82" gradientUnits="userSpaceOnUse">
