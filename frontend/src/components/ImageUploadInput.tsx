@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { ImagePlus } from "lucide-react";
 
 type Props = {
@@ -18,6 +18,7 @@ export default function ImageUploadInput({
   label = "Click to upload or drag and drop image(s) here",
 }: Props) {
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   const handleFiles = (files: FileList | null) => {
     if (!files) return;
@@ -31,14 +32,14 @@ export default function ImageUploadInput({
   return (
     <div
       className={`flex flex-col items-center justify-center
-        w-full h-32 border-2 border-dashed border-neutral-200
-        rounded-xl cursor-pointer
-        hover:border-neutral-400 hover:bg-white bg-white
-        transition ${className}`}
+        w-full h-32 border-2 border-dashed rounded-xl cursor-pointer transition ${className}
+        ${isDragging ? "bg-[#F3E9DC]" : "border-neutral-200 bg-white hover:border-neutral-400"}`}
       onClick={() => inputRef.current?.click()}
-      onDragOver={(e) => e.preventDefault()}
+      onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+      onDragLeave={() => setIsDragging(false)}
       onDrop={(e) => {
         e.preventDefault();
+        setIsDragging(false);
         handleFiles(e.dataTransfer.files);
       }}
     >
