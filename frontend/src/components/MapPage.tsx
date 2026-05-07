@@ -210,8 +210,6 @@ export default function MapPage() {
     );
     const data = await res.json();
 
-    console.log(data);
-
     handleSelect({
       adm1: data.adm1,
       city: data.city,
