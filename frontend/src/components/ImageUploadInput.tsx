@@ -13,6 +13,7 @@ type Props = {
 export default function ImageUploadInput({
   onFilesAdded,
   onError,
+  multiple = true,
   className = "",
   label = "Click to upload or drag and drop image(s) here",
 }: Props) {
@@ -47,6 +48,7 @@ export default function ImageUploadInput({
       <input
         ref={inputRef}
         type="file"
+        multiple={multiple}
         accept="image/*"
         className="hidden"
         onChange={(e) => handleFiles(e.target.files)}
