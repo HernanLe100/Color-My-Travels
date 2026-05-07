@@ -20,13 +20,17 @@ export default function ImageUploadInput({
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
+  const MAX_SIZE = 10 * 1024 * 1024;
+
   const handleFiles = (files: FileList | null) => {
     if (!files) return;
     const all = Array.from(files);
     const hasNonImage = all.some((f) => !f.type.startsWith("image/"));
-    onError?.(hasNonImage ? "Files must be images" : null);
-    const imageFiles = all.filter((f) => f.type.startsWith("image/"));
-    if (imageFiles.length) onFilesAdded(imageFiles);
+    if (hasNonImage) { onError?.("Files must be images"); return; }
+    const tooBig = all.some((f) => f.size > MAX_SIZE);
+    if (tooBig) { onError?.("Images must be under 10 MB"); return; }
+    onError?.(null);
+    if (all.length) onFilesAdded(all);
   };
 
   return (
