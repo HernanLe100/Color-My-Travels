@@ -63,6 +63,7 @@ export default function AddAlbumModal({
   const [fieldErrors, setFieldErrors] = useState<{
     city?: "required" | "unselected";
     dateRange?: boolean;
+    image?: string;
   }>({});
   const cityQueryRef = useRef("");
 
@@ -100,7 +101,9 @@ export default function AddAlbumModal({
       ? "City is required"
       : fieldErrors.dateRange
         ? "End date should be on or after start date"
-        : null;
+        : fieldErrors.image
+          ? fieldErrors.image
+          : null;
 
   if (!isOpen) return null;
 
@@ -163,7 +166,7 @@ export default function AddAlbumModal({
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className={`bg-white font-serif ${startDate ? "text-black" : "text-stone-500"}`}
+                className={`bg-white font-serif ${startDate ? "text-black" : "text-neutral-500"}`}
               />
             </div>
             <div className="flex flex-col gap-2">
@@ -174,7 +177,7 @@ export default function AddAlbumModal({
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className={`bg-white font-serif ${endDate ? "text-black" : "text-stone-500"}`}
+                className={`bg-white font-serif ${endDate ? "text-black" : "text-neutral-500"}`}
               />
             </div>
           </div>
@@ -192,6 +195,7 @@ export default function AddAlbumModal({
           <div className="flex flex-col gap-2 text-[#5E3023]">
             <Label className="font-serif font-semibold">Images</Label>
             <ImageUploadInput
+              onError={(msg) => setFieldErrors((f) => ({ ...f, image: msg ?? undefined }))}
               onFilesAdded={(selectedFiles) => {
                 // append images
                 setImages((prev) => {
