@@ -71,6 +71,14 @@ def send_friend_request(sender_id, receiver_id):
     with psycopg.connect(_DATABASE_URL, connect_timeout=5) as connection:
         with connection.cursor(row_factory=dict_row) as cursor:
 
+            # Check receiver exists
+            cursor.execute(
+                "SELECT 1 FROM users WHERE user_id = %s;",
+                [receiver_id]
+            )
+            if not cursor.fetchone():
+                return {"error": "User not found"}
+
             # Check if already friends
             cursor.execute(
                 """
