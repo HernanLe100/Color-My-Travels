@@ -24,6 +24,7 @@ type AlbumEditFormProps = {
   cloudName: string | undefined;
   onCancel: () => void;
   onSave: () => void;
+  isSaving: boolean;
   newPageFiles: File[];
   setNewPageFiles: (value: SetStateAction<File[]>) => void;
   newPageCaptions: string[];
@@ -38,6 +39,7 @@ export default function AlbumEditForm({
   cloudName,
   onCancel,
   onSave,
+  isSaving,
   newPageFiles,
   setNewPageFiles,
   newPageCaptions,
@@ -332,8 +334,8 @@ export default function AlbumEditForm({
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
-        <Button type="button" onClick={handleSave} className="bg-[#2A81CB] hover:bg-[#1F3665]">
-          Save <Save/>
+        <Button type="button" onClick={handleSave} disabled={isSaving} className="bg-[#2A81CB] hover:bg-[#1F3665]">
+          {isSaving ? "Saving…" : <><span>Save</span><Save className="size-4"/></>}
         </Button>
       </div>
     </>

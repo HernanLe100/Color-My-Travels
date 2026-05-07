@@ -38,9 +38,9 @@ export default function MapContent({ isTogglePins = false }: MapContentProps) {
     return albums
       .filter((a) => a.location_id === selectedPin.location_id)
       .sort((a, b) => {
-        const dateA = new Date(a.start_date ?? 0).getTime();
-        const dateB = new Date(b.start_date ?? 0).getTime();
-        return dateB - dateA; // newest to oldest by start date of album
+        const dateA = new Date(a.created_at ?? 0).getTime();
+        const dateB = new Date(b.created_at ?? 0).getTime();
+        return dateB - dateA;
       });
   }, [albums, selectedPin]);
 
