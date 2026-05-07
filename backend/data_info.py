@@ -11,13 +11,6 @@ info_bp = Blueprint("info", __name__)
 
 load_dotenv()
 
-_FRONTEND_URL = os.environ.get("FRONTEND_URL")
-
-#_GOOGLE_CLIENT_SECRET = os.environ["GOOGLE_CLIENT_SECRET"]
-_GOOGLE_DISCOVERY_URL = "https://accounts.google.com/.well-known/openid-configuration"
-
-_GOOGLE_CLIENT_ID = os.environ["GOOGLE_CLIENT_ID"]
-
 # --------------------------------------------------
 
 # route to spin up Render server or keep it active
@@ -151,7 +144,6 @@ def get_friends_albums():
     user_id = get_jwt_identity()
 
     result = db.get_friends_albums(user_id)
-    print(result)
 
     return jsonify({"albums": result})
 
