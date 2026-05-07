@@ -126,7 +126,7 @@ export default function ColorsPage() {
 
       if (!res.ok) throw new Error();
 
-      toast.success("Color updated successfully");
+      toast.success("Color updated successfully.");
     } catch {
       setColors((prev) =>
         prev.map((row) =>
@@ -135,7 +135,7 @@ export default function ColorsPage() {
             : row,
         ),
       );
-      toast.error("Failed to update color");
+      toast.error("Failed to update color.");
     }
   };
 

@@ -1,8 +1,20 @@
 import { GoogleLogin } from '@react-oauth/google';
+import { useEffect } from 'react';
+import toast from 'react-hot-toast';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 function LoginPage() {
+  useEffect(() => {
+    if (sessionStorage.getItem("session_expired")) {
+      sessionStorage.removeItem("session_expired");
+      toast.error("Session expired. Please sign in again.");
+    }
+    if (sessionStorage.getItem("account_deleted")) {
+      sessionStorage.removeItem("account_deleted");
+      toast.success("Account deleted successfully.");
+    }
+  }, []);
   const handleSuccess = async (credentialResponse: any) => {
     const res = await fetch(`${BACKEND_URL}/login_success`, {
       method: "POST",

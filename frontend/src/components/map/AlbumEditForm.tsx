@@ -321,7 +321,7 @@ export default function AlbumEditForm({
                   setActiveCarouselIndex(0);
                 }
 
-                toast.success("New images added successfully");
+                toast.success("New images added successfully.");
                 handleShowNewTag();
               }}
             />

@@ -56,10 +56,12 @@ export function useAuth() {
 
         if (timeUntilExpiry <= 0) {
           localStorage.removeItem("token");
+          sessionStorage.setItem("session_expired", "true");
           setToken(null);
         } else {
           timeout = window.setTimeout(() => {
             localStorage.removeItem("token");
+            sessionStorage.setItem("session_expired", "true");
             setToken(null);
           }, timeUntilExpiry);
         }
