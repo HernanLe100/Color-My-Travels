@@ -20,13 +20,21 @@ export default function ImageUploadInput({
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
+  const MAX_SIZE = 10 * 1024 * 1024;
+
   const handleFiles = (files: FileList | null) => {
     if (!files) return;
     const all = Array.from(files);
     const hasNonImage = all.some((f) => !f.type.startsWith("image/"));
-    onError?.(hasNonImage ? "Files must be images" : null);
-    const imageFiles = all.filter((f) => f.type.startsWith("image/"));
-    if (imageFiles.length) onFilesAdded(imageFiles);
+    if (hasNonImage) { onError?.("Files must be images"); return; }
+    const valid = all.filter((f) => f.size <= MAX_SIZE);
+    const skipped = all.length - valid.length;
+    if (skipped > 0) {
+      onError?.(`Image${skipped > 1 ? "s" : ""} exceeding 10 MB ${skipped > 1 ? "were" : "was"} not uploaded`);
+    } else {
+      onError?.(null);
+    }
+    if (valid.length) onFilesAdded(valid);
   };
 
   return (
@@ -45,6 +53,7 @@ export default function ImageUploadInput({
     >
       <ImagePlus className="w-6 h-6 text-neutral-400 mb-1" />
       <span className="text-sm font-serif text-neutral-500">{label}</span>
+      <span className="text-xs font-serif text-neutral-400 mt-0.5">Max 10 MB per image</span>
 
       <input
         ref={inputRef}
