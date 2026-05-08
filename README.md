@@ -1,4 +1,5 @@
 # Color My Travels
+Keep track of your travels in an easy and visually appealing way
 
 ## Running instructions (local)
 Make sure Python and npm versions are up to date (at least Python 3.12.10 and npm 10.9.2)
