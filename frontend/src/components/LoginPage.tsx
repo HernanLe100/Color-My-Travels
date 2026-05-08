@@ -136,7 +136,6 @@ function LoginPage() {
                       className="flex items-center gap-1 text-xs text-[#2A81CB] hover:underline"
                     >
                       <LinkedInIcon />
-                      LinkedIn
                     </a>
                     <a
                       href={member.github}
@@ -145,7 +144,6 @@ function LoginPage() {
                       className="flex items-center gap-1 text-xs text-stone-600 hover:underline"
                     >
                       <GitHubIcon />
-                      GitHub
                     </a>
                   </div>
                 </div>
