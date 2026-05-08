@@ -85,7 +85,6 @@ export default function ColorsPage() {
     })
       .then((res) => res.json())
       .then((data) => {
-        console.log(data.db_response);
         setColors(data.db_response);
         setIsLoading(false);
       });
@@ -140,8 +139,6 @@ export default function ColorsPage() {
   };
 
   if (isLoading) return <Loading />;
-
-  console.log(colors);
 
   const countries = colors.filter((c) => c.region_type === "country");
   const regions = colors.filter((c) => c.region_type === "adm1");

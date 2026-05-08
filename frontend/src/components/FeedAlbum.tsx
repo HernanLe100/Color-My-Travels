@@ -51,8 +51,6 @@ export default function FeedAlbum({
   const photos = useMemo(() => photoPages(album.pages), [album.pages]);
   const [slide, setSlide] = useState(0);
 
-  console.log(album);
-
   useEffect(() => {
     if (slide > photos.length - 1) {
       setSlide(Math.max(0, photos.length - 1));
