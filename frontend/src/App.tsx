@@ -13,6 +13,7 @@ import PublicRoute from "./components/PublicRoute";
 import { jwtDecode } from "jwt-decode";
 import FriendsPage from "./components/FriendsPage";
 import FeedPage from "./components/FeedPage";
+import AboutPage from "./components/AboutPage";
 
 type JwtPayload = {
   exp: number;
@@ -195,6 +196,8 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+
+              <Route path="/about" element={<AboutPage />} />
             </Routes>
           </main>
         </div>
