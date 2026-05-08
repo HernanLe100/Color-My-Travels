@@ -33,7 +33,7 @@ function LoginPage() {
   return (
     <div className="flex h-screen flex-col md:flex-row">
       {/* Left half */}
-      <div className="flex w-full md:w-1/2 md:flex-none flex-col items-center justify-center gap-6 bg-[#F3E9DC] py-10 md:py-0">
+      <div className="relative flex w-full md:w-1/2 md:flex-none flex-col items-center justify-center gap-6 bg-[#F3E9DC] py-10 md:py-0">
         <div
           className="absolute bottom-2 left-0 top-2 w-2 rounded-sm bg-[#895737]"
           aria-hidden
@@ -68,6 +68,7 @@ function LoginPage() {
         <p className="text-sm text-[#5E3023]">Continue with Google</p>
         <GoogleLogin onSuccess={handleSuccess} onError={handleError} />
       </div>
+      <p className="fixed bottom-4 right-4 text-neutral-400 text-xs">Created by Angela Cai, Lucy Chen, and Hernan Le</p>
     </div>
   );
 }
