@@ -1,5 +1,5 @@
 # Color My Travels
-Keep track of your travels in an easy and visually appealing way
+Keep track of your travels in an easy and visually appealing way.
 
 By Angela Cai, Lucy Chen, and Hernan Le
 
