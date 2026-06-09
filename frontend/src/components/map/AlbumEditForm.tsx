@@ -133,6 +133,7 @@ export default function AlbumEditForm({
               id="edit-start-date"
               type="date"
               value={editForm.start_date}
+              max={"9999-12-31"}
               onChange={(e) =>
                 setEditForm((f) => ({
                   ...f,
@@ -149,6 +150,7 @@ export default function AlbumEditForm({
               id="edit-end-date"
               type="date"
               value={editForm.end_date}
+              max={"9999-12-31"}
               onChange={(e) =>
                 setEditForm((f) => ({
                   ...f,

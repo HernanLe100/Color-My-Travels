@@ -165,6 +165,7 @@ export default function AddAlbumModal({
               <Input
                 type="date"
                 value={startDate}
+                max={"9999-12-31"}
                 onChange={(e) => setStartDate(e.target.value)}
                 className={`bg-white font-serif ${startDate ? "text-black" : "text-neutral-500"}`}
               />
@@ -176,6 +177,7 @@ export default function AddAlbumModal({
               <Input
                 type="date"
                 value={endDate}
+                max={"9999-12-31"}
                 onChange={(e) => setEndDate(e.target.value)}
                 className={`bg-white font-serif ${endDate ? "text-black" : "text-neutral-500"}`}
               />
