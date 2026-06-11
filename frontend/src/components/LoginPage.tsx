@@ -7,7 +7,7 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 const team = [
   { name: "Angela Cai", linkedin: "https://www.linkedin.com/in/angcai/", github: "https://github.com/ang-cai", photo: "/Angela-Linkedin.png" },
   { name: "Lucy Chen", linkedin: "https://www.linkedin.com/in/lucy-c1/", github: "https://github.com/lucy-c1", photo: "/Lucy-Linkedin.jpeg" },
-  { name: "Hernan Le", linkedin: "https://www.linkedin.com/in/hernan-le/", github: "https://github.com/HernanLe100", photo: "/Hernan-Linkedin.jpeg" },
+  { name: "Hernan Le", linkedin: "https://www.linkedin.com/in/hernan-le/", github: "https://github.com/HernanLe100", photo: "/Hernan-Linkedin.png" },
 ];
 
 function LinkedInIcon() {
