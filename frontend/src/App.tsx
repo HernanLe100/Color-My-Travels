@@ -13,6 +13,9 @@ import PublicRoute from "./components/PublicRoute";
 import { jwtDecode } from "jwt-decode";
 import FriendsPage from "./components/FriendsPage";
 import FeedPage from "./components/FeedPage";
+import Loading from "./components/Loading";
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 type JwtPayload = {
   exp: number;
@@ -130,6 +133,56 @@ function MobileHeader() {
 
 function App() {
   const token = useAuth();
+  const [backendReady, setBackendReady] = useState(false);
+  const [slowWake, setSlowWake] = useState(false);
+
+  // ping the backend to boot up backend if not already active
+  useEffect(() => {
+    let cancelled = false;
+    // only show the "waking up" message if the backend takes more than a few seconds to respond
+    const slowTimer = setTimeout(() => setSlowWake(true), 3000);
+    const ping = () =>
+      fetch(`${BACKEND_URL}/ping`)
+        .then((res) => {
+          if (!res.ok) throw new Error();
+          clearTimeout(slowTimer);
+          if (!cancelled) setBackendReady(true);
+        })
+        .catch(() => {
+          if (!cancelled) setTimeout(ping, 5000);
+        });
+    ping();
+    return () => {
+      cancelled = true;
+      clearTimeout(slowTimer);
+    };
+  }, []);
+
+  // keep the backend awake while the app is open and visible
+  // wake it right when the user returns to the tab to avoid errors
+  useEffect(() => {
+    const PING_INTERVAL = 10 * 60 * 1000; // every 10 min
+    let lastPing = Date.now();
+    // only ping if the tab is visible and it's been at least PING_INTERVAL since the last ping
+    const ping = () => {
+      if (document.hidden || Date.now() - lastPing < PING_INTERVAL) 
+        return;
+      lastPing = Date.now();
+      fetch(`${BACKEND_URL}/ping`).catch(() => {});
+    };
+    const interval = setInterval(ping, 60 * 1000); // check whether ready to /ping every minute (up to 10 checks in 10 min)
+
+    document.addEventListener("visibilitychange", ping); // check ping when switching visibility
+    
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", ping);
+    };
+  }, []);
+
+  if (!backendReady) {
+    return slowWake ? <Loading message="Waking up the server... (this may take a minute)" /> : <Loading />;
+  }
 
   return (
     <BrowserRouter>
