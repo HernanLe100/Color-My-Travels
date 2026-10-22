@@ -15,6 +15,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import { CircleHelp, MapPinPlus } from "lucide-react";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+const CARTO_KEY = import.meta.env.VITE_CARTO_API_KEY;
 
 // Fix default icon paths
 L.Icon.Default.mergeOptions({
@@ -322,7 +323,7 @@ export default function MapPage() {
             <a href='https://www.geoapify.com/' target='_blank' rel='noopener noreferrer'>Geoapify</a>
             and <a href='https://www.geoboundaries.org/' target='_blank' rel='noopener noreferrer'>geoBoundaries</a>
           "
-          url="https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png"
+          url={`https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png?key=${CARTO_KEY}`}
         />
 
         {/* Labels-only layer */}
@@ -331,7 +332,7 @@ export default function MapPage() {
             <a href='https://www.geoapify.com/' target='_blank' rel='noopener noreferrer'>Geoapify</a>
             and <a href='https://www.geoboundaries.org/' target='_blank' rel='noopener noreferrer'>geoBoundaries</a>
           "
-          url="https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png"
+          url={`https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png?key=${CARTO_KEY}`}
           pane="overlayPane"
         />
 
