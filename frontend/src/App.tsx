@@ -13,6 +13,9 @@ import PublicRoute from "./components/PublicRoute";
 import { jwtDecode } from "jwt-decode";
 import FriendsPage from "./components/FriendsPage";
 import FeedPage from "./components/FeedPage";
+import Loading from "./components/Loading";
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 type JwtPayload = {
   exp: number;
@@ -130,6 +133,29 @@ function MobileHeader() {
 
 function App() {
   const token = useAuth();
+  const [backendReady, setBackendReady] = useState(false);
+
+  // ping the backend to boot up backend if not already active
+  useEffect(() => {
+    let cancelled = false;
+    const ping = () =>
+      fetch(`${BACKEND_URL}/ping`)
+        .then((res) => {
+          if (!res.ok) throw new Error();
+          if (!cancelled) setBackendReady(true);
+        })
+        .catch(() => {
+          if (!cancelled) setTimeout(ping, 5000);
+        });
+    ping();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (!backendReady) {
+    return <Loading message="Waking up the server... (this may take a minute)" />;
+  }
 
   return (
     <BrowserRouter>
