@@ -134,14 +134,18 @@ function MobileHeader() {
 function App() {
   const token = useAuth();
   const [backendReady, setBackendReady] = useState(false);
+  const [slowWake, setSlowWake] = useState(false);
 
   // ping the backend to boot up backend if not already active
   useEffect(() => {
     let cancelled = false;
+    // only show the "waking up" message if the backend takes more than a few seconds to respond
+    const slowTimer = setTimeout(() => setSlowWake(true), 3000);
     const ping = () =>
       fetch(`${BACKEND_URL}/ping`)
         .then((res) => {
           if (!res.ok) throw new Error();
+          clearTimeout(slowTimer);
           if (!cancelled) setBackendReady(true);
         })
         .catch(() => {
@@ -150,6 +154,7 @@ function App() {
     ping();
     return () => {
       cancelled = true;
+      clearTimeout(slowTimer);
     };
   }, []);
 
@@ -176,7 +181,7 @@ function App() {
   }, []);
 
   if (!backendReady) {
-    return <Loading message="Waking up the server... (this may take a minute)" />;
+    return slowWake ? <Loading message="Waking up the server... (this may take a minute)" /> : <Loading />;
   }
 
   return (
